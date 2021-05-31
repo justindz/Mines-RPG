@@ -1,11 +1,16 @@
-#Local
+# Local
 from actor import Actor
 from elements import Elements
 import utilities
+
+
 #
 
 class Enemy(Actor):
-    def __init__(self, name, strength, strength_growth, intelligence, intelligence_growth, dexterity, dexterity_growth, willpower, willpower_growth, health, health_growth, mana, mana_growth, stamina, stamina_growth, init, init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth, electricity_res, electricity_res_growth, water_res, water_res_growth):
+    def __init__(self, name, strength, strength_growth, intelligence, intelligence_growth, dexterity, dexterity_growth,
+                 willpower, willpower_growth, health, health_growth, mana, mana_growth, stamina, stamina_growth, init,
+                 init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth, electricity_res,
+                 electricity_res_growth, water_res, water_res_growth):
         super().__init__()
         self.name = name
 
@@ -24,6 +29,9 @@ class Enemy(Actor):
         self.mana_growth = mana_growth
         self.stamina = stamina
         self.stamina_growth = stamina_growth
+        self.current_health = self.health
+        self.current_stamina = self.stamina
+        self.current_mana = self.mana
         self.init = init
         self.init_growth = init_growth
 
@@ -47,27 +55,33 @@ class Enemy(Actor):
         self.health += round(self.health_growth * gap)
         self.mana += round(self.mana_growth * gap)
         self.stamina += round(self.stamina_growth * gap)
+        self.current_health = self.health
+        self.current_stamina = self.stamina
+        self.current_mana = self.mana
         self.init += round(self.init_growth * gap)
         self.name = prefixes[utilities.clamp(int(depth / 10), 1, len(prefixes))] + " " + self.name
 
     def take_damage(self, dmgs: list):
         for dmg in dmgs:
-            if dmg[1] == Elements.earth:
-                dmg[0] *= (1.0 - self.earth_res)
-            elif dmg[1] == Elements.fire:
-                dmg[0] *= (1.0 - self.fire_res)
-            elif dmg[1] == Elements.electricity:
-                dmg[0] *= (1.0 - self.electricity_res)
-            elif dmg[1] == Elements.water:
-                dmg[0] *= (1.0 - self.water_res)
+            amt = dmg[0]
 
-            self.current_health -= round(dmg[0])
+            if dmg[1] == Elements.earth:
+                amt *= (1.0 - self.earth_res)
+            elif dmg[1] == Elements.fire:
+                amt *= (1.0 - self.fire_res)
+            elif dmg[1] == Elements.electricity:
+                amt *= (1.0 - self.electricity_res)
+            elif dmg[1] == Elements.water:
+                amt *= (1.0 - self.water_res)
+
+            self.current_health -= round(amt)
             self.current_health = max(0, self.current_health)
 
         return dmgs
 
     def attack(self):
         return [[2, Elements.earth]]
+
 
 prefixes = {
     1: 'Pico',
@@ -90,5 +104,6 @@ prefixes = {
 }
 
 enemies = {
-    'slime': Enemy('Slime', 1, 0.3, 1, 0.3, 1, 0.3, 1, 0.3, 10, 0.1, 10, 0.1, 10, 0.1, 5, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+    'slime': Enemy('Slime', 1, 0.3, 1, 0.3, 1, 0.3, 1, 0.3, 10, 0.1, 10, 0.1, 10, 0.1, 5, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0,
+                   0.0, 0.0, 0.0),
 }

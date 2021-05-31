@@ -1,13 +1,12 @@
 import discord
 from discord.ext import commands
 
-#Local
 import utilities
 import weapon
 from character import Character
 from weapon import Weapon
 from armor import Armor
-#
+
 
 class CharacterController(commands.Cog):
     def __init__(self, bot):
@@ -25,7 +24,7 @@ class CharacterController(commands.Cog):
         self.characters.append(character)
         return character
 
-    ### CHECKS ###
+    #  CHECKS  #
     async def check_idle_or_not_delving(ctx):
         delves = ctx.bot.get_cog('DelveController').delves
 
@@ -35,7 +34,7 @@ class CharacterController(commands.Cog):
 
         return True
 
-    ### COMMANDS ###
+    #  COMMANDS  #
     @commands.command(aliases=['statistics'])
     async def stats(self, ctx):
         """Displays your character's vital statistics, including base stats and any current modifiers due to equipment or active effects."""
@@ -66,24 +65,36 @@ class CharacterController(commands.Cog):
 | Water Res: {}
 --<-(@  --<-(@  --<-(@  --<-(@
         '''.format(character.name, character.level, character.xp, character.coins, character.points,
-        character.strength, character.bonus_strength, character.intelligence, character.bonus_intelligence, character.dexterity, character.bonus_dexterity, character.willpower, character.bonus_willpower,
-        character.current_health, character.health, character.bonus_health, character.current_stamina, character.stamina, character.bonus_stamina, character.current_mana, character.mana, character.bonus_mana,
-        character.init, character.bonus_init, character.current_carry, character.carry, character.bonus_carry,
-        character.earth_res, character.fire_res, character.electricity_res, character.water_res))
+                   character.strength, character.bonus_strength, character.intelligence, character.bonus_intelligence,
+                   character.dexterity, character.bonus_dexterity, character.willpower, character.bonus_willpower,
+                   character.current_health, character.health, character.bonus_health, character.current_stamina,
+                   character.stamina, character.bonus_stamina, character.current_mana, character.mana,
+                   character.bonus_mana,
+                   character.init, character.bonus_init, character.current_carry, character.carry,
+                   character.bonus_carry,
+                   character.earth_res, character.fire_res, character.electricity_res, character.water_res))
 
     @commands.command(aliases=['inventory'])
     async def inv(self, ctx):
-        """Lists all your equipped and carried items. Use the show command to view an individual item once you have its postion number in your inventory."""
+        """Lists all your equipped and carried items. Use the show command to view an individual item once you have its position number in your inventory."""
         character = self.get(ctx.author)
         inv_string = '=================EQUIPPED================\n'
-        inv_string += 'Weapon: {}\n'.format(character.equipped['weapon'].name if character.equipped['weapon'] is not None else 'None')
-        inv_string += 'Head: {}\n'.format(character.equipped['head'].name if character.equipped['head'] is not None else 'None')
-        inv_string += 'Chest: {}\n'.format(character.equipped['chest'].name if character.equipped['chest'] is not None else 'None')
-        inv_string += 'Belt: {}\n'.format(character.equipped['belt'].name if character.equipped['belt'] is not None else 'None')
-        inv_string += 'Boots: {}\n'.format(character.equipped['boots'].name if character.equipped['boots'] is not None else 'None')
-        inv_string += 'Gloves: {}\n'.format(character.equipped['gloves'].name if character.equipped['gloves'] is not None else 'None')
-        inv_string += 'Amulet: {}\n'.format(character.equipped['amulet'].name if character.equipped['amulet'] is not None else 'None')
-        inv_string += 'Ring: {}\n'.format(character.equipped['ring'].name if character.equipped['ring'] is not None else 'None')
+        inv_string += 'Weapon: {}\n'.format(
+            character.equipped['weapon'].name if character.equipped['weapon'] is not None else 'None')
+        inv_string += 'Head: {}\n'.format(
+            character.equipped['head'].name if character.equipped['head'] is not None else 'None')
+        inv_string += 'Chest: {}\n'.format(
+            character.equipped['chest'].name if character.equipped['chest'] is not None else 'None')
+        inv_string += 'Belt: {}\n'.format(
+            character.equipped['belt'].name if character.equipped['belt'] is not None else 'None')
+        inv_string += 'Boots: {}\n'.format(
+            character.equipped['boots'].name if character.equipped['boots'] is not None else 'None')
+        inv_string += 'Gloves: {}\n'.format(
+            character.equipped['gloves'].name if character.equipped['gloves'] is not None else 'None')
+        inv_string += 'Amulet: {}\n'.format(
+            character.equipped['amulet'].name if character.equipped['amulet'] is not None else 'None')
+        inv_string += 'Ring: {}\n'.format(
+            character.equipped['ring'].name if character.equipped['ring'] is not None else 'None')
         inv_string += '================INVENTORY================\n'
 
         i = 0
@@ -124,7 +135,7 @@ Damage: {}
 Bonuses
 -------
 {}
-'''.format(item.type, item.get_damages_display_string(), item.get_bonuses_display_string())
+'''.format(item.weapon_type, item.get_damages_display_string(), item.get_bonuses_display_string())
             elif isinstance(item, Armor):
                 item_string += '''
 Class: {}

@@ -1,18 +1,15 @@
 import discord
 from discord.ext import commands
 import asyncio
-import re
 import random
 
-#local
+import skill
 import utilities
 from zone import Zone
 from delve import Delve
 from character import Character
-from challenge_encounter import Challenge
-from trap_encounter import Trap
 from fight_encounter import Fight
-#
+
 
 class DelveController(commands.Cog):
     def __init__(self, bot):
@@ -26,7 +23,7 @@ class DelveController(commands.Cog):
             if ctx.channel.name in delves.keys():
                 if ctx.author in delves[ctx.channel.name].players:
                     return True
-        except AttributeError: #DMChannel
+        except AttributeError:  # DMChannel
             return False
 
         return False
@@ -58,7 +55,7 @@ class DelveController(commands.Cog):
     async def check_room_complete(ctx):
         delves = ctx.bot.get_cog('DelveController').delves
 
-        if ctx.channel.name in delves.keys() and delves[ctx.channel.name].status == 'idle' and delves[ctx.channel.name].current_room.encounter == None:
+        if ctx.channel.name in delves.keys() and delves[ctx.channel.name].status == 'idle' and delves[ctx.channel.name].current_room.encounter is None:
             return True
 
         await ctx.channel.send('Your path is blocked.')
@@ -86,10 +83,10 @@ class DelveController(commands.Cog):
         await asyncio.sleep(2)
         await channel.send(utilities.blue('{}\n\n{}'.format(current_room.name, current_room.description)))
 
-        if isinstance(current_room.encounter, Trap):
-            await self.encounter_trap(self.delves[channel.name])
-        elif isinstance(current_room.encounter, Fight):
-            await self.encounter_fight(self.delves[channel.name])
+        # if isinstance(current_room.encounter, None):
+        #     await self.encounter_loot(self.delves[channel.name])
+        # elif isinstance(current_room.encounter, Fight):
+        await self.encounter_fight(self.delves[channel.name])
 
     @commands.command()
     @commands.check(check_correct_delve_channel)
@@ -121,39 +118,6 @@ class DelveController(commands.Cog):
     @commands.command()
     @commands.check(check_correct_delve_channel)
     @commands.check(check_is_leader)
-    @commands.check(check_idle)
-    async def attempt(self, ctx, player: discord.Member):
-        """The player chosen by the party leader will attempt to clear the challenge or disarm the trap in this room."""
-        delve = self.delves[ctx.channel.name]
-        character = ctx.bot.get_cog('CharacterController').get(player)
-
-        if delve.current_room.encounter != None:
-            delve.status = 'busy'
-            await ctx.channel.send('{} makes the attempt...'.format(player.name))
-            await asyncio.sleep(5)
-
-            if isinstance(delve.current_room.encounter, Challenge):
-                if delve.current_room.encounter.get_result(character, delve.depth):
-                    await ctx.channel.send(delve.current_room.encounter.success.format(player.name))
-                    await ctx.channel.send('{} has gained {} xp, and the rest of the party has gained half as much.'.format(player.name, xp))
-                    xp = 10 * delve.depth
-
-                    for char in delve.characters:
-                        if char.name == player.name:
-                            char.gain_xp(xp, delve.depth)
-                        else:
-                            char.gain_xp(int(xp / 2), delve.depth)
-                else:
-                    await ctx.channel.send(delve.current_room.encounter.failure.format(player.name))
-
-                delve.status = 'idle'
-                delve.current_room.encounter = None
-        else:
-            await ctx.channel.send('Nothing remains to attempt here.')
-
-    @commands.command()
-    @commands.check(check_correct_delve_channel)
-    @commands.check(check_is_leader)
     @commands.check(check_room_complete)
     async def proceed(self, ctx):
         """Delve deeper into the mine. You must complete the current room before proceeding."""
@@ -162,30 +126,10 @@ class DelveController(commands.Cog):
         await asyncio.sleep(2)
         await delve.channel.send(utilities.blue('{} - d{}\n\n{}'.format(delve.current_room.name, delve.depth, delve.current_room.description)))
 
-        if isinstance(delve.current_room.encounter, Trap):
-            await self.encounter_trap(delve)
-        elif isinstance(delve.current_room.encounter, Fight):
-            await self.encounter_fight(delve)
-
-    async def encounter_trap(self, delve):
-        delve.status = 'busy'
-        await delve.channel.send(utilities.yellow(delve.current_room.encounter.description))
-        await asyncio.sleep(3)
-
-        for player in delve.players:
-            character = self.bot.get_cog('CharacterController').get(player)
-
-            if delve.current_room.encounter.get_result(character, delve.depth):
-                await delve.channel.send(delve.current_room.encounter.success.format(player.name))
-            else:
-                dmg, element = character.take_damage([[2 * delve.depth, delve.current_room.encounter.element]])
-                await delve.channel.send(utilities.red(delve.current_room.encounter.failure.format(player.name, dmg)))
-
-                if dmg > 0 and character.current_health <= 0:
-                    await self.player_dead(delve, player)
-
-        delve.status = 'idle'
-        delve.current_room.encounter = None
+        # if isinstance(delve.current_room.encounter, Loot):
+        #     await self.encounter_loot(self.delves[ctx.channel.name])
+        # elif isinstance(delve.current_room.encounter, Fight):
+        await self.encounter_fight(self.delves[ctx.channel.name])
 
     async def encounter_fight(self, delve):
         delve.status = 'fighting'
@@ -203,37 +147,73 @@ class DelveController(commands.Cog):
             for actor in fight.inits:
                 await delve.channel.send(utilities.bold('{} goes next.'.format(actor.name)))
 
-                if isinstance(actor, Character): # Player
-                    def check(m):
+                if isinstance(actor, Character):  # Player
+                    def check_action_menu(m):
                         if m.author.name == actor.name and m.channel == delve.channel:
-                            mg = re.match('(attack|att)\s+([1-9])', m.content, re.I)
-
-                            if mg is not None:
+                            if m.content in ['1', '2', '3']:
                                 return True
                         return False
                     try:
-                        msg = await self.bot.wait_for('message', check=check, timeout=30)
-                        mg = re.match('(attack|att)\s+([1-9])', msg.content, re.I)
-                        enemy = fight.enemies[int(mg[2]) - 1]
+                        await delve.channel.send(Fight.display_action_menu())
+                        msg = await self.bot.wait_for('message', check=check_action_menu, timeout=30)
+                        action = msg.content
 
-                        if actor.equipped['weapon'] is None:
-                            await delve.channel.send('{} kicks {} ineffectually.'.format(actor.name, enemy.name))
-                        else:
-                            dmgs = enemy.take_damage(actor.attack())
-                            await delve.channel.send('{} attacks {} with {} for {}.'.format(actor.name, enemy.name, actor.equipped['weapon'].name, utilities.dmgs_to_str(dmgs)))
+                        if action == '1':  # Ability
+                            await delve.channel.send(Fight.display_ability_menu(actor))
 
-                            if enemy.current_health <= 0: # Enemy defeated
-                                fight.remove_enemy(enemy)
-                                await delve.channel.send('{} has been defeated.'.format(enemy.name))
+                            def check_ability_menu(m):
+                                if m.author.name == actor.name and m.channel == delve.channel:
+                                    if 0 < int(m.content) <= 6 and actor.ability_slots[int(m.content)] is not None:
+                                        return True
+                                return False
 
-                                if len(fight.enemies) == 0: # All enemies defeated
-                                    await delve.channel.send('All enemies have been defeated.')
-                                    [await delve.channel.send('{} has gained {} xp.'.format(c.name, c.gain_xp(fight.xp, fight.level))) for c in fight.characters]
-                                    delve.status = 'idle'
+                            msg = await self.bot.wait_for('message', check=check_ability_menu, timeout=30)
+                            ability_choice = msg.content
+                            ability = utilities.get_ability_by_name(actor.ability_slots[int(ability_choice)])
+                            await delve.channel.send(fight.display_enemy_menu())
 
+                            def check_enemy_menu(m):
+                                if m.author.name == actor.name and m.channel == delve.channel:
+                                    if 0 < int(m.content) <= len(fight.enemies):
+                                        return True
+                                return False
+
+                            msg = await self.bot.wait_for('message', check=check_enemy_menu, timeout=30)
+                            enemy_choice = int(msg.content)
+                            enemy = fight.enemies[enemy_choice - 1]
+
+                            if type(ability) == skill.Skill and actor.equipped['weapon'] is None:
+                                await delve.channel.send('You cannot use this skill without an equipped weapon.')
+                            elif type(ability) == skill.Skill and actor.equipped['weapon'].weapon_type != ability.weapon_type:
+                                await delve.channel.send(f'This skill requires a {ability.weapon_type}.')
+                            else:
+                                await delve.channel.send(fight.use_ability(actor, ability, enemy))
+
+                            if len(fight.enemies) == 0:
+                                await delve.channel.send('All enemies have been defeated.')
+                                [await delve.channel.send(
+                                    '{} has gained {} xp.'.format(c.name, c.gain_xp(fight.xp, fight.level))) for c in
+                                 fight.characters]
+                                delve.status = 'idle'
+                        elif action == '2':  # Item
+                            menu, indices = Fight.display_item_menu(actor)
+                            await delve.channel.send(menu)
+
+                            def check_item_menu(m):
+                                if m.author.name == actor.name and m.channel == delve.channel and 0 < int(m.content) <= len(indices):
+                                    return True
+                                return False
+
+                            msg = await self.bot.wait_for('message', check=check_item_menu, timeout=30)
+                            choice = msg.content
+                            await delve.channel.send(actor.use_consumable(actor.inventory[indices[int(choice) - 1]]))
+                        elif action == '3':  # Recover
+                            h, s, m = actor.recover()
+                            await delve.channel.send(f'{actor.name} recovered {h}h, {s}s, {m}m.')
                     except asyncio.TimeoutError:
                         await delve.channel.send('{} did not take an action in time.'.format(actor.name))
-                else: # Enemy
+                else:  # Enemy
+                    # TODO GOAP me
                     target = random.choice(delve.characters)
                     dmgs = target.take_damage(actor.attack())
                     await delve.channel.send('{} attacks {} for {}.'.format(actor.name, target.name, utilities.dmgs_to_str(dmgs)))
@@ -244,10 +224,20 @@ class DelveController(commands.Cog):
 
                 await asyncio.sleep(3)
 
-            await delve.channel.send('End of turn {}.'.format(turn_count))
             turn_count += 1
+            await delve.channel.send('End of turn {}.'.format(turn_count))
+
+            for character in delve.characters:
+                h, s, m = character.regen()
+
+                if h > 0 or s > 0 or m > 0:
+                    await delve.channel.send(f'{character.name} regenerates {h}h {s}s {m}m.')
 
         delve.current_room.encounter = None
+
+    async def encounter_loot(self, delve):
+        await delve.channel.send(utilities.green(delve.current_room.encounter.description))
+        await delve.channel.send('Loot encounters are not implemented yet. This would have been sweet, sweet loot.')
 
     async def player_dead(self, delve, player: discord.Member):
         await delve.channel.send('{} has died'.format(player.name))

@@ -1,11 +1,8 @@
 import discord
-import asyncio
 
-#local
 from zone import Zone
-import biome
 from character import Character
-#
+
 
 class Delve(object):
     def __init__(self, bot, leader: discord.Member, players: [discord.Member], zone: Zone, channel: discord.TextChannel):
@@ -24,7 +21,7 @@ class Delve(object):
         self.solo = True if len(players) == 1 else False
         self.channel = channel
         self.current_room = self.zone.get_next_room(self.characters, self.depth)
-        self.status = 'idle' # idle, busy (challs/traps), fighting (fights)
+        self.status = 'idle'  # idle, fighting
 
     def proceed(self):
         self.depth += 1
@@ -32,14 +29,15 @@ class Delve(object):
 
     async def remove_player(self, player: discord.Member):
         self.players.remove(player)
+        leader = None
 
         for character in self.characters:
             if character.name == player.name:
                 self.characters.remove(character)
                 break
 
-        if player == leader:
-            leader = delve.players[0]
+        if player == self.leader:
+            leader = self.players[0]
 
         await self.channel.set_permissions(player, overwrite=None)
         return leader.name

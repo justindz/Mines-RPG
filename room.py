@@ -4,6 +4,7 @@ class Room(object):
         self.description = description
         self.encounter = None
 
+
 rooms = {
     'basic': [
         Room('Room A', 'Beautifully poetic description of a room within the mine. Poetic language abounds. Metaphors! Similes! You weep with sexy admiration.'),

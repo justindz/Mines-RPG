@@ -1,6 +1,5 @@
-#Local
 from item import Item, ItemType
-#
+
 
 class Armor(Item):
     def __init__(self):
@@ -9,7 +8,6 @@ class Armor(Item):
         self.description = 'An RND helmet.'
         self.weight = 2
         self.type = ItemType.head
-        self.level = 1
         self.bonus_strength = 0
         self.bonus_intelligence = 0
         self.bonus_dexterity = 0

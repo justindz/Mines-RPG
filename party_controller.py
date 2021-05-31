@@ -2,11 +2,9 @@ import discord
 from discord.ext import commands
 import asyncio
 
-#local
 import utilities
-from zone import Zone
 import zone
-#
+
 
 class PartyController(commands.Cog):
     def __init__(self, bot):
@@ -23,7 +21,7 @@ class PartyController(commands.Cog):
     async def check_correct_channel(ctx):
         try:
             return ctx.channel.name in ['encampment']
-        except AttributeError: #DMChannel
+        except AttributeError:  # DMChannel
             return False
 
     async def check_not_delving(ctx):
@@ -51,10 +49,13 @@ class PartyController(commands.Cog):
                 return
 
         if self.is_player_in_a_party(ctx.author.name):
-            await ctx.author.send(utilities.yellow('You are already in a party. If you want to form a party, you will need to \\leave this one.'))
+            await ctx.author.send(utilities.yellow(
+                'You are already in a party. If you want to form a party, you will need to \\leave this one.'))
             return
 
-        message = await member.send('{} has invited you to join their party. Thumbs up to accept, or thumbs down to decline.'.format(ctx.author.name))
+        message = await member.send(
+            '{} has invited you to join their party. Thumbs up to accept, or thumbs down to decline.'.format(
+                ctx.author.name))
         await message.add_reaction('\N{THUMBS UP SIGN}')
         await message.add_reaction('\N{THUMBS DOWN SIGN}')
 
@@ -132,10 +133,12 @@ class PartyController(commands.Cog):
 
                 if len(party_to_modify) < 2:
                     disband = self.parties.pop(leader_to_modify)
-                    await ctx.guild.get_member_named(leader_to_modify).send('The last member {} left, so the party has disbanded.'.format(ctx.author.name))
+                    await ctx.guild.get_member_named(leader_to_modify).send(
+                        'The last member {} left, so the party has disbanded.'.format(ctx.author.name))
                 else:
                     self.parties[leader_to_modify].remove(ctx.author.name)
-                    await ctx.guild.get_member_named(leader_to_modify).send('{} has left the party.'.format(ctx.author.name))
+                    await ctx.guild.get_member_named(leader_to_modify).send(
+                        '{} has left the party.'.format(ctx.author.name))
 
                     for name in self.parties[leader_to_modify]:
                         await ctx.guild.get_member_named(name).send('{} has left the party.'.format(ctx.author.name))
@@ -153,7 +156,7 @@ class PartyController(commands.Cog):
     @commands.check(check_correct_channel)
     @commands.check(check_not_delving)
     async def delve(self, ctx, index: int):
-        """Start a delve. The index is avaialable through \mines. If in a party, the leader must start the delve, and party members are given a period of time to decline before the delve starts."""
+        """Start a delve. The index is availaable through \\mines. If in a party, the leader must start the delve, and party members are given a period of time to decline before the delve starts."""
         if index < 0 or index > len(zone.zones) + 1:
             await ctx.author.send('Invalid mine index number.')
             return

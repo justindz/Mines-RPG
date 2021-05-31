@@ -1,19 +1,21 @@
 import discord
 import random
 
-#Local
+import ability
 from actor import Actor
-import weapon
 from weapon import Weapon
 from armor import Armor
+from consumable import Consumable
 from elements import Elements
 import utilities
-#
+import skill
+import spell
+
 
 class Character(Actor):
     def __init__(self, player: discord.Member):
-        # Core
         super().__init__()
+
         # Stats
         self.strength = self.bonus_strength = 0
         self.intelligence = self.bonus_intelligence = 0
@@ -33,10 +35,13 @@ class Character(Actor):
         self.points = 0
         self.player = player
         self.name = player.name
-        self.equipped = {'weapon':None, 'head':None, 'chest':None, 'belt':None, 'boots':None, 'gloves':None, 'amulet':None, 'ring':None}
+        self.abilities = ['spell.stalagmite', 'skill.slash']
+        self.ability_slots = {1: 'spell.stalagmite', 2: 'skill.slash', 3: None, 4: None, 5: None, 6: None}
+        self.equipped = {'weapon': None, 'head': None, 'chest': None, 'belt': None, 'boots': None, 'gloves': None, 'amulet': None, 'ring': None}
         self.inventory = []
         self.add_to_inventory(Weapon(), True)
         self.add_to_inventory(Armor(), True)
+        self.add_to_inventory(Consumable(), True)
 
     def add_to_inventory(self, item, ignore_carry, unequipping=False):
         if ignore_carry or self.current_carry + item.weight <= self.carry + self.bonus_carry:
@@ -55,6 +60,9 @@ class Character(Actor):
             self.current_carry -= item.weight
 
     def equip(self, item):
+        if type(item) not in [Weapon, Armor]:
+            return False
+
         if self.equipped[item.type.name] is not None:
             self.unequip(item.type.name)
 
@@ -63,6 +71,7 @@ class Character(Actor):
             self.equipped[item.type.name] = item
             self.update_stats(item, True)
             return True
+
         return False
 
     def unequip(self, slot):
@@ -179,6 +188,109 @@ class Character(Actor):
         if armor.water_res != 0:
             self.water_res -= armor.water_res
 
+    def use_consumable(self, consumable):
+        if type(consumable) not in [Consumable]:
+            raise Exception(f'Invalid consumable {consumable.name} of type {consumable.type} used by {self.name}.')
+        elif consumable.uses <= 0:
+            raise Exception(f'Consumable {consumable.name} used by {self.name} had {consumable.uses} uses.')
+        else:
+            out = f'The {consumable.type.name}:'
+
+            if consumable.health != 0:
+                result = self.restore_health(consumable.health)
+
+                if result > 0:
+                    out += f'\nRestores {result} health'
+                else:
+                    out += f'\nDrains {result} health'
+
+            if consumable.stamina != 0:
+                result = self.restore_stamina(consumable.stamina)
+
+                if result > 0:
+                    out += f'\nRestores {result} stamina'
+                else:
+                    out += f'\nDrains {result} stamina'
+
+            if consumable.mana != 0:
+                result = self.restore_mana(consumable.mana)
+
+                if result > 0:
+                    out += f'\nRestores {result} mana'
+                else:
+                    out += f'\nDrains {result} mana'
+
+            consumable.charges -= 1
+
+            if consumable.charges < 1:
+                self.remove_from_inventory(consumable)
+                out += '\n... and was consumed'
+
+            return out
+
+    def restore_health(self, amount):
+        start = self.current_health
+        self.current_health += amount
+
+        if self.current_health > self.health:
+            self.current_health = self.health
+
+        return self.current_health - start
+
+    def restore_stamina(self, amount):
+        start = self.current_stamina
+        self.current_stamina += amount
+
+        if self.current_stamina > self.stamina:
+            self.current_stamina = self.stamina
+
+        return self.current_stamina - start
+
+    def restore_mana(self, amount):
+        start = self.current_mana
+        self.current_mana += amount
+
+        if self.current_mana > self.mana:
+            self.current_mana = self.mana
+
+        return self.current_mana - start
+
+    def restore_all(self, h, s, m):
+        return self.restore_health(h), self.restore_stamina(s), self.restore_mana(m)
+
+    def recover(self):
+        percentage = 0.1
+        return self.restore_all(int(self.health * percentage), int(self.stamina * percentage), int(self.mana * percentage))
+
+    def regen(self):
+        h = 0
+        s = 0
+        m = 0
+        return self.restore_all(h, s, m)
+
+    def deal_damage(self, effect):
+        dmgs = []
+
+        if effect.type == ability.EffectType.damage_health:
+            if type(effect) == skill.SkillEffect:
+                weapon = self.equipped['weapon']
+                for dmg in weapon.damages:
+                    min = int(dmg[0] * effect.damage_scaling)
+                    max = int(dmg[1] * effect.damage_scaling)
+                    # TODO apply element scaling
+                    # TODO apply active character effects
+                    dmgs.append((random.randint(min, max), dmg[2]))
+            elif type(effect) == spell.SpellEffect:
+                    min = effect.min
+                    max = effect.max
+                    # TODO apply element scaling
+                    # TODO apply active character effects
+                    dmgs.append((random.randint(min, max), effect.element))
+        else:
+            raise Exception(f'{self.name} called deal damage with invalid effect type {type(effect)}')
+
+        return dmgs
+
     def take_damage(self, dmgs: list):
         for dmg in dmgs:
             if dmg[1] == Elements.earth:
@@ -192,17 +304,6 @@ class Character(Actor):
 
             self.current_health -= round(dmg[0])
             self.current_health = max(0, self.current_health)
-
-        return dmgs
-
-    def attack(self):
-        if self.equipped['weapon'] is None:
-            raise Exception('Attempted attack by {} with no weapon equipped.'.format(self.name))
-
-        dmgs = []
-
-        for dmg in self.equipped['weapon'].damages:
-            dmgs.append([random.randint(dmg[0], dmg[1]), dmg[2]])
 
         return dmgs
 

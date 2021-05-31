@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class Elements(Enum):
     earth = 1
     fire = 2

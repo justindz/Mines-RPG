@@ -1,11 +1,10 @@
 from enum import Enum
 
-# local
 from item import Item, ItemType
 from elements import Elements
-#
 
 valid_slots = ['weapon', 'head', 'chest', 'belt', 'boots', 'gloves', 'amulet', 'ring']
+
 
 class WeaponType(Enum):
     dagger = 1
@@ -15,9 +14,6 @@ class WeaponType(Enum):
     mace = 5
     staff = 6
 
-class DamageMode(Enum):
-    hit = 1
-    steal = 2
 
 class Weapon(Item):
     def __init__(self):
@@ -27,7 +23,6 @@ class Weapon(Item):
         self.weight = 3
         self.type = ItemType.weapon
         self.weapon_type = WeaponType.sword
-        self.level = 1
         self.bonus_strength = 1
         self.bonus_intelligence = 0
         self.bonus_dexterity = 0
@@ -37,19 +32,14 @@ class Weapon(Item):
         self.bonus_mana = 0
         self.bonus_init = 0
         self.damages = [
-            [1, 4, Elements.earth, DamageMode.hit]
+            [1, 4, Elements.earth]
         ]
 
     def get_damages_display_string(self):
         display_string = ''
 
         for damage in self.damages:
-            display_string += '{}-{} {}'.format(damage[0], damage[1], damage[2])
-
-            if damage[3] == DamageMode.steal:
-                display_string += ' Steal'
-
-            display_string += '\n'
+            display_string += '{}-{} {}\n'.format(damage[0], damage[1], damage[2])
 
         return display_string
 
