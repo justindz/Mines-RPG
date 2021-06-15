@@ -1,4 +1,3 @@
-from elements import Elements
 from enum import Enum
 
 
@@ -23,13 +22,11 @@ class EffectType(Enum):
 
 
 class Ability:
-    def __init__(self, _name, _description, _level, _cost, _effects, _area, _cooldown, _area_modifiable, _cooldown_modifiable):
+    def __init__(self, _name, _description, _level, _cost, _effects, _area, _area_modifiable):
         self.name = _name
         self.description = _description
         self.level = _level
         self.cost = _cost
         self.effects = _effects
         self.area = _area
-        self.cooldown = _cooldown
         self.area_modifiable = _area_modifiable
-        self.cooldown_modifiable = _cooldown_modifiable

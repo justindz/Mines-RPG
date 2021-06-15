@@ -21,10 +21,12 @@ class Character(Actor):
         self.intelligence = self.bonus_intelligence = 0
         self.dexterity = self.bonus_dexterity = 0
         self.willpower = self.bonus_willpower = 0
-        self.health = self.current_health = 100
-        self.stamina = self.current_stamina = 100
-        self.mana = self.current_mana = 100
+        self.health = 100
+        self.stamina = 100
+        self.mana = 100
         self.bonus_health = self.bonus_stamina = self.bonus_mana = 0
+        self.current_health = self.current_stamina = self.current_mana = 0
+        self.update_current_hsm()
         self.init = self.bonus_init = 0
         self.carry = 500
         self.current_carry = self.bonus_carry = 0
@@ -35,13 +37,18 @@ class Character(Actor):
         self.points = 0
         self.player = player
         self.name = player.name
-        self.abilities = ['spell.stalagmite', 'skill.slash']
-        self.ability_slots = {1: 'spell.stalagmite', 2: 'skill.slash', 3: None, 4: None, 5: None, 6: None}
+        self.abilities = ['spell.stalagmite', 'skill.slash', 'spell.mend_wounds']
+        self.ability_slots = {1: 'spell.stalagmite', 2: 'skill.slash', 3: 'spell.mend_wounds', 4: None, 5: None, 6: None}
         self.equipped = {'weapon': None, 'head': None, 'chest': None, 'belt': None, 'boots': None, 'gloves': None, 'amulet': None, 'ring': None}
         self.inventory = []
         self.add_to_inventory(Weapon(), True)
         self.add_to_inventory(Armor(), True)
         self.add_to_inventory(Consumable(), True)
+
+    def update_current_hsm(self):
+        self.current_health = self.health + self.bonus_health
+        self.current_stamina = self.stamina + self.bonus_stamina
+        self.current_mana = self.mana + self.bonus_mana
 
     def add_to_inventory(self, item, ignore_carry, unequipping=False):
         if ignore_carry or self.current_carry + item.weight <= self.carry + self.bonus_carry:
@@ -95,6 +102,8 @@ class Character(Actor):
                 self.apply_armor_bonuses(thing)
             else:
                 self.remove_armor_bonuses(thing)
+
+        self.update_current_hsm()
 
     def apply_weapon_bonuses(self, weapon):
         if weapon.bonus_strength != 0:
@@ -220,9 +229,9 @@ class Character(Actor):
                 else:
                     out += f'\nDrains {result} mana'
 
-            consumable.charges -= 1
+            consumable.uses -= 1
 
-            if consumable.charges < 1:
+            if consumable.uses < 1:
                 self.remove_from_inventory(consumable)
                 out += '\n... and was consumed'
 
@@ -268,7 +277,7 @@ class Character(Actor):
         m = 0
         return self.restore_all(h, s, m)
 
-    def deal_damage(self, effect):
+    def deal_damage(self, effect, critical=False):
         dmgs = []
 
         if effect.type == ability.EffectType.damage_health:
@@ -279,13 +288,21 @@ class Character(Actor):
                     max = int(dmg[1] * effect.damage_scaling)
                     # TODO apply element scaling
                     # TODO apply active character effects
-                    dmgs.append((random.randint(min, max), dmg[2]))
+
+                    if critical:
+                        dmgs.append((max, dmg[2]))
+                    else:
+                        dmgs.append((random.randint(min, max), dmg[2]))
             elif type(effect) == spell.SpellEffect:
                     min = effect.min
                     max = effect.max
                     # TODO apply element scaling
                     # TODO apply active character effects
-                    dmgs.append((random.randint(min, max), effect.element))
+
+                    if critical:
+                        dmgs.append((max, effect.element))
+                    else:
+                        dmgs.append((random.randint(min, max), effect.element))
         else:
             raise Exception(f'{self.name} called deal damage with invalid effect type {type(effect)}')
 

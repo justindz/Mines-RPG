@@ -2,6 +2,7 @@ import random
 
 import room
 
+
 class Biome(object):
     def __init__(self, name: str, enemy_tags: list[str], room_tags: list[str], encounter_tags: list[str]):
         self.name = name

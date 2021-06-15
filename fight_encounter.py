@@ -2,6 +2,7 @@ import random
 import copy
 
 import utilities
+from actor import Actor
 from character import Character
 import enemy
 from enemy import Enemy
@@ -52,20 +53,61 @@ class Fight(object):
         self.enemies.remove(enemy_to_remove)
         self.inits.remove(enemy_to_remove)
 
-    def use_ability(self, char, ab, target):
+    def use_ability(self, char: Character, ab, target: Actor):
         out = f'{char.name} used {ab.name} on {target.name}.'
+        targets = [target]
 
-        for effect in ab.effects:
-            if effect.type == ability.EffectType.damage_health:
-                dmgs = target.take_damage(char.deal_damage(effect))
+        if ab.area > 0:
+            i = ab.area
 
-                for dmg in dmgs:
-                    out += f'\n{target.name} suffered {dmg[0]} {dmg[1].name} damage.'
-            else:
-                raise Exception(f'{char.name} used ability {ab.name} with unsupported effect type {effect.type}')
+            while i <= ab.area:
+                if ab is spell.Spell and not ab.targets_enemies:
+                    if self.characters.index(target) + i <= len(self.characters - 1):
+                        targets.append(self.characters.index(target) + i)
 
-        if target.current_health <= 0:
-            self.enemies.remove(target)
+                    if self.characters.index(target) - i > 0:
+                        targets.insert(0, self.characters.index(target) - i)
+                else:
+                    if self.enemies.index(target) + i <= len(self.enemies - 1):
+                        targets.append(self.enemies.index(target) + i)
+
+                    if self.enemies.index(target) - i > 0:
+                        targets.insert(0, self.enemies.index(target) - i)
+
+                i -= 1
+
+        crit = False
+        roll = random.random()
+
+        if ab is skill.Skill and roll <= char.equipped['weapon'].base_crit_chance:
+            crit = True
+        elif ab is spell.Spell and roll <= ab.base_crit_chance:
+            crit = True
+
+        if crit:
+            out += f' CRITICAL HIT!'
+
+        for _target in targets:
+            for effect in ab.effects:
+                if effect.type == ability.EffectType.damage_health:
+                    dmgs = _target.take_damage(char.deal_damage(effect, critical=crit))
+
+                    for dmg in dmgs:
+                        out += f'\n{_target.name} suffered {dmg[0]} {dmg[1].name} damage.'
+                elif effect.type == ability.EffectType.restore_health:
+                    heal = _target.restore_health(random.randint(effect.min, effect.max))
+                    out += f'\n{_target.name} regained {heal} health.'
+                elif effect.type == ability.EffectType.restore_stamina:
+                    stam = _target.restore_stamina(random.randint(effect.min, effect.max))
+                    out += f'\n{_target.name} regained {stam} stamina.'
+                elif effect.type == ability.EffectType.restore_mana:
+                    mana = _target.restore_mana(random.randint(effect.min, effect.max))
+                    out += f'\n{_target.name} regained {mana} mana.'
+                else:
+                    raise Exception(f'{char.name} used ability {ab.name} with unsupported effect type {effect.type}')
+
+            if _target.current_health <= 0:
+                self.enemies.remove(_target)
 
         return out
 
@@ -79,6 +121,18 @@ class Fight(object):
 
         return out
 
+    def display_ally_menu(self, ally):
+        out = 'Allies:'
+        i = 1
+
+        for c in self.characters:
+            if c != ally:
+                out += f'\n{i} - {c.name} {c.current_health}h {c.current_stamina}s {c.current_mana}m'
+            else:
+                out += f'\n{i} - YOU {c.current_health}h {c.current_stamina}s {c.current_mana}m'
+
+        return out
+
     @staticmethod
     def display_action_menu():
         return '1 - Ability\n2 - Item\n3 - Recover'
@@ -89,7 +143,15 @@ class Fight(object):
 
         for i in range(1, 6):
             if character.ability_slots[i] is not None:
-                out += '\n' + str(i) + ' - ' + utilities.get_ability_by_name(character.ability_slots[i]).name
+                _ability = utilities.get_ability_by_name(character.ability_slots[i])
+                cost = f'{_ability.cost}'
+
+                if _ability is skill.Skill:
+                    cost += 's'
+                elif _ability is spell.Spell:
+                    cost = 'm'
+
+                out += f'\n {str(i)} - {_ability.name} - {cost}'
 
         return out
 

@@ -11,11 +11,8 @@ class SkillEffect:
 
 
 class Skill(ability.Ability):
-    def __init__(self, _name, _description, _level, _cost, _effects, _weapon_type, _area=0, _cooldown=0,
-                 _area_modifiable=False,
-                 _cooldown_modifiable=False):
-        super().__init__(_name, _description, _level, _cost, _effects, _area, _cooldown, _area_modifiable,
-                         _cooldown_modifiable)
+    def __init__(self, _name, _description, _level, _cost, _effects, _weapon_type, _area=0, _area_modifiable=False):
+        super().__init__(_name, _description, _level, _cost, _effects, _area, _area_modifiable)
         self.weapon_type = _weapon_type
 
 
@@ -23,5 +20,5 @@ skills = {
     'slash': Skill('Slash', 'Slash skill description.', 1,
                    {'h': 0, 's': 5, 'm': 0},
                    [SkillEffect(EffectType.damage_health, 1.0)],
-                   WeaponType.sword, 1, 1, True, False),
+                   WeaponType.sword, 1, _area_modifiable=True),
 }

@@ -11,6 +11,34 @@ from character import Character
 from fight_encounter import Fight
 
 
+async def check_ability_requirements_and_use(ability, actor, delve, target, fight):
+    for stat in ability.cost.keys():
+        cost = ability.cost[stat]
+
+        if cost > 0:
+            if stat == 'h' and actor.health <= cost:
+                await delve.channel.send(f'You need more health to use {ability.name}')
+                return False
+            elif stat == 's':
+                await delve.channel.send(f'You need more stamina to use {ability.name}')
+                return False
+            elif stat == 'm':
+                await delve.channel.send(f'You need more mana to use {ability.name}')
+                return False
+            else:
+                raise Exception(f'Invalid stat {stat} cost checked in check_ability_requirements_and_use for ability {ability.name}')
+
+    if type(ability) == skill.Skill and actor.equipped['weapon'] is None:
+        await delve.channel.send('You cannot use this skill without an equipped weapon.')
+        return False
+    elif type(ability) == skill.Skill and actor.equipped['weapon'].weapon_type != ability.weapon_type:
+        await delve.channel.send(f'This skill requires a {ability.weapon_type}.')
+        return False
+    else:
+        await delve.channel.send(fight.use_ability(actor, ability, target))
+        return True
+
+
 class DelveController(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -170,24 +198,33 @@ class DelveController(commands.Cog):
                             msg = await self.bot.wait_for('message', check=check_ability_menu, timeout=30)
                             ability_choice = msg.content
                             ability = utilities.get_ability_by_name(actor.ability_slots[int(ability_choice)])
-                            await delve.channel.send(fight.display_enemy_menu())
 
-                            def check_enemy_menu(m):
-                                if m.author.name == actor.name and m.channel == delve.channel:
-                                    if 0 < int(m.content) <= len(fight.enemies):
-                                        return True
-                                return False
+                            if ability.targets_enemies:
+                                await delve.channel.send(fight.display_enemy_menu())
 
-                            msg = await self.bot.wait_for('message', check=check_enemy_menu, timeout=30)
-                            enemy_choice = int(msg.content)
-                            enemy = fight.enemies[enemy_choice - 1]
+                                def check_enemy_menu(m):
+                                    if m.author.name == actor.name and m.channel == delve.channel:
+                                        if 0 < int(m.content) <= len(fight.enemies):
+                                            return True
+                                    return False
 
-                            if type(ability) == skill.Skill and actor.equipped['weapon'] is None:
-                                await delve.channel.send('You cannot use this skill without an equipped weapon.')
-                            elif type(ability) == skill.Skill and actor.equipped['weapon'].weapon_type != ability.weapon_type:
-                                await delve.channel.send(f'This skill requires a {ability.weapon_type}.')
+                                msg = await self.bot.wait_for('message', check=check_enemy_menu, timeout=30)
+                                enemy_choice = int(msg.content)
+                                enemy = fight.enemies[enemy_choice - 1]
+                                await check_ability_requirements_and_use(ability, actor, delve, enemy, fight)
                             else:
-                                await delve.channel.send(fight.use_ability(actor, ability, enemy))
+                                await delve.channel.send(fight.display_ally_menu(actor))
+
+                                def check_ally_menu(m):
+                                    if m.author.name == actor.name and m.channel == delve.channel:
+                                        if 0 < int(m.content) <= len(fight.characters):
+                                            return True
+                                    return False
+
+                                msg = await self.bot.wait_for('message', check=check_ally_menu, timeout=30)
+                                ally_choice = int(msg.content)
+                                ally = fight.characters[ally_choice - 1]
+                                await check_ability_requirements_and_use(ability, actor, delve, ally, fight)
 
                             if len(fight.enemies) == 0:
                                 await delve.channel.send('All enemies have been defeated.')

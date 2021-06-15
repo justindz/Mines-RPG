@@ -31,6 +31,7 @@ class Weapon(Item):
         self.bonus_stamina = 0
         self.bonus_mana = 0
         self.bonus_init = 0
+        self.base_crit_chance = 0.05
         self.damages = [
             [1, 4, Elements.earth]
         ]
