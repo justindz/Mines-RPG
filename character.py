@@ -1,8 +1,9 @@
 import discord
 import random
+import datetime
+from mongokit_ng import Document
 
 import ability
-from actor import Actor
 from weapon import Weapon
 from armor import Armor
 from consumable import Consumable
@@ -12,38 +13,98 @@ import skill
 import spell
 
 
-class Character(Actor):
-    def __init__(self, player: discord.Member):
-        super().__init__()
+class Character(Document):
+    __database__ = 'delverpg'
+    __collection__ = 'characters'
+    structure = {
+        'name': str,
+        'level': int,
+        'xp': int,
+        'coins': int,
+        'created': datetime.datetime,
 
-        # Stats
-        self.strength = self.bonus_strength = 0
-        self.intelligence = self.bonus_intelligence = 0
-        self.dexterity = self.bonus_dexterity = 0
-        self.willpower = self.bonus_willpower = 0
-        self.health = 100
-        self.stamina = 100
-        self.mana = 100
-        self.bonus_health = self.bonus_stamina = self.bonus_mana = 0
-        self.current_health = self.current_stamina = self.current_mana = 0
-        self.update_current_hsm()
-        self.init = self.bonus_init = 0
-        self.carry = 500
-        self.current_carry = self.bonus_carry = 0
+        'strength': int,
+        'bonus_strength': int,
+        'intelligence': int,
+        'bonus_intelligence': int,
+        'dexterity': int,
+        'bonus_dexterity': int,
+        'willpower': int,
+        'bonus_willpower': int,
 
-        # Resistances
-        self.earth_res = self.fire_res = self.electricity_res = self.water_res = 0.0
+        'health': int,
+        'bonus_health': int,
+        'current_health': int,
+        'stamina': int,
+        'bonus_stamina': int,
+        'current_stamina': int,
+        'mana': int,
+        'bonus_mana': int,
+        'current_mana': int,
 
-        self.points = 0
-        self.player = player
-        self.name = player.name
-        self.abilities = ['spell.stalagmite', 'skill.slash', 'spell.mend_wounds']
-        self.ability_slots = {1: 'spell.stalagmite', 2: 'skill.slash', 3: 'spell.mend_wounds', 4: None, 5: None, 6: None}
-        self.equipped = {'weapon': None, 'head': None, 'chest': None, 'belt': None, 'boots': None, 'gloves': None, 'amulet': None, 'ring': None}
-        self.inventory = []
-        self.add_to_inventory(Weapon(), True)
-        self.add_to_inventory(Armor(), True)
-        self.add_to_inventory(Consumable(), True)
+        'init': int,
+        'bonus_init': int,
+        'carry': int,
+        'bonus_carry': int,
+        'current_carry': int,
+
+        'earth_res': float,
+        'fire_res': float,
+        'electricity_res': float,
+        'water_res': float,
+
+        'points': int,
+        'abilities': [str],
+        'ability_slots': dict,
+        'equipped': dict,
+        'inventory': None,
+    }
+    required_fields = ['name']
+    default_values = {
+        'level': 1,
+        'xp': 0,
+        'coins': 0,
+        'created': datetime.datetime.utcnow,
+
+        'strength': 0,
+        'bonus_strength': 0,
+        'intelligence': 0,
+        'bonus_intelligence': 0,
+        'dexterity': 0,
+        'bonus_dexterity': 0,
+        'willpower': 0,
+        'bonus_willpower': 0,
+
+        'health': 100,
+        'bonus_health': 0,
+        'current_health': 100,
+        'stamina': 100,
+        'bonus_stamina': 0,
+        'current_stamina': 100,
+        'mana': 100,
+        'bonus_mana': 0,
+        'current_mana': 100,
+
+        'init': 0,
+        'bonus_init': 0,
+        'carry': 500,
+        'current_carry': 0,
+        'bonus_carry': 0,
+
+        'earth_res': 0.0,
+        'fire_res': 0.0,
+        'electricity_res': 0.0,
+        'water_res': 0.0,
+
+        'points': 0,
+        'abilities': ['spell-stalagmite', 'skill-slash', 'spell-mend_wounds'],
+        'ability_slots': {'1': 'spell-stalagmite', '2': 'skill-slash', '3': 'spell-mend_wounds', '4': None, '5': None, '6': None},
+        'equipped': {'weapon': None, 'head': None, 'chest': None, 'belt': None, 'boots': None, 'gloves': None,
+                     'amulet': None, 'ring': None},
+        'inventory': [],
+    }
+    use_dot_notation = True
+    use_autorefs = True
 
     def update_current_hsm(self):
         self.current_health = self.health + self.bonus_health
@@ -57,6 +118,7 @@ class Character(Actor):
             if not unequipping:
                 self.current_carry += item.weight
 
+            self.save()
             return True
         return False
 
@@ -66,12 +128,15 @@ class Character(Actor):
         if not equipping:
             self.current_carry -= item.weight
 
+        self.save()
+
     def equip(self, item):
         if type(item) not in [Weapon, Armor]:
             return False
 
         if self.equipped[item.type.name] is not None:
             self.unequip(item.type.name)
+            self.save()
 
         if self.level >= item.level:
             self.remove_from_inventory(item, True)
@@ -82,7 +147,8 @@ class Character(Actor):
         return False
 
     def unequip(self, slot):
-        if slot not in ['weapon', 'head', 'chest', 'belt', 'boots', 'gloves', 'amulet', 'ring'] or self.equipped[slot] is None:
+        if slot not in ['weapon', 'head', 'chest', 'belt', 'boots', 'gloves', 'amulet', 'ring'] or self.equipped[
+                slot] is None:
             return False
         else:
             item = self.equipped[slot]
@@ -104,6 +170,7 @@ class Character(Actor):
                 self.remove_armor_bonuses(thing)
 
         self.update_current_hsm()
+        self.save()
 
     def apply_weapon_bonuses(self, weapon):
         if weapon.bonus_strength != 0:
@@ -235,6 +302,7 @@ class Character(Actor):
                 self.remove_from_inventory(consumable)
                 out += '\n... and was consumed'
 
+            self.save()
             return out
 
     def restore_health(self, amount):
@@ -269,7 +337,8 @@ class Character(Actor):
 
     def recover(self):
         percentage = 0.1
-        return self.restore_all(int(self.health * percentage), int(self.stamina * percentage), int(self.mana * percentage))
+        return self.restore_all(int(self.health * percentage), int(self.stamina * percentage),
+                                int(self.mana * percentage))
 
     def regen(self):
         h = 0
@@ -294,15 +363,15 @@ class Character(Actor):
                     else:
                         dmgs.append((random.randint(min, max), dmg[2]))
             elif type(effect) == spell.SpellEffect:
-                    min = effect.min
-                    max = effect.max
-                    # TODO apply element scaling
-                    # TODO apply active character effects
+                min = effect.min
+                max = effect.max
+                # TODO apply element scaling
+                # TODO apply active character effects
 
-                    if critical:
-                        dmgs.append((max, effect.element))
-                    else:
-                        dmgs.append((random.randint(min, max), effect.element))
+                if critical:
+                    dmgs.append((max, effect.element))
+                else:
+                    dmgs.append((random.randint(min, max), effect.element))
         else:
             raise Exception(f'{self.name} called deal damage with invalid effect type {type(effect)}')
 
@@ -327,47 +396,49 @@ class Character(Actor):
     def gain_xp(self, xp: int, level: int):
         gain = utilities.scale_xp(xp, self.level, level)
         self.xp += gain
+        self.save()
         return gain
 
-    xp_table = {
-        1:	0,
-        2:	1000,
-        3:	2500,
-        4:	5000,
-        5:	8000,
-        6:	11000,
-        7:	15000,
-        8:	18500,
-        9:	22500,
-        10:	27000,
-        11:	31500,
-        12:	36500,
-        13:	41500,
-        14:	47000,
-        15:	52500,
-        16:	58000,
-        17:	64000,
-        18:	70000,
-        19:	76500,
-        20:	83000,
-        21:	89500,
-        22:	96000,
-        23:	103000,
-        24:	110500,
-        25:	117500,
-        26:	125000,
-        27:	132000,
-        28:	140000,
-        29:	148000,
-        30:	156000,
-        31:	164000,
-        32:	173000,
-        33:	181000,
-        34:	190000,
-        35:	198000,
-        36:	207000,
-        37:	216000,
-        38:	225000,
-        39:	235000,
-        40:	250000,
-    }
+
+xp_table = {
+    1: 0,
+    2: 1000,
+    3: 2500,
+    4: 5000,
+    5: 8000,
+    6: 11000,
+    7: 15000,
+    8: 18500,
+    9: 22500,
+    10: 27000,
+    11: 31500,
+    12: 36500,
+    13: 41500,
+    14: 47000,
+    15: 52500,
+    16: 58000,
+    17: 64000,
+    18: 70000,
+    19: 76500,
+    20: 83000,
+    21: 89500,
+    22: 96000,
+    23: 103000,
+    24: 110500,
+    25: 117500,
+    26: 125000,
+    27: 132000,
+    28: 140000,
+    29: 148000,
+    30: 156000,
+    31: 164000,
+    32: 173000,
+    33: 181000,
+    34: 190000,
+    35: 198000,
+    36: 207000,
+    37: 216000,
+    38: 225000,
+    39: 235000,
+    40: 250000,
+}

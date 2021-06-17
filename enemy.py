@@ -1,18 +1,15 @@
-# Local
-from actor import Actor
 from elements import Elements
 import utilities
 
 
-#
-
-class Enemy(Actor):
+class Enemy:
     def __init__(self, name, strength, strength_growth, intelligence, intelligence_growth, dexterity, dexterity_growth,
                  willpower, willpower_growth, health, health_growth, mana, mana_growth, stamina, stamina_growth, init,
                  init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth, electricity_res,
                  electricity_res_growth, water_res, water_res_growth):
         super().__init__()
         self.name = name
+        self.level = 1
 
         # Stats
         self.strength = strength

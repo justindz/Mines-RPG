@@ -2,7 +2,6 @@ import random
 import copy
 
 import utilities
-from actor import Actor
 from character import Character
 import enemy
 from enemy import Enemy
@@ -53,7 +52,7 @@ class Fight(object):
         self.enemies.remove(enemy_to_remove)
         self.inits.remove(enemy_to_remove)
 
-    def use_ability(self, char: Character, ab, target: Actor):
+    def use_ability(self, char: Character, ab, target):
         out = f'{char.name} used {ab.name} on {target.name}.'
         targets = [target]
 

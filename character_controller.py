@@ -3,25 +3,36 @@ from discord.ext import commands
 
 import utilities
 import weapon
-from character import Character
-from weapon import Weapon
-from armor import Armor
+from weapon import Weapon, WeaponType
+import armor
+from consumable import Consumable
+from item import ItemType
 
 
 class CharacterController(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot, connection):
         self.bot = bot
-        self.characters = []
+        self.connection = connection
 
     def get(self, player: discord.Member):
-        # see if they already exist
-        for character in self.characters:
-            if character.name == player.name:
-                return character
+        character = self.connection.Character.find_one({'name': str(player)})
 
-        # didn't find them, so create
-        character = Character(player)
-        self.characters.append(character)
+        if character is None:
+            character = self.connection.Character()
+            character.name = str(player)
+            character.update_current_hsm()
+            w = self.connection.Weapon()
+            w.save()
+            character.add_to_inventory(w, True)
+            a = self.connection.Armor()
+            a.save()
+            character.add_to_inventory(a, True)
+            c = self.connection.Consumable()
+            c.save()
+            character.add_to_inventory(c, True)
+            character.save()
+            print(f'Created new character for {str(player)}')  # TODO make a logging call
+
         return character
 
     #  CHECKS  #
@@ -99,7 +110,7 @@ class CharacterController(commands.Cog):
 
         i = 0
         for item in character.inventory:
-            inv_string += '{} - {} ({}) {}wgt\n'.format(i, item.name, item.level, item.weight)
+            inv_string += f'{i} - {item["name"]} ({item["level"]}) {item["weight"]}wgt\n'
             i += 1
 
         inv_string += 'Carry: {}/{}\n'.format(character.current_carry, character.carry + character.bonus_carry)
@@ -111,8 +122,8 @@ class CharacterController(commands.Cog):
         """View the details of an item in your inventory by position number or equipped gear by slot name (obtained using the 'inv' command)."""
         character = self.get(ctx.author)
 
-        if isinstance(pos, int) and pos + 1 <= len(character.inventory):
-            item = character.inventory[pos]
+        if pos.isdigit() and int(pos) + 1 <= len(character.inventory):
+            item = character.inventory[int(pos)]
         elif isinstance(pos, str) and pos in weapon.valid_slots:
             item = character.equipped[pos]
         else:
@@ -126,27 +137,27 @@ class CharacterController(commands.Cog):
 {} - Level {}
 
 "{}"
-'''.format(item.name, item.level, item.description)
-            if isinstance(item, Weapon):
+'''.format(item["name"], item["level"], item["description"])
+            if item['_itype'] == ItemType.weapon.value:
                 item_string += '''
 Class: {}
 Damage: {}
 
 Bonuses
 -------
-{}
-'''.format(item.weapon_type, item.get_damages_display_string(), item.get_bonuses_display_string())
-            elif isinstance(item, Armor):
+{}'''.format(WeaponType(item['_weapon_type']).name, weapon.get_damages_display_string(item), weapon.get_bonuses_display_string(item))
+            elif item['_itype'] in [ItemType.head.value, ItemType.chest.value, ItemType.belt.value,
+                                    ItemType.boots.value, ItemType.gloves.value, ItemType.amulet.value,
+                                    ItemType.ring.value]:
                 item_string += '''
 Class: {}
 
 Bonuses
 -------
-{}
-'''.format(item.type, item.get_bonuses_display_string())
+{}'''.format(ItemType(item['_itype']).name, armor.get_bonuses_display_string(item))
             item_string += '''
 Weight: {}
-============================================'''.format(item.weight)
+============================================'''.format(item["weight"])
             await ctx.author.send(item_string)
         else:
             await ctx.author.send('No item equipped in that slot.')

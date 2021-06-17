@@ -1,13 +1,16 @@
 import discord
 from discord.ext import commands
 import logging
+from mongokit_ng import Connection
 import secrets
 
-# Local
 import character_controller
 import party_controller
 import delve_controller
-#
+from character import Character
+from armor import Armor
+from consumable import Consumable
+from weapon import Weapon
 
 #   LOGGING CONFIG   #
 logger = logging.getLogger('discord')
@@ -16,12 +19,19 @@ handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w'
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 
+#   DB CONFIG   #
+connection = Connection(secrets.MONGODB_URI)
+connection.register([Character])
+connection.register([Armor])
+connection.register([Consumable])
+connection.register([Weapon])
+
 #   BOT CONFIG   #
 intents = discord.Intents.default()
 intents.members = True
 intents.reactions = True
 bot = commands.Bot(command_prefix='\\', intents=intents)
-bot.add_cog(character_controller.CharacterController(bot))
+bot.add_cog(character_controller.CharacterController(bot, connection))
 bot.add_cog(party_controller.PartyController(bot))
 bot.add_cog(delve_controller.DelveController(bot))
 

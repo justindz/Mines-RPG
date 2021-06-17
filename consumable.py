@@ -1,21 +1,33 @@
-from item import Item, ItemType
+from mongokit_ng import Document
+
+from item import ItemType
 
 
-class Consumable(Item):
-    def __init__(self):
-        super().__init__()
-        self.name = 'Test Healing Potion'
-        self.weight = 1
-        self.type = ItemType.potion
-        self.uses = 1
-        self.health = 0
-        self.stamina = 0
-        self.mana = 5
-
-        if self.uses == 1:
-            self.description = f'A phial containing a foul-tasting liquid. {self.uses} use remains.'
-        else:
-            self.description = f'A phial containing a foul-tasting liquid. {self.uses} uses remain.'
-
-        self.name = 'Test Potion (Pico)'
-        # TODO Add effects
+class Consumable(Document):
+    __database__ = 'delverpg'
+    __collection__ = 'consumables'
+    structure = {
+        'name': str,
+        'description': str,
+        'level': int,
+        'weight': int,
+        '_itype': int,
+        'uses': int,
+        'health': int,
+        'stamina': int,
+        'mana': int,
+    }
+    required_fields = ['name', 'description', 'level', 'weight', '_itype', 'uses', 'health', 'stamina', 'mana']
+    default_values = {
+        'name': 'Test Potion (Pico)',
+        'description': 'A phial containing a foul-tasting liquid. 1 use remains.',
+        'level': 1,
+        'weight': 1,
+        '_itype': ItemType.potion.value,
+        'uses': 1,
+        'health': 0,
+        'stamina': 0,
+        'mana': 5,
+    }
+    use_dot_notation = True
+    use_autorefs = True
