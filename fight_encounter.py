@@ -7,6 +7,7 @@ import enemy
 from enemy import Enemy
 import enemy_group
 from consumable import Consumable
+from elements import Elements
 import ability
 import spell
 import skill
@@ -59,15 +60,15 @@ class Fight(object):
         if ab.area > 0:
             i = ab.area
 
-            while i <= ab.area:
+            while i > 0:
                 if ab is spell.Spell and not ab.targets_enemies:
-                    if self.characters.index(target) + i <= len(self.characters - 1):
+                    if self.characters.index(target) + i <= len(self.characters) - 1:
                         targets.append(self.characters.index(target) + i)
 
                     if self.characters.index(target) - i > 0:
                         targets.insert(0, self.characters.index(target) - i)
                 else:
-                    if self.enemies.index(target) + i <= len(self.enemies - 1):
+                    if self.enemies.index(target) + i <= len(self.enemies) - 1:
                         targets.append(self.enemies.index(target) + i)
 
                     if self.enemies.index(target) - i > 0:
@@ -92,7 +93,7 @@ class Fight(object):
                     dmgs = _target.take_damage(char.deal_damage(effect, critical=crit))
 
                     for dmg in dmgs:
-                        out += f'\n{_target.name} suffered {dmg[0]} {dmg[1].name} damage.'
+                        out += f'\n{_target.name} suffered {dmg[0]} {Elements(dmg[1]).name} damage.'
                 elif effect.type == ability.EffectType.restore_health:
                     heal = _target.restore_health(random.randint(effect.min, effect.max))
                     out += f'\n{_target.name} regained {heal} health.'
@@ -141,8 +142,8 @@ class Fight(object):
         out = 'Abilities:'
 
         for i in range(1, 6):
-            if character.ability_slots[i] is not None:
-                _ability = utilities.get_ability_by_name(character.ability_slots[i])
+            if character.ability_slots[str(i)] is not None:
+                _ability = utilities.get_ability_by_name(character.ability_slots[str(i)])
                 cost = f'{_ability.cost}'
 
                 if _ability is skill.Skill:

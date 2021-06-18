@@ -26,7 +26,7 @@ class Armor(Document):
         'electricity_res': float,
         'water_res': float,
     }
-    required_fields = ['name', 'description', 'level' 'weight', '_itype', 'bonus_strength', 'bonus_intelligence',
+    required_fields = ['name', 'description', 'level', 'weight', '_itype', 'bonus_strength', 'bonus_intelligence',
                        'bonus_dexterity', 'bonus_willpower', 'bonus_health', 'bonus_stamina', 'bonus_mana',
                        'bonus_init', 'bonus_carry', 'earth_res', 'fire_res', 'electricity_res', 'water_res']
     default_values = {

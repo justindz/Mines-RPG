@@ -91,21 +91,21 @@ class CharacterController(commands.Cog):
         character = self.get(ctx.author)
         inv_string = '=================EQUIPPED================\n'
         inv_string += 'Weapon: {}\n'.format(
-            character.equipped['weapon'].name if character.equipped['weapon'] is not None else 'None')
+            character.equipped['weapon']['name'] if character.equipped['weapon'] is not None else 'None')
         inv_string += 'Head: {}\n'.format(
-            character.equipped['head'].name if character.equipped['head'] is not None else 'None')
+            character.equipped['head']['name'] if character.equipped['head'] is not None else 'None')
         inv_string += 'Chest: {}\n'.format(
-            character.equipped['chest'].name if character.equipped['chest'] is not None else 'None')
+            character.equipped['chest']['name'] if character.equipped['chest'] is not None else 'None')
         inv_string += 'Belt: {}\n'.format(
-            character.equipped['belt'].name if character.equipped['belt'] is not None else 'None')
+            character.equipped['belt']['name'] if character.equipped['belt'] is not None else 'None')
         inv_string += 'Boots: {}\n'.format(
-            character.equipped['boots'].name if character.equipped['boots'] is not None else 'None')
+            character.equipped['boots']['name'] if character.equipped['boots'] is not None else 'None')
         inv_string += 'Gloves: {}\n'.format(
-            character.equipped['gloves'].name if character.equipped['gloves'] is not None else 'None')
+            character.equipped['gloves']['name'] if character.equipped['gloves'] is not None else 'None')
         inv_string += 'Amulet: {}\n'.format(
-            character.equipped['amulet'].name if character.equipped['amulet'] is not None else 'None')
+            character.equipped['amulet']['name'] if character.equipped['amulet'] is not None else 'None')
         inv_string += 'Ring: {}\n'.format(
-            character.equipped['ring'].name if character.equipped['ring'] is not None else 'None')
+            character.equipped['ring']['name'] if character.equipped['ring'] is not None else 'None')
         inv_string += '================INVENTORY================\n'
 
         i = 0
@@ -175,9 +175,9 @@ Weight: {}
 
         if item is not None:
             if character.equip(item):
-                await ctx.author.send('{} equipped.'.format(utilities.underline(item.name)))
+                await ctx.author.send('{} equipped.'.format(utilities.underline(item['name'])))
             else:
-                await ctx.author.send('You do not meet the requirements to equip {}.'.format(item.name))
+                await ctx.author.send('You do not meet the requirements to equip {}.'.format(item['name']))
 
     @commands.command(aliases=['uneq'])
     @commands.check(check_idle_or_not_delving)
@@ -190,4 +190,4 @@ Weight: {}
             item = character.unequip(slot)
 
             if item is not None:
-                await ctx.author.send('{} unequipped.'.format(utilities.underline(item.name)))
+                await ctx.author.send('{} unequipped.'.format(utilities.underline(item['name'])))

@@ -4,6 +4,7 @@ import asyncio
 import random
 
 import skill
+import spell
 import utilities
 from zone import Zone
 from delve import Delve
@@ -16,22 +17,22 @@ async def check_ability_requirements_and_use(ability, actor, delve, target, figh
         cost = ability.cost[stat]
 
         if cost > 0:
-            if stat == 'h' and actor.health <= cost:
+            if stat == 'h' and actor.current_health < cost:
                 await delve.channel.send(f'You need more health to use {ability.name}')
                 return False
-            elif stat == 's':
+            elif stat == 's' and actor.current_stamina < cost:
                 await delve.channel.send(f'You need more stamina to use {ability.name}')
                 return False
-            elif stat == 'm':
+            elif stat == 'm' and actor.current_mana < cost:
                 await delve.channel.send(f'You need more mana to use {ability.name}')
                 return False
-            else:
+            elif stat not in ['h', 's', 'm']:
                 raise Exception(f'Invalid stat {stat} cost checked in check_ability_requirements_and_use for ability {ability.name}')
 
-    if type(ability) == skill.Skill and actor.equipped['weapon'] is None:
+    if isinstance(ability, skill.Skill) and actor.equipped['weapon'] is None:
         await delve.channel.send('You cannot use this skill without an equipped weapon.')
         return False
-    elif type(ability) == skill.Skill and actor.equipped['weapon'].weapon_type != ability.weapon_type:
+    elif isinstance(ability, skill.Skill) and actor.equipped['weapon']['_weapon_type'] != ability.weapon_type.value:
         await delve.channel.send(f'This skill requires a {ability.weapon_type}.')
         return False
     else:
@@ -173,12 +174,15 @@ class DelveController(commands.Cog):
                 await delve.channel.send(utilities.underline('{} ({}/{})'.format(el.name, el.current_health, el.health)))
 
             for actor in fight.inits:
-                await delve.channel.send(utilities.bold('{} goes next.'.format(actor.name)))
+                await delve.channel.send(utilities.bold(f'{actor.name} goes next.'))
 
                 if isinstance(actor, Character):  # Player
                     def check_action_menu(m):
-                        if m.author.name == actor.name and m.channel == delve.channel:
+                        if str(m.author) == actor.name and m.channel == delve.channel:
                             if m.content in ['1', '2', '3']:
+                                if m.content == '3' and not actor.has_consumables():
+                                    await delve.channel.send(f'You have no usable items.')
+                                    return False
                                 return True
                         return False
                     try:
@@ -190,20 +194,19 @@ class DelveController(commands.Cog):
                             await delve.channel.send(Fight.display_ability_menu(actor))
 
                             def check_ability_menu(m):
-                                if m.author.name == actor.name and m.channel == delve.channel:
-                                    if 0 < int(m.content) <= 6 and actor.ability_slots[int(m.content)] is not None:
+                                if str(m.author) == actor.name and m.channel == delve.channel:
+                                    if 0 < int(m.content) <= 6 and actor.ability_slots[m.content] is not None:
                                         return True
                                 return False
 
                             msg = await self.bot.wait_for('message', check=check_ability_menu, timeout=30)
-                            ability_choice = msg.content
-                            ability = utilities.get_ability_by_name(actor.ability_slots[int(ability_choice)])
+                            ability = utilities.get_ability_by_name(actor.ability_slots[msg.content])
 
-                            if ability.targets_enemies:
+                            if isinstance(ability, skill.Skill) or (isinstance(ability, spell.Spell) and ability.targets_enemies):
                                 await delve.channel.send(fight.display_enemy_menu())
 
                                 def check_enemy_menu(m):
-                                    if m.author.name == actor.name and m.channel == delve.channel:
+                                    if str(m.author) == actor.name and m.channel == delve.channel:
                                         if 0 < int(m.content) <= len(fight.enemies):
                                             return True
                                     return False
@@ -216,7 +219,7 @@ class DelveController(commands.Cog):
                                 await delve.channel.send(fight.display_ally_menu(actor))
 
                                 def check_ally_menu(m):
-                                    if m.author.name == actor.name and m.channel == delve.channel:
+                                    if str(m.author) == actor.name and m.channel == delve.channel:
                                         if 0 < int(m.content) <= len(fight.characters):
                                             return True
                                     return False
@@ -237,7 +240,7 @@ class DelveController(commands.Cog):
                             await delve.channel.send(menu)
 
                             def check_item_menu(m):
-                                if m.author.name == actor.name and m.channel == delve.channel and 0 < int(m.content) <= len(indices):
+                                if str(m.author) == actor.name and m.channel == delve.channel and 0 < int(m.content) <= len(indices):
                                     return True
                                 return False
 

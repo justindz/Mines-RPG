@@ -52,9 +52,9 @@ def dmgs_to_str(dmgs):
 
 def get_ability_by_name(ability_name):
     try:
-        if ability_name.startswith('spell.'):
+        if ability_name.startswith('spell-'):
             return spell.spells[ability_name[6:]]
-        elif ability_name.startswith("skill."):
+        elif ability_name.startswith("skill-"):
             return skill.skills[ability_name[6:]]
         else:
             raise Exception(f'utilities.get_ability_name called for unknown type: {ability_name}')

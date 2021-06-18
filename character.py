@@ -1,9 +1,9 @@
-import discord
 import random
 import datetime
 from mongokit_ng import Document
 
 import ability
+from item import ItemType
 from weapon import Weapon
 from armor import Armor
 from consumable import Consumable
@@ -98,7 +98,8 @@ class Character(Document):
 
         'points': 0,
         'abilities': ['spell-stalagmite', 'skill-slash', 'spell-mend_wounds'],
-        'ability_slots': {'1': 'spell-stalagmite', '2': 'skill-slash', '3': 'spell-mend_wounds', '4': None, '5': None, '6': None},
+        'ability_slots': {'1': 'spell-stalagmite', '2': 'skill-slash', '3': 'spell-mend_wounds', '4': None, '5': None,
+                          '6': None},
         'equipped': {'weapon': None, 'head': None, 'chest': None, 'belt': None, 'boots': None, 'gloves': None,
                      'amulet': None, 'ring': None},
         'inventory': [],
@@ -112,11 +113,11 @@ class Character(Document):
         self.current_mana = self.mana + self.bonus_mana
 
     def add_to_inventory(self, item, ignore_carry, unequipping=False):
-        if ignore_carry or self.current_carry + item.weight <= self.carry + self.bonus_carry:
+        if ignore_carry or self.current_carry + item['weight'] <= self.carry + self.bonus_carry:
             self.inventory.append(item)
 
             if not unequipping:
-                self.current_carry += item.weight
+                self.current_carry += item['weight']
 
             self.save()
             return True
@@ -126,21 +127,25 @@ class Character(Document):
         self.inventory.remove(item)
 
         if not equipping:
-            self.current_carry -= item.weight
+            self.current_carry -= item['weight']
 
         self.save()
 
     def equip(self, item):
-        if type(item) not in [Weapon, Armor]:
+        if item['_itype'] not in [ItemType.weapon.value, ItemType.head.value, ItemType.chest.value, ItemType.belt.value,
+                                  ItemType.boots.value, ItemType.gloves.value, ItemType.amulet.value,
+                                  ItemType.ring.value]:
             return False
 
-        if self.equipped[item.type.name] is not None:
-            self.unequip(item.type.name)
+        slot = ItemType(item['_itype']).name
+
+        if self.equipped[slot] is not None:
+            self.unequip(slot)
             self.save()
 
-        if self.level >= item.level:
+        if self.level >= item['level']:
             self.remove_from_inventory(item, True)
-            self.equipped[item.type.name] = item
+            self.equipped[slot] = item
             self.update_stats(item, True)
             return True
 
@@ -148,7 +153,7 @@ class Character(Document):
 
     def unequip(self, slot):
         if slot not in ['weapon', 'head', 'chest', 'belt', 'boots', 'gloves', 'amulet', 'ring'] or self.equipped[
-                slot] is None:
+                        slot] is None:
             return False
         else:
             item = self.equipped[slot]
@@ -157,153 +162,120 @@ class Character(Document):
             self.add_to_inventory(item, True, True)
             return item
 
-    def update_stats(self, thing, equip):
-        if isinstance(thing, Weapon):
+    def update_stats(self, item, equip):
+        if item['_itype'] == ItemType.weapon.value:
             if equip:
-                self.apply_weapon_bonuses(thing)
+                self.apply_weapon_bonuses(item)
             else:
-                self.remove_weapon_bonuses(thing)
-        if isinstance(thing, Armor):
+                self.remove_weapon_bonuses(item)
+        elif item['_itype'] in [ItemType.head.value, ItemType.chest.value, ItemType.belt.value,
+                                ItemType.boots.value, ItemType.gloves.value, ItemType.amulet.value,
+                                ItemType.ring.value]:
             if equip:
-                self.apply_armor_bonuses(thing)
+                self.apply_armor_bonuses(item)
             else:
-                self.remove_armor_bonuses(thing)
+                self.remove_armor_bonuses(item)
 
         self.update_current_hsm()
         self.save()
 
     def apply_weapon_bonuses(self, weapon):
-        if weapon.bonus_strength != 0:
-            self.bonus_strength += weapon.bonus_strength
-        if weapon.bonus_intelligence != 0:
-            self.bonus_intelligence += weapon.bonus_intelligence
-        if weapon.bonus_dexterity != 0:
-            self.bonus_dexterity += weapon.bonus_dexterity
-        if weapon.bonus_willpower != 0:
-            self.bonus_willpower += weapon.bonus_willpower
-        if weapon.bonus_health != 0:
-            self.bonus_health += weapon.bonus_health
-        if weapon.bonus_stamina != 0:
-            self.bonus_stamina += weapon.bonus_stamina
-        if weapon.bonus_mana != 0:
-            self.bonus_mana += weapon.bonus_mana
-        if weapon.bonus_init != 0:
-            self.bonus_init += weapon.bonus_init
+        self.bonus_strength += weapon['bonus_strength']
+        self.bonus_intelligence += weapon['bonus_intelligence']
+        self.bonus_dexterity += weapon['bonus_dexterity']
+        self.bonus_willpower += weapon['bonus_willpower']
+        self.bonus_health += weapon['bonus_health']
+        self.bonus_stamina += weapon['bonus_stamina']
+        self.bonus_mana += weapon['bonus_mana']
+        self.bonus_init += weapon['bonus_init']
 
     def remove_weapon_bonuses(self, weapon):
-        if weapon.bonus_strength != 0:
-            self.bonus_strength -= weapon.bonus_strength
-        if weapon.bonus_intelligence != 0:
-            self.bonus_intelligence -= weapon.bonus_intelligence
-        if weapon.bonus_dexterity != 0:
-            self.bonus_dexterity -= weapon.bonus_dexterity
-        if weapon.bonus_willpower != 0:
-            self.bonus_willpower -= weapon.bonus_willpower
-        if weapon.bonus_health != 0:
-            self.bonus_health -= weapon.bonus_health
-        if weapon.bonus_stamina != 0:
-            self.bonus_stamina -= weapon.bonus_stamina
-        if weapon.bonus_mana != 0:
-            self.bonus_mana -= weapon.bonus_mana
-        if weapon.bonus_init != 0:
-            self.bonus_init -= weapon.bonus_init
-
+        self.bonus_strength -= weapon['bonus_strength']
+        self.bonus_intelligence -= weapon['bonus_intelligence']
+        self.bonus_dexterity -= weapon['bonus_dexterity']
+        self.bonus_willpower -= weapon['bonus_willpower']
+        self.bonus_health -= weapon['bonus_health']
+        self.bonus_stamina -= weapon['bonus_stamina']
+        self.bonus_mana -= weapon['bonus_mana']
+        self.bonus_init -= weapon['bonus_init']
+        
     def apply_armor_bonuses(self, armor):
-        if armor.bonus_strength != 0:
-            self.bonus_strength += armor.bonus_strength
-        if armor.bonus_intelligence != 0:
-            self.bonus_intelligence += armor.bonus_intelligence
-        if armor.bonus_dexterity != 0:
-            self.bonus_dexterity += armor.bonus_dexterity
-        if armor.bonus_willpower != 0:
-            self.bonus_willpower += armor.bonus_willpower
-        if armor.bonus_health != 0:
-            self.bonus_health += armor.bonus_health
-        if armor.bonus_stamina != 0:
-            self.bonus_stamina += armor.bonus_stamina
-        if armor.bonus_mana != 0:
-            self.bonus_mana += armor.bonus_mana
-        if armor.bonus_init != 0:
-            self.bonus_init += armor.bonus_init
-        if armor.bonus_carry != 0:
-            self.bonus_carry += armor.bonus_carry
-        if armor.earth_res != 0:
-            self.earth_res += armor.earth_res
-        if armor.fire_res != 0:
-            self.fire_res += armor.fire_res
-        if armor.electricity_res != 0:
-            self.electricity_res += armor.electricity_res
-        if armor.water_res != 0:
-            self.water_res += armor.water_res
+        self.bonus_strength += armor['bonus_strength']
+        self.bonus_intelligence += armor['bonus_intelligence']
+        self.bonus_dexterity += armor['bonus_dexterity']
+        self.bonus_willpower += armor['bonus_willpower']
+        self.bonus_health += armor['bonus_health']
+        self.bonus_stamina += armor['bonus_stamina']
+        self.bonus_mana += armor['bonus_mana']
+        self.bonus_init += armor['bonus_init']
+        self.bonus_carry += armor['bonus_carry']
+        self.earth_res += armor['earth_res']
+        self.fire_res += armor['fire_res']
+        self.electricity_res += armor['electricity_res']
+        self.water_res += armor['water_res']
 
     def remove_armor_bonuses(self, armor):
-        if armor.bonus_strength != 0:
-            self.bonus_strength -= armor.bonus_strength
-        if armor.bonus_intelligence != 0:
-            self.bonus_intelligence -= armor.bonus_intelligence
-        if armor.bonus_dexterity != 0:
-            self.bonus_dexterity -= armor.bonus_dexterity
-        if armor.bonus_willpower != 0:
-            self.bonus_willpower -= armor.bonus_willpower
-        if armor.bonus_health != 0:
-            self.bonus_health -= armor.bonus_health
-        if armor.bonus_stamina != 0:
-            self.bonus_stamina -= armor.bonus_stamina
-        if armor.bonus_mana != 0:
-            self.bonus_mana -= armor.bonus_mana
-        if armor.bonus_init != 0:
-            self.bonus_init -= armor.bonus_init
-        if armor.bonus_carry != 0:
-            self.bonus_carry -= armor.bonus_carry
-        if armor.earth_res != 0:
-            self.earth_res -= armor.earth_res
-        if armor.fire_res != 0:
-            self.fire_res -= armor.fire_res
-        if armor.electricity_res != 0:
-            self.electricity_res -= armor.electricity_res
-        if armor.water_res != 0:
-            self.water_res -= armor.water_res
+        self.bonus_strength -= armor['bonus_strength']
+        self.bonus_intelligence -= armor['bonus_intelligence']
+        self.bonus_dexterity -= armor['bonus_dexterity']
+        self.bonus_willpower -= armor['bonus_willpower']
+        self.bonus_health -= armor['bonus_health']
+        self.bonus_stamina -= armor['bonus_stamina']
+        self.bonus_mana -= armor['bonus_mana']
+        self.bonus_init -= armor['bonus_init']
+        self.bonus_carry -= armor['bonus_carry']
+        self.earth_res -= armor['earth_res']
+        self.fire_res -= armor['fire_res']
+        self.electricity_res -= armor['electricity_res']
+        self.water_res -= armor['water_res']
 
     def use_consumable(self, consumable):
-        if type(consumable) not in [Consumable]:
-            raise Exception(f'Invalid consumable {consumable.name} of type {consumable.type} used by {self.name}.')
-        elif consumable.uses <= 0:
-            raise Exception(f'Consumable {consumable.name} used by {self.name} had {consumable.uses} uses.')
+        if consumable['_itype'] not in [ItemType.potion.value, ItemType.food.value]:
+            raise Exception(f'Invalid consumable {consumable["name"]} of type {ItemType(consumable["_itype"]).name} used by {self.name}.')
+        elif consumable['uses'] <= 0:
+            raise Exception(f'Consumable {consumable["name"]} used by {self.name} had {consumable["uses"]} uses.')
         else:
-            out = f'The {consumable.type.name}:'
+            out = f'The {ItemType(consumable["_itype"]).name}:'
 
-            if consumable.health != 0:
-                result = self.restore_health(consumable.health)
+            if consumable['health'] != 0:
+                result = self.restore_health(consumable['health'])
 
                 if result > 0:
                     out += f'\nRestores {result} health'
                 else:
                     out += f'\nDrains {result} health'
 
-            if consumable.stamina != 0:
-                result = self.restore_stamina(consumable.stamina)
+            if consumable['stamina'] != 0:
+                result = self.restore_stamina(consumable['stamina'])
 
                 if result > 0:
                     out += f'\nRestores {result} stamina'
                 else:
                     out += f'\nDrains {result} stamina'
 
-            if consumable.mana != 0:
-                result = self.restore_mana(consumable.mana)
+            if consumable['mana'] != 0:
+                result = self.restore_mana(consumable['mana'])
 
                 if result > 0:
                     out += f'\nRestores {result} mana'
                 else:
                     out += f'\nDrains {result} mana'
 
-            consumable.uses -= 1
+            consumable['uses'] -= 1
 
-            if consumable.uses < 1:
+            if consumable['uses'] < 1:
                 self.remove_from_inventory(consumable)
                 out += '\n... and was consumed'
 
             self.save()
             return out
+
+    def has_consumables(self):
+        for item in self.inventory:
+            if item['_itype'] in [ItemType.potion.value, ItemType.food.value]:
+                return True
+
+        return False
 
     def restore_health(self, amount):
         start = self.current_health
@@ -352,7 +324,7 @@ class Character(Document):
         if effect.type == ability.EffectType.damage_health:
             if type(effect) == skill.SkillEffect:
                 weapon = self.equipped['weapon']
-                for dmg in weapon.damages:
+                for dmg in weapon['damages']:
                     min = int(dmg[0] * effect.damage_scaling)
                     max = int(dmg[1] * effect.damage_scaling)
                     # TODO apply element scaling
