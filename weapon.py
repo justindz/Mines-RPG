@@ -1,7 +1,6 @@
 from enum import Enum
 from mongokit_ng import Document
 
-from item import ItemType
 from elements import Elements
 
 valid_slots = ['weapon', 'head', 'chest', 'belt', 'boots', 'gloves', 'amulet', 'ring']
@@ -37,29 +36,9 @@ class Weapon(Document):
         'base_crit_chance': float,
         'damages': None,
     }
-    required_fields = ['name', 'description', 'level', 'weight', '_itype', 'bonus_strength', 'bonus_intelligence',
-                       'bonus_dexterity', 'bonus_willpower', 'bonus_health', 'bonus_stamina', 'bonus_mana',
-                       'bonus_init', 'base_crit_chance', 'damages']
-    default_values = {
-        'name': 'Test Sword',
-        'description': 'An RND sword.',
-        'level': 1,
-        'weight': 3,
-        '_itype': ItemType.weapon.value,
-        '_weapon_type': WeaponType.sword.value,
-        'bonus_strength': 1,
-        'bonus_intelligence': 0,
-        'bonus_dexterity': 0,
-        'bonus_willpower': 0,
-        'bonus_health': 0,
-        'bonus_stamina': 0,
-        'bonus_mana': 0,
-        'bonus_init': 0,
-        'base_crit_chance': 0.05,
-        'damages': [
-            [1, 4, Elements.earth.value]
-        ],
-    }
+    required_fields = ['name', 'description', 'level', 'weight', '_itype', '_weapon_type', 'bonus_strength',
+                       'bonus_intelligence', 'bonus_dexterity', 'bonus_willpower', 'bonus_health', 'bonus_stamina',
+                       'bonus_mana', 'bonus_init', 'base_crit_chance', 'damages']
     use_dot_notation = True
     use_autorefs = True
 
@@ -94,3 +73,34 @@ def get_bonuses_display_string(item):
         display_string += '\nInitiative {:+}'.format(item['bonus_init'])
 
     return display_string
+
+
+weapons = {
+    'test_sword': {'name': 'RND Sword', 'description': 'Shite.', 'level': 1, 'weight': 3, '_itype': 1,
+                   '_weapon_type': WeaponType.sword.value, 'bonus_strength': 1, 'bonus_intelligence': 0, 'bonus_dexterity': 0,
+                   'bonus_willpower': 0, 'bonus_health': 0, 'bonus_stamina': 0, 'bonus_mana': 0, 'bonus_init': 0,
+                   'base_crit_chance': 0.5, 'damages': [[1, 4, Elements.earth.value]]}
+}
+
+prefixes = {
+    'Wicked': {
+        1: {'effect': 'base_crit_chance', 'value': 0.1},
+        2: {'effect': 'base_crit_chance', 'value': 0.2},
+        3: {'effect': 'base_crit_chance', 'value': 0.3},
+    },
+    'Smoldering': {
+        1: {'effect': 'conversion', 'value': Elements.fire.value},
+    }
+}
+
+suffixes = {
+    'Volcanic': {
+        1: {'effect': 'damage_mode', 'value': [1, 2, Elements.fire.value]}
+    },
+    'Consistent': {
+        1: {'effect': 'damage_narrow', 'value': 10}
+    },
+    'Wild': {
+        1: {'effect': 'damage_spread', 'value': 10}
+    }
+}

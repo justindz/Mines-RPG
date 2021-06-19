@@ -1,7 +1,5 @@
 from mongokit_ng import Document
 
-from item import ItemType
-
 
 class Armor(Document):
     __database__ = 'delverpg'
@@ -29,26 +27,6 @@ class Armor(Document):
     required_fields = ['name', 'description', 'level', 'weight', '_itype', 'bonus_strength', 'bonus_intelligence',
                        'bonus_dexterity', 'bonus_willpower', 'bonus_health', 'bonus_stamina', 'bonus_mana',
                        'bonus_init', 'bonus_carry', 'earth_res', 'fire_res', 'electricity_res', 'water_res']
-    default_values = {
-        'name': 'Test Helmet',
-        'description': 'An RND helmet.',
-        'level': 1,
-        'weight': 2,
-        '_itype': ItemType.head.value,
-        'bonus_strength': 0,
-        'bonus_intelligence': 0,
-        'bonus_dexterity': 0,
-        'bonus_willpower': 0,
-        'bonus_health': 0,
-        'bonus_stamina': 0,
-        'bonus_mana': 0,
-        'bonus_init': 1,
-        'bonus_carry': 0,
-        'earth_res': 0.0,
-        'fire_res': 0.0,
-        'electricity_res': 0.0,
-        'water_res': 0.0,
-    }
     use_dot_notation = True
     use_autorefs = True
 
@@ -84,3 +62,15 @@ def get_bonuses_display_string(item):
         display_string += '\nWater Res {:+}'.format(item['water_res'])
 
     return display_string
+
+
+armors = {
+    'test_helmet': {'name': 'RND Helmet', 'description': 'Shite.', 'level': 1, 'weight': 2, '_itype': 2,
+                    'bonus_strength': 1, 'bonus_intelligence': 0, 'bonus_dexterity': 0, 'bonus_willpower': 0,
+                    'bonus_health': 0, 'bonus_stamina': 0, 'bonus_mana': 0, 'bonus_init': 1, 'bonus_carry': 0,
+                    'earth_res': 0.0, 'fire_res': 0.0, 'electricity_res': 0.0, 'water_res': 0.0}
+}
+
+prefixes = {}
+
+suffixes = {}

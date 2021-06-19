@@ -177,7 +177,7 @@ class DelveController(commands.Cog):
                 await delve.channel.send(utilities.bold(f'{actor.name} goes next.'))
 
                 if isinstance(actor, Character):  # Player
-                    def check_action_menu(m):
+                    async def check_action_menu(m):
                         if str(m.author) == actor.name and m.channel == delve.channel:
                             if m.content in ['1', '2', '3']:
                                 if m.content == '3' and not actor.has_consumables():

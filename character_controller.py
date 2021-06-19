@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 
+import consumable
+import item
 import utilities
 import weapon
 from weapon import Weapon, WeaponType
@@ -21,15 +23,12 @@ class CharacterController(commands.Cog):
             character = self.connection.Character()
             character.name = str(player)
             character.update_current_hsm()
-            w = self.connection.Weapon()
-            w.save()
-            character.add_to_inventory(w, True)
-            a = self.connection.Armor()
-            a.save()
-            character.add_to_inventory(a, True)
-            c = self.connection.Consumable()
-            c.save()
-            character.add_to_inventory(c, True)
+            character.add_to_inventory(item.generate_random_item(self.connection, 1, item_type=ItemType.weapon,
+                                                                 rarities=['c']), False)
+            character.add_to_inventory(item.generate_random_item(self.connection, 1, item_type=ItemType.head,
+                                                                 rarities=['c']), False)
+            character.add_to_inventory(item.generate_random_item(self.connection, 1, item_type=ItemType.potion,
+                                                                 rarities=['c']), False)
             character.save()
             print(f'Created new character for {str(player)}')  # TODO make a logging call
 
