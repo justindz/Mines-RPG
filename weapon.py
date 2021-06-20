@@ -22,6 +22,7 @@ class Weapon(Document):
         'name': str,
         'description': str,
         'level': int,
+        'rarity': int,
         'weight': int,
         '_itype': int,
         '_weapon_type': int,
@@ -36,7 +37,7 @@ class Weapon(Document):
         'base_crit_chance': float,
         'damages': None,
     }
-    required_fields = ['name', 'description', 'level', 'weight', '_itype', '_weapon_type', 'bonus_strength',
+    required_fields = ['name', 'description', 'level', 'rarity', 'weight', '_itype', '_weapon_type', 'bonus_strength',
                        'bonus_intelligence', 'bonus_dexterity', 'bonus_willpower', 'bonus_health', 'bonus_stamina',
                        'bonus_mana', 'bonus_init', 'base_crit_chance', 'damages']
     use_dot_notation = True
@@ -83,13 +84,34 @@ weapons = {
 }
 
 prefixes = {
+    'Lightweight': {
+        1: {'effect': 'weight', 'value': -1}
+    },
+    'Empowering': {
+        1: {'effect': 'bonus_strength', 'value': 1}
+    },
+    'Enlightening': {
+        1: {'effect': 'bonus_intelligence', 'value': 1}
+    },
+    'Encouraging': {
+        1: {'effect': 'bonus_dexterity', 'value': 1}
+    },
+    'Inspiring': {
+        1: {'effect': 'bonus_willpower', 'value': 1}
+    },
+    'Vigilant': {
+        1: {'effect': 'bonus_init', 'value': 1}
+    },
     'Wicked': {
         1: {'effect': 'base_crit_chance', 'value': 0.1},
         2: {'effect': 'base_crit_chance', 'value': 0.2},
         3: {'effect': 'base_crit_chance', 'value': 0.3},
     },
+    'Powerful': {
+        1: {'effect': 'damage_added', 'value': 0.2}
+    },
     'Smoldering': {
-        1: {'effect': 'conversion', 'value': Elements.fire.value},
+        1: {'effect': 'damage_convert', 'value': Elements.fire.value},
     }
 }
 

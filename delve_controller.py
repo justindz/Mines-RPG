@@ -10,6 +10,7 @@ from zone import Zone
 from delve import Delve
 from character import Character
 from fight_encounter import Fight
+from loot_encounter import Loot
 
 
 async def check_ability_requirements_and_use(ability, actor, delve, target, fight):
@@ -41,9 +42,10 @@ async def check_ability_requirements_and_use(ability, actor, delve, target, figh
 
 
 class DelveController(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot, connection):
         self.bot = bot
         self.delves = {}
+        self.connection = connection
 
     async def check_correct_delve_channel(ctx):
         try:
@@ -102,7 +104,7 @@ class DelveController(commands.Cog):
 
         category = discord.utils.get(ctx.guild.categories, name='Delve RPG')
         channel = await ctx.guild.create_text_channel('{}-{}'.format(leader.name, zone.name), overwrites=overwrites, category=category)
-        self.delves[channel.name] = Delve(ctx.bot, leader, players, zone, channel)
+        self.delves[channel.name] = Delve(ctx.bot, self.connection, leader, players, zone, channel)
 
         for player in players:
             await player.send('Your delve has begun! Please join <#{}>'.format(channel.id))
@@ -112,10 +114,10 @@ class DelveController(commands.Cog):
         await asyncio.sleep(2)
         await channel.send(utilities.blue('{}\n\n{}'.format(current_room.name, current_room.description)))
 
-        # if isinstance(current_room.encounter, None):
-        #     await self.encounter_loot(self.delves[channel.name])
-        # elif isinstance(current_room.encounter, Fight):
-        await self.encounter_fight(self.delves[channel.name])
+        if isinstance(current_room.encounter, Loot):
+            await self.encounter_loot(self.delves[channel.name])
+        elif isinstance(current_room.encounter, Fight):
+            await self.encounter_fight(self.delves[channel.name])
 
     @commands.command()
     @commands.check(check_correct_delve_channel)
@@ -155,10 +157,10 @@ class DelveController(commands.Cog):
         await asyncio.sleep(2)
         await delve.channel.send(utilities.blue('{} - d{}\n\n{}'.format(delve.current_room.name, delve.depth, delve.current_room.description)))
 
-        # if isinstance(delve.current_room.encounter, Loot):
-        #     await self.encounter_loot(self.delves[ctx.channel.name])
-        # elif isinstance(delve.current_room.encounter, Fight):
-        await self.encounter_fight(self.delves[ctx.channel.name])
+        if isinstance(delve.current_room.encounter, Loot):
+            await self.encounter_loot(self.delves[ctx.channel.name])
+        elif isinstance(delve.current_room.encounter, Fight):
+            await self.encounter_fight(self.delves[ctx.channel.name])
 
     async def encounter_fight(self, delve):
         delve.status = 'fighting'
@@ -276,8 +278,32 @@ class DelveController(commands.Cog):
         delve.current_room.encounter = None
 
     async def encounter_loot(self, delve):
-        await delve.channel.send(utilities.green(delve.current_room.encounter.description))
-        await delve.channel.send('Loot encounters are not implemented yet. This would have been sweet, sweet loot.')
+        loot = delve.current_room.encounter
+        await delve.channel.send(utilities.green(loot.description))
+        await delve.channel.send(f'The party also found: {loot.roll_item["name"]} {utilities.get_rarity_symbol(loot.roll_item["rarity"])}')
+        await asyncio.sleep(1)
+        await delve.channel.send(f'Each player may +roll in the next 15 seconds to attempt to acquire.')
+
+        def check_roll(m):
+            if m.channel == delve.channel:
+                if m.content.startswith('+roll'):
+                    loot.add_to_roll_list(str(m.author))
+            return False
+        try:
+            await self.bot.wait_for('message', check=check_roll, timeout=15)
+        except asyncio.TimeoutError:
+            winner = loot.choose_winner()
+
+            if winner is not None:
+                for character in delve.characters:
+                    if character['name'] == winner:
+                        character.add_to_inventory(loot.roll_item, True)
+                        await delve.channel.send(utilities.green(f'{character["name"]} acquired the {loot.roll_item["name"]}!'))
+                        break
+            else:
+                await delve.channel.send(utilities.green(f'The party leaves the item behind.'))
+
+        delve.current_room.encounter = None
 
     async def player_dead(self, delve, player: discord.Member):
         await delve.channel.send('{} has died'.format(player.name))

@@ -33,7 +33,7 @@ intents.reactions = True
 bot = commands.Bot(command_prefix='\\', intents=intents)
 bot.add_cog(character_controller.CharacterController(bot, connection))
 bot.add_cog(party_controller.PartyController(bot))
-bot.add_cog(delve_controller.DelveController(bot))
+bot.add_cog(delve_controller.DelveController(bot, connection))
 
 
 @bot.check

@@ -1,14 +1,12 @@
 import discord
 from discord.ext import commands
 
-import consumable
 import item
 import utilities
 import weapon
-from weapon import Weapon, WeaponType
+from weapon import WeaponType
 import armor
-from consumable import Consumable
-from item import ItemType
+from item import ItemType, Rarity
 
 
 class CharacterController(commands.Cog):
@@ -24,11 +22,11 @@ class CharacterController(commands.Cog):
             character.name = str(player)
             character.update_current_hsm()
             character.add_to_inventory(item.generate_random_item(self.connection, 1, item_type=ItemType.weapon,
-                                                                 rarities=['c']), False)
+                                                                 rarity=Rarity.common), False)
             character.add_to_inventory(item.generate_random_item(self.connection, 1, item_type=ItemType.head,
-                                                                 rarities=['c']), False)
+                                                                 rarity=Rarity.common), False)
             character.add_to_inventory(item.generate_random_item(self.connection, 1, item_type=ItemType.potion,
-                                                                 rarities=['c']), False)
+                                                                 rarity=Rarity.common), False)
             character.save()
             print(f'Created new character for {str(player)}')  # TODO make a logging call
 
@@ -108,8 +106,8 @@ class CharacterController(commands.Cog):
         inv_string += '================INVENTORY================\n'
 
         i = 0
-        for item in character.inventory:
-            inv_string += f'{i} - {item["name"]} ({item["level"]}) {item["weight"]}wgt\n'
+        for it in character.inventory:
+            inv_string += f'{i} - {it["name"]}{utilities.get_rarity_symbol(it["rarity"])} ({it["level"]}) {it["weight"]}wgt\n'
             i += 1
 
         inv_string += 'Carry: {}/{}\n'.format(character.current_carry, character.carry + character.bonus_carry)
@@ -122,41 +120,41 @@ class CharacterController(commands.Cog):
         character = self.get(ctx.author)
 
         if pos.isdigit() and int(pos) + 1 <= len(character.inventory):
-            item = character.inventory[int(pos)]
+            it = character.inventory[int(pos)]
         elif isinstance(pos, str) and pos in weapon.valid_slots:
-            item = character.equipped[pos]
+            it = character.equipped[pos]
         else:
             await ctx.author.send(utilities.red('Invalid inventory position or gear slot.'))
             return
 
-        if item is not None:
+        if it is not None:
             item_string = '''
 ====================ITEM===================='''
             item_string += '''
-{} - Level {}
+{} - Level {} {}
 
 "{}"
-'''.format(item["name"], item["level"], item["description"])
-            if item['_itype'] == ItemType.weapon.value:
+'''.format(it["name"], it["level"], utilities.get_rarity_symbol(it['rarity']), it["description"])
+            if it['_itype'] == ItemType.weapon.value:
                 item_string += '''
 Class: {}
 Damage: {}
 
 Bonuses
 -------
-{}'''.format(WeaponType(item['_weapon_type']).name, weapon.get_damages_display_string(item), weapon.get_bonuses_display_string(item))
-            elif item['_itype'] in [ItemType.head.value, ItemType.chest.value, ItemType.belt.value,
-                                    ItemType.boots.value, ItemType.gloves.value, ItemType.amulet.value,
-                                    ItemType.ring.value]:
+{}'''.format(WeaponType(it['_weapon_type']).name, weapon.get_damages_display_string(it), weapon.get_bonuses_display_string(it))
+            elif it['_itype'] in [ItemType.head.value, ItemType.chest.value, ItemType.belt.value,
+                                  ItemType.boots.value, ItemType.gloves.value, ItemType.amulet.value,
+                                  ItemType.ring.value]:
                 item_string += '''
 Class: {}
 
 Bonuses
 -------
-{}'''.format(ItemType(item['_itype']).name, armor.get_bonuses_display_string(item))
+{}'''.format(ItemType(it['_itype']).name, armor.get_bonuses_display_string(it))
             item_string += '''
 Weight: {}
-============================================'''.format(item["weight"])
+============================================'''.format(it["weight"])
             await ctx.author.send(item_string)
         else:
             await ctx.author.send('No item equipped in that slot.')

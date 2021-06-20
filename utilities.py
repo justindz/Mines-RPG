@@ -3,8 +3,6 @@ import random
 import spell
 import skill
 
-from consumable import Consumable
-
 
 #  DISPLAY  #
 
@@ -35,6 +33,15 @@ def italics(txt):
 
 def underline(txt):
     return '__{}__'.format(txt)
+
+
+def get_rarity_symbol(rarity: int):
+    if rarity == 2:
+        return ':small_blue_diamond:'
+    elif rarity == 3:
+        return ':small_orange_diamond:'
+
+    return ''
 
 
 def dmgs_to_str(dmgs):

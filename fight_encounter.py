@@ -28,7 +28,7 @@ def get_random_fight(tags: [str], characters: [Character], depth: int):
     return Fight(enemies, characters)
 
 
-class Fight(object):
+class Fight:
     def __init__(self, enemies: [enemy.Enemy], characters: [Character]):
         self.enemies = enemies
         self.characters = characters

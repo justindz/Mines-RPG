@@ -8,6 +8,7 @@ class Armor(Document):
         'name': str,
         'description': str,
         'level': int,
+        'rarity': int,
         'weight': int,
         '_itype': int,
         'bonus_strength': int,
@@ -24,9 +25,10 @@ class Armor(Document):
         'electricity_res': float,
         'water_res': float,
     }
-    required_fields = ['name', 'description', 'level', 'weight', '_itype', 'bonus_strength', 'bonus_intelligence',
-                       'bonus_dexterity', 'bonus_willpower', 'bonus_health', 'bonus_stamina', 'bonus_mana',
-                       'bonus_init', 'bonus_carry', 'earth_res', 'fire_res', 'electricity_res', 'water_res']
+    required_fields = ['name', 'description', 'level', 'rarity', 'weight', '_itype', 'bonus_strength',
+                       'bonus_intelligence', 'bonus_dexterity', 'bonus_willpower', 'bonus_health', 'bonus_stamina',
+                       'bonus_mana', 'bonus_init', 'bonus_carry', 'earth_res', 'fire_res', 'electricity_res',
+                       'water_res']
     use_dot_notation = True
     use_autorefs = True
 
@@ -71,6 +73,53 @@ armors = {
                     'earth_res': 0.0, 'fire_res': 0.0, 'electricity_res': 0.0, 'water_res': 0.0}
 }
 
-prefixes = {}
+prefixes = {
+    'Lightweight': {
+        1: {'effect': 'weight', 'value': -1}
+    },
+    'Empowering': {
+        1: {'effect': 'bonus_strength', 'value': 1}
+    },
+    'Enlightening': {
+        1: {'effect': 'bonus_intelligence', 'value': 1}
+    },
+    'Encouraging': {
+        1: {'effect': 'bonus_dexterity', 'value': 1}
+    },
+    'Inspiring': {
+        1: {'effect': 'bonus_willpower', 'value': 1}
+    },
+    'Cargo': {
+        1: {'effect': 'bonus_carry', 'value': 10}
+    },
+    'Vigilant': {
+        1: {'effect': 'bonus_init', 'value': 1}
+    },
+    'Hardened': {
+        1: {'effect': 'earth_res', 'value': 0.1}
+    },
+    'Insulated': {
+        1: {'effect': 'fire_res', 'value': 0.1}
+    },
+    'Grounded': {
+        1: {'effect': 'electricity_res', 'value': 0.1}
+    },
+    'Sealed': {
+        1: {'effect': 'water_res', 'value': 0.1}
+    }
+}
 
-suffixes = {}
+suffixes = {
+    'Reinforcing': {
+        1: {'effect': 'earth_res', 'value': 0.15}
+    },
+    'Chilling': {
+        1: {'effect': 'fire_res', 'value': 0.15}
+    },
+    'Conducting': {
+        1: {'effect': 'electricity_res', 'value': 0.15}
+    },
+    'Absorbing': {
+        1: {'effect': 'water_res', 'value': 0.15}
+    }
+}

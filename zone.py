@@ -1,3 +1,4 @@
+import loot_encounter
 import utilities
 import biome
 from biome import Biome
@@ -12,11 +13,11 @@ class Zone(object):
         self.description = description
         self.biome = _biome
 
-    def get_next_room(self, characters: [Character], depth: int):
+    def get_next_room(self, connection, characters: [Character], depth: int):
         room = self.biome.get_random_room()
 
-        if depth % 5 == 0:
-            room.encounter = None  # TODO Change this to a loot encounter
+        if depth % 1 == 5:
+            room.encounter = loot_encounter.Loot(connection, characters, depth)
         else:
             room.encounter = fight_encounter.get_random_fight(self.biome.enemy_tags, characters, depth)
 
