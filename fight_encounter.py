@@ -6,8 +6,8 @@ from character import Character
 import enemy
 from enemy import Enemy
 import enemy_group
-from consumable import Consumable
 from elements import Elements
+from item import ItemType
 import ability
 import spell
 import skill
@@ -43,7 +43,10 @@ class Fight:
 
         self.level = int(self.level / len(self.enemies))
         self.inits = characters + enemies
-        self.inits.sort(key=lambda x: x.init, reverse=True)
+        self.update_turn_order()
+
+    def update_turn_order(self):
+        self.inits.sort(key=lambda x: x.init + x.bonus_init, reverse=True)
 
     def remove_character(self, character: Character):
         self.characters.remove(character)
@@ -77,14 +80,15 @@ class Fight:
                 i -= 1
 
         crit = False
-        roll = random.random()
+        chance = None
 
-        if ab is skill.Skill and roll <= char.equipped['weapon'].base_crit_chance:
-            crit = True
-        elif ab is spell.Spell and roll <= ab.base_crit_chance:
-            crit = True
+        if isinstance(ab, skill.Skill):
+            chance = min(char.equipped['weapon'].base_crit_chance, 0.5)
+        elif isinstance(ab, spell.Spell):
+            chance = min(ab.base_crit_chance, 0.5)
 
-        if crit:
+        if random.random() <= chance:
+            crit = True
             out += f' CRITICAL HIT!'
 
         for _target in targets:
@@ -95,13 +99,13 @@ class Fight:
                     for dmg in dmgs:
                         out += f'\n{_target.name} suffered {dmg[0]} {Elements(dmg[1]).name} damage.'
                 elif effect.type == ability.EffectType.restore_health:
-                    heal = _target.restore_health(random.randint(effect.min, effect.max))
+                    heal = _target.restore_health(random.randint(effect.min, effect.max), char)
                     out += f'\n{_target.name} regained {heal} health.'
                 elif effect.type == ability.EffectType.restore_stamina:
-                    stam = _target.restore_stamina(random.randint(effect.min, effect.max))
+                    stam = _target.restore_stamina(random.randint(effect.min, effect.max), char)
                     out += f'\n{_target.name} regained {stam} stamina.'
                 elif effect.type == ability.EffectType.restore_mana:
-                    mana = _target.restore_mana(random.randint(effect.min, effect.max))
+                    mana = _target.restore_mana(random.randint(effect.min, effect.max), char)
                     out += f'\n{_target.name} regained {mana} mana.'
                 else:
                     raise Exception(f'{char.name} used ability {ab.name} with unsupported effect type {effect.type}')
@@ -134,8 +138,11 @@ class Fight:
         return out
 
     @staticmethod
-    def display_action_menu():
-        return '1 - Ability\n2 - Item\n3 - Recover'
+    def display_action_menu(char: Character):
+        if char.has_consumables():
+            return '1 - Ability\n2 - Item\n3 - Recover'
+        else:
+            return '1 - Ability\n2 - Item (None)\n3 - Recover'
 
     @staticmethod
     def display_ability_menu(character):
@@ -163,8 +170,8 @@ class Fight:
         indices = []
 
         for item in character.inventory:
-            if type(item) is Consumable:
-                display_string += f'\n{display_counter} - {item.name} ({item.uses})'
+            if item['_itype'] in [ItemType.potion.value, ItemType.food.value]:
+                display_string += f'\n{display_counter} - {item["name"]} ({item["uses"]})'
                 display_counter += 1
                 indices.append(indices_counter)
 

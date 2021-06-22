@@ -175,20 +175,21 @@ class DelveController(commands.Cog):
             for el in fight.enemies:
                 await delve.channel.send(utilities.underline('{} ({}/{})'.format(el.name, el.current_health, el.health)))
 
+            # TODO show turn order here with hsm instead of just listing enemies?
+
             for actor in fight.inits:
                 await delve.channel.send(utilities.bold(f'{actor.name} goes next.'))
 
                 if isinstance(actor, Character):  # Player
-                    async def check_action_menu(m):
+                    def check_action_menu(m):
                         if str(m.author) == actor.name and m.channel == delve.channel:
                             if m.content in ['1', '2', '3']:
-                                if m.content == '3' and not actor.has_consumables():
-                                    await delve.channel.send(f'You have no usable items.')
+                                if m.content == '2' and not actor.has_consumables():
                                     return False
                                 return True
                         return False
                     try:
-                        await delve.channel.send(Fight.display_action_menu())
+                        await delve.channel.send(Fight.display_action_menu(actor))
                         msg = await self.bot.wait_for('message', check=check_action_menu, timeout=30)
                         action = msg.content
 
@@ -232,7 +233,7 @@ class DelveController(commands.Cog):
                                 await check_ability_requirements_and_use(ability, actor, delve, ally, fight)
 
                             if len(fight.enemies) == 0:
-                                await delve.channel.send('All enemies have been defeated.')
+                                await delve.channel.send('The enemies have been defeated.')
                                 [await delve.channel.send(
                                     '{} has gained {} xp.'.format(c.name, c.gain_xp(fight.xp, fight.level))) for c in
                                  fight.characters]
@@ -266,6 +267,7 @@ class DelveController(commands.Cog):
 
                 await asyncio.sleep(3)
 
+            fight.update_turn_order()
             turn_count += 1
             await delve.channel.send('End of turn {}.'.format(turn_count))
 

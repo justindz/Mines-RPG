@@ -31,15 +31,20 @@ class Rarity(Enum):
 
 
 def generate_item(connection, key: str, selection: dict, rarity=None, lucky=False):
+    value = 0
+
     try:
         base = selection[key]
 
         if selection == weapons:
             item = connection.Weapon()
+            value += 5 * base['level']
         elif selection == consumables:
             item = connection.Consumable()
+            value += 1 * base['level']
         else:
             item = connection.Armor()
+            value += 5 * base['level']
     except KeyError:
         print(f'generate_item failed on KeyError for key: {key}')
         return None
@@ -61,6 +66,13 @@ def generate_item(connection, key: str, selection: dict, rarity=None, lucky=Fals
             item['rarity'] = Rarity.common.value
     else:
         item['rarity'] = rarity.value
+
+    if rarity == Rarity.rare:
+        value += 10 * item['level']
+    elif rarity == rarity.uncommon:
+        value += 5 * item['level']
+
+    item['value'] = value
 
     if rarity in [Rarity.uncommon, Rarity.rare]:
         if selection == weapons:

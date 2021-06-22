@@ -15,9 +15,10 @@ class Consumable(Document):
         'health': int,
         'stamina': int,
         'mana': int,
+        'value': int,
     }
     required_fields = ['name', 'description', 'level', 'rarity', 'weight', '_itype', 'uses', 'health', 'stamina',
-                       'mana']
+                       'mana', 'value']
     use_dot_notation = True
     use_autorefs = True
 
@@ -28,6 +29,9 @@ consumables = {
 }
 
 prefixes = {
+    'Collectible': {
+        1: {'effect': 'value', 'value': 10}
+    },
     'Lightweight': {
         1: {'effect': 'weight', 'value': -1}
     },
@@ -43,7 +47,10 @@ prefixes = {
 }
 
 suffixes = {
+    'Gilded': {
+        1: {'effect': 'value', 'value': 25}
+    },
     'Infused': {
         1: {'effect': 'uses', 'value': 1}
-    }
+    },
 }

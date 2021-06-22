@@ -31,6 +31,7 @@ class Enemy:
         self.current_mana = self.mana
         self.init = init
         self.init_growth = init_growth
+        self.bonus_init = 0  # exists for the purpose of init sorting in fight encounters with characters
 
         # Resistances
         self.earth_res = earth_res

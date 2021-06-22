@@ -20,7 +20,7 @@ class CharacterController(commands.Cog):
         if character is None:
             character = self.connection.Character()
             character.name = str(player)
-            character.update_current_hsm()
+            character.set_current_hsm()
             character.add_to_inventory(item.generate_random_item(self.connection, 1, item_type=ItemType.weapon,
                                                                  rarity=Rarity.common), False)
             character.add_to_inventory(item.generate_random_item(self.connection, 1, item_type=ItemType.head,
@@ -139,10 +139,11 @@ class CharacterController(commands.Cog):
                 item_string += '''
 Class: {}
 Damage: {}
+Crit Damage: +{}
 
 Bonuses
 -------
-{}'''.format(WeaponType(it['_weapon_type']).name, weapon.get_damages_display_string(it), weapon.get_bonuses_display_string(it))
+{}'''.format(WeaponType(it['_weapon_type']).name, weapon.get_damages_display_string(it), it['crit_damage'], weapon.get_bonuses_display_string(it))
             elif it['_itype'] in [ItemType.head.value, ItemType.chest.value, ItemType.belt.value,
                                   ItemType.boots.value, ItemType.gloves.value, ItemType.amulet.value,
                                   ItemType.ring.value]:
@@ -154,7 +155,8 @@ Bonuses
 {}'''.format(ItemType(it['_itype']).name, armor.get_bonuses_display_string(it))
             item_string += '''
 Weight: {}
-============================================'''.format(it["weight"])
+Value: {}
+============================================'''.format(it["weight"], it["value"])
             await ctx.author.send(item_string)
         else:
             await ctx.author.send('No item equipped in that slot.')

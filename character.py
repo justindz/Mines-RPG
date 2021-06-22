@@ -107,7 +107,7 @@ class Character(Document):
     use_dot_notation = True
     use_autorefs = True
 
-    def update_current_hsm(self):
+    def set_current_hsm(self):
         self.current_health = self.health + self.bonus_health
         self.current_stamina = self.stamina + self.bonus_stamina
         self.current_mana = self.mana + self.bonus_mana
@@ -137,6 +137,21 @@ class Character(Document):
                                   ItemType.ring.value]:
             return False
 
+        if self.level < item['level']:
+            return False
+
+        if self.strength + self.bonus_strength < item['required_strength']:
+            return False
+
+        if self.intelligence + self.bonus_intelligence < item['required_intelligence']:
+            return False
+
+        if self.dexterity + self.bonus_dexterity < item['required_dexterity']:
+            return False
+
+        if self.willpower + self.bonus_willpower < item['required_willpower']:
+            return False
+
         slot = ItemType(item['_itype']).name
 
         if self.equipped[slot] is not None:
@@ -151,7 +166,7 @@ class Character(Document):
 
         return False
 
-    def unequip(self, slot):
+    def unequip(self, slot: str):
         if slot not in ['weapon', 'head', 'chest', 'belt', 'boots', 'gloves', 'amulet', 'ring'] or self.equipped[
                         slot] is None:
             return False
@@ -162,7 +177,7 @@ class Character(Document):
             self.add_to_inventory(item, True, True)
             return item
 
-    def update_stats(self, item, equip):
+    def update_stats(self, item, equip: bool):
         if item['_itype'] == ItemType.weapon.value:
             if equip:
                 self.apply_weapon_bonuses(item)
@@ -176,7 +191,6 @@ class Character(Document):
             else:
                 self.remove_armor_bonuses(item)
 
-        self.update_current_hsm()
         self.save()
 
     def apply_weapon_bonuses(self, weapon):
@@ -240,7 +254,7 @@ class Character(Document):
             if consumable['health'] != 0:
                 result = self.restore_health(consumable['health'])
 
-                if result > 0:
+                if result >= 0:
                     out += f'\nRestores {result} health'
                 else:
                     out += f'\nDrains {result} health'
@@ -248,7 +262,7 @@ class Character(Document):
             if consumable['stamina'] != 0:
                 result = self.restore_stamina(consumable['stamina'])
 
-                if result > 0:
+                if result >= 0:
                     out += f'\nRestores {result} stamina'
                 else:
                     out += f'\nDrains {result} stamina'
@@ -256,7 +270,7 @@ class Character(Document):
             if consumable['mana'] != 0:
                 result = self.restore_mana(consumable['mana'])
 
-                if result > 0:
+                if result >= 0:
                     out += f'\nRestores {result} mana'
                 else:
                     out += f'\nDrains {result} mana'
@@ -277,46 +291,73 @@ class Character(Document):
 
         return False
 
-    def restore_health(self, amount):
+    def restore_health(self, amount: int, source=None):
         start = self.current_health
-        self.current_health += amount
 
-        if self.current_health > self.health:
-            self.current_health = self.health
+        if source is not None and isinstance(source, Character):
+            self.current_health += amount * source.get_element_scaling(Elements.water)
+        else:
+            self.current_health += amount
+
+        if self.current_health > self.health + self.bonus_health:
+            self.current_health = self.health + self.bonus_health
 
         return self.current_health - start
 
-    def restore_stamina(self, amount):
+    def restore_stamina(self, amount: int, source=None):
         start = self.current_stamina
-        self.current_stamina += amount
 
-        if self.current_stamina > self.stamina:
-            self.current_stamina = self.stamina
+        if source is not None and isinstance(source, Character):
+            self.current_stamina += amount * source.get_element_scaling(Elements.water)
+        else:
+            self.current_stamina += amount
+
+        if self.current_stamina > self.stamina + self.bonus_stamina:
+            self.current_stamina = self.stamina + self.bonus_stamina
 
         return self.current_stamina - start
 
-    def restore_mana(self, amount):
+    def restore_mana(self, amount: int, source=None):
         start = self.current_mana
-        self.current_mana += amount
 
-        if self.current_mana > self.mana:
-            self.current_mana = self.mana
+        if source is not None and isinstance(source, Character):
+            self.current_mana += amount * source.get_element_scaling(Elements.water)
+        else:
+            self.current_mana += amount
+
+        if self.current_mana > self.mana + self.bonus_mana:
+            self.current_mana = self.mana + self.bonus_mana
 
         return self.current_mana - start
 
-    def restore_all(self, h, s, m):
+    def restore_all(self, h: int, s: int, m: int):
         return self.restore_health(h), self.restore_stamina(s), self.restore_mana(m)
 
     def recover(self):
         percentage = 0.1
-        return self.restore_all(int(self.health * percentage), int(self.stamina * percentage),
-                                int(self.mana * percentage))
+        return self.restore_all(int((self.health + self.bonus_health) * percentage),
+                                int((self.stamina + self.bonus_stamina) * percentage),
+                                int((self.mana + self.bonus_mana) * percentage))
 
     def regen(self):
         h = 0
         s = 0
         m = 0
         return self.restore_all(h, s, m)
+
+    def get_element_scaling(self, element: Elements):
+        if element == Elements.earth:
+            stat = self.strength + self.bonus_strength
+        elif element == Elements.fire:
+            stat = self.intelligence + self.bonus_intelligence
+        elif element == Elements.electricity:
+            stat = self.dexterity + self.bonus_dexterity
+        elif element == Elements.water:
+            stat = self.willpower + self.bonus_willpower
+        else:
+            raise Exception(f'{self.name} called get_element_scaling with invalid element {element.name}')
+
+        return 1.0 + (stat / 1000)
 
     def deal_damage(self, effect, critical=False):
         dmgs = []
@@ -325,25 +366,25 @@ class Character(Document):
             if type(effect) == skill.SkillEffect:
                 weapon = self.equipped['weapon']
                 for dmg in weapon['damages']:
-                    min = int(dmg[0] * effect.damage_scaling)
-                    max = int(dmg[1] * effect.damage_scaling)
-                    # TODO apply element scaling
+                    element_scaling = self.get_element_scaling(dmg[2])
+                    max = int(dmg[1] * effect.damage_scaling * element_scaling)
                     # TODO apply active character effects
 
                     if critical:
-                        dmgs.append((max, dmg[2]))
+                        dmgs.append((max + weapon['crit_damage'], dmg[2]))
                     else:
+                        min = int(dmg[0] * effect.damage_scaling * element_scaling)
                         dmgs.append((random.randint(min, max), dmg[2]))
             elif type(effect) == spell.SpellEffect:
+                element_scaling = self.get_element_scaling(effect.element)
                 min = effect.min
                 max = effect.max
-                # TODO apply element scaling
                 # TODO apply active character effects
 
                 if critical:
-                    dmgs.append((max, effect.element))
+                    dmgs.append((int(max * element_scaling), effect.element))
                 else:
-                    dmgs.append((random.randint(min, max), effect.element))
+                    dmgs.append((int(random.randint(min, max) * element_scaling), effect.element))
         else:
             raise Exception(f'{self.name} called deal damage with invalid effect type {type(effect)}')
 
