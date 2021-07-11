@@ -150,16 +150,23 @@ class PartyController(commands.Cog):
     @commands.check(check_not_delving)
     async def mines(self, ctx):
         """Displays the mines currently available for delving, as well as their starting level and a description. Use the index number to start a delve."""
-        await ctx.channel.send(zone.get_zone_list())
+        await ctx.channel.send(zone.get_zone_list(self.bot.get_cog('CharacterController').get(ctx.author)))
 
     @commands.command()
     @commands.check(check_correct_channel)
     @commands.check(check_not_delving)
-    async def delve(self, ctx, index: int):
-        """Start a delve. The index is availaable through \\mines. If in a party, the leader must start the delve, and party members are given a period of time to decline before the delve starts."""
+    async def delve(self, ctx, index: int, restart=False):
+        """Start a delve. The index is available through \\mines. If in a party, the leader must start the delve, and party members are given a period of time to decline before the delve starts. Optionally, add "True" to restart the mine based on your maximum depth achieved."""
         if index < 0 or index > len(zone.zones) + 1:
             await ctx.author.send('Invalid mine index number.')
             return
+
+        if index > 0 and not self.bot.get_cog('CharacterController').get(ctx.author).has_completed_tutorial():
+            await ctx.author.send(utilities.yellow('You must complete Boon Mine to access new areas.'))
+            return
+
+        if not isinstance(restart, bool):
+            restart = False
 
         if ctx.author.name in self.parties.keys():
             players = []
@@ -167,8 +174,8 @@ class PartyController(commands.Cog):
             for player in self.parties[ctx.author.name]:
                 players.append(ctx.guild.get_member_named(player))
 
-            await self.bot.get_cog('DelveController').request_delve(ctx, ctx.author, players, zone.zones[index])
+            await self.bot.get_cog('DelveController').request_delve(ctx, ctx.author, players, zone.zones[index], restart)
         elif self.is_player_in_a_party(ctx.author.name):
             await ctx.author.send('Only the party leader can initiate a delve.')
         else:
-            await self.bot.get_cog('DelveController').request_delve(ctx, ctx.author, [], zone.zones[index])
+            await self.bot.get_cog('DelveController').request_delve(ctx, ctx.author, [], zone.zones[index], restart)

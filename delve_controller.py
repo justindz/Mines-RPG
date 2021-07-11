@@ -92,7 +92,7 @@ class DelveController(commands.Cog):
         await ctx.channel.send('Your path is blocked.')
         return False
 
-    async def request_delve(self, ctx, leader: discord.Member, players: [discord.Member], zone: Zone):
+    async def request_delve(self, ctx, leader: discord.Member, players: [discord.Member], zone: Zone, restart: bool):
         overwrites = {
             ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
             ctx.guild.me: discord.PermissionOverwrite(read_messages=True),
@@ -104,12 +104,16 @@ class DelveController(commands.Cog):
 
         category = discord.utils.get(ctx.guild.categories, name='Delve RPG')
         channel = await ctx.guild.create_text_channel('{}-{}'.format(leader.name, zone.name), overwrites=overwrites, category=category)
-        self.delves[channel.name] = Delve(ctx.bot, self.connection, leader, players, zone, channel)
+        self.delves[channel.name] = Delve(ctx.bot, self.connection, leader, players, zone, channel, restart)
 
         for player in players:
             await player.send('Your delve has begun! Please join <#{}>'.format(channel.id))
 
-        await channel.send('The party has entered {} at depth {}.'.format(zone.name, zone.level))
+        if restart:
+            await channel.send('The party has re-entered {} at depth {}.'.format(zone.name, zone.level))
+        else:
+            await channel.send('The party has entered {} at depth {}.'.format(zone.name, zone.level))
+
         current_room = self.delves[channel.name].current_room
         await asyncio.sleep(2)
         await channel.send(utilities.blue('{}\n\n{}'.format(current_room.name, current_room.description)))
@@ -153,9 +157,19 @@ class DelveController(commands.Cog):
     async def proceed(self, ctx):
         """Delve deeper into the mine. You must complete the current room before proceeding."""
         delve = self.delves[ctx.channel.name]
+
+        if delve.zone.name == 'Boon Mine' and delve.depth >= 10:
+            await delve.channel.send('You have reached the end of Boon Mine.')
+            return
+
         delve.proceed()
+
+        for char in delve.characters:
+            if char.update_depth_progress(delve.zone, delve.depth):
+                await delve.channel.send(utilities.green(f'{char.name} has reached a new depth and is now level {char.level}!'))
+
         await asyncio.sleep(2)
-        await delve.channel.send(utilities.blue('{} - d{}\n\n{}'.format(delve.current_room.name, delve.depth, delve.current_room.description)))
+        await delve.channel.send(utilities.blue('{}\n\n{}'.format(delve.current_room.name, delve.current_room.description)))
 
         if isinstance(delve.current_room.encounter, Loot):
             await self.encounter_loot(self.delves[ctx.channel.name])
@@ -163,8 +177,9 @@ class DelveController(commands.Cog):
             await self.encounter_fight(self.delves[ctx.channel.name])
 
     async def encounter_fight(self, delve):
-        delve.status = 'fighting'
         await delve.channel.send(utilities.green(delve.current_room.encounter.description))
+        await asyncio.sleep(5)
+        delve.status = 'fighting'
         await delve.channel.send('The enemies attack!')
         fight = delve.current_room.encounter
 
@@ -234,9 +249,6 @@ class DelveController(commands.Cog):
 
                             if len(fight.enemies) == 0:
                                 await delve.channel.send('The enemies have been defeated.')
-                                [await delve.channel.send(
-                                    '{} has gained {} xp.'.format(c.name, c.gain_xp(fight.xp, fight.level))) for c in
-                                 fight.characters]
                                 delve.status = 'idle'
                         elif action == '2':  # Item
                             menu, indices = Fight.display_item_menu(actor)

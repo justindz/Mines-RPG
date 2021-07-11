@@ -5,7 +5,7 @@ from character import Character
 
 
 class Delve(object):
-    def __init__(self, bot, connection, leader: discord.Member, players: [discord.Member], zone: Zone, channel: discord.TextChannel):
+    def __init__(self, bot, connection, leader: discord.Member, players: [discord.Member], zone: Zone, channel: discord.TextChannel, restart: bool):
         self.bot = bot
         self.connection = connection
         self.leader = leader
@@ -18,7 +18,15 @@ class Delve(object):
             self.characters.append(cc.get(player))
 
         self.zone = zone
-        self.depth = 1
+
+        if restart:
+            leader_char = cc.get(leader)
+
+            if zone.name in leader_char.depths.keys():
+                self.depth = zone.get_restart_level(leader_char.get_depth_progress(zone.name))
+        else:
+            self.depth = 1
+
         self.solo = True if len(players) == 1 else False
         self.channel = channel
         self.current_room = self.zone.get_next_room(self.connection, self.characters, self.depth)

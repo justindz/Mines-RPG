@@ -58,6 +58,7 @@ class Character(Document):
         'ability_slots': dict,
         'equipped': dict,
         'inventory': None,
+        'depths': dict,
     }
     required_fields = ['name']
     default_values = {
@@ -103,6 +104,7 @@ class Character(Document):
         'equipped': {'weapon': None, 'head': None, 'chest': None, 'belt': None, 'boots': None, 'gloves': None,
                      'amulet': None, 'ring': None},
         'inventory': [],
+        'depths': {},
     }
     use_dot_notation = True
     use_autorefs = True
@@ -366,7 +368,7 @@ class Character(Document):
             if type(effect) == skill.SkillEffect:
                 weapon = self.equipped['weapon']
                 for dmg in weapon['damages']:
-                    element_scaling = self.get_element_scaling(dmg[2])
+                    element_scaling = self.get_element_scaling(Elements(dmg[2]))
                     max = int(dmg[1] * effect.damage_scaling * element_scaling)
                     # TODO apply active character effects
 
@@ -406,52 +408,37 @@ class Character(Document):
 
         return dmgs
 
-    def gain_xp(self, xp: int, level: int):
-        gain = utilities.scale_xp(xp, self.level, level)
-        self.xp += gain
+    def has_completed_tutorial(self):
+        if 'Boon Mine' in self.depths.keys() and self.depths['Boon Mine'] >= 10:
+            return True
+
+        return False
+
+    def get_depth_progress(self, zone_name: str):
+        if zone_name in self.depths.keys():
+            return self.depths[zone_name]
+        else:
+            return 0
+
+    def update_depth_progress(self, zone, depth):
+        if zone.name in self.depths.keys() and depth <= self.depths[zone.name]:
+            return False
+
+        highest = 0
+
+        for key in self.depths.keys():
+            if self.depths[key] > highest:
+                highest = self.depths[key]
+
+        self.depths[zone.name] = depth
         self.save()
-        return gain
 
+        if depth % 5 == 0 and depth > highest:
+            self.level += 1
+            self.points += 1
+            self.save()
+            return True
 
-xp_table = {
-    1: 0,
-    2: 1000,
-    3: 2500,
-    4: 5000,
-    5: 8000,
-    6: 11000,
-    7: 15000,
-    8: 18500,
-    9: 22500,
-    10: 27000,
-    11: 31500,
-    12: 36500,
-    13: 41500,
-    14: 47000,
-    15: 52500,
-    16: 58000,
-    17: 64000,
-    18: 70000,
-    19: 76500,
-    20: 83000,
-    21: 89500,
-    22: 96000,
-    23: 103000,
-    24: 110500,
-    25: 117500,
-    26: 125000,
-    27: 132000,
-    28: 140000,
-    29: 148000,
-    30: 156000,
-    31: 164000,
-    32: 173000,
-    33: 181000,
-    34: 190000,
-    35: 198000,
-    36: 207000,
-    37: 216000,
-    38: 225000,
-    39: 235000,
-    40: 250000,
-}
+    @staticmethod
+    def display_level_up_menu():
+        return 'Choose one:\n1 - Strength +3\n2 - Intelligence +3\n3 - Dexterity +3\n4 - Willpower +3\n5 - Health +5\n6 - Stamina +5\n7 - Mana +5'

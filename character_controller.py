@@ -1,3 +1,5 @@
+import asyncio
+
 import discord
 from discord.ext import commands
 
@@ -33,10 +35,12 @@ class CharacterController(commands.Cog):
         return character
 
     #  CHECKS  #
-    async def check_idle_or_not_delving(ctx):
+    async def check_idle(ctx):
         delves = ctx.bot.get_cog('DelveController').delves
 
-        for delve in delves:
+        for channel_name in delves.keys():
+            delve = delves[channel_name]
+
             if ctx.author in delve.players and delve.status != 'idle':
                 return False
 
@@ -53,7 +57,7 @@ class CharacterController(commands.Cog):
 | Level: {}
 | XP: {}
 | Coins: {}
-| Skill Points: {}
+| Level Points: {}
 |----
 | Strength: {:-} ({:+})
 | Intelligence: {:-} ({:+})
@@ -162,7 +166,7 @@ Value: {}
             await ctx.author.send('No item equipped in that slot.')
 
     @commands.command(aliases=['eq'])
-    @commands.check(check_idle_or_not_delving)
+    @commands.check(check_idle)
     async def equip(self, ctx, pos: int):
         """Attempts to equip the item from your inventory at the specified position. Will first unequip anything already equipped in that same slot."""
         character = self.get(ctx.author)
@@ -179,7 +183,7 @@ Value: {}
                 await ctx.author.send('You do not meet the requirements to equip {}.'.format(item['name']))
 
     @commands.command(aliases=['uneq'])
-    @commands.check(check_idle_or_not_delving)
+    @commands.check(check_idle)
     async def unequip(self, ctx, slot):
         """Unequips the item from your gear in the specified slot."""
         if slot not in weapon.valid_slots:
@@ -190,3 +194,71 @@ Value: {}
 
             if item is not None:
                 await ctx.author.send('{} unequipped.'.format(utilities.underline(item['name'])))
+
+    @commands.command()
+    @commands.check(check_idle)
+    async def depths(self, ctx):
+        """Displays your maximum depths achieved in each mine you have entered."""
+        character = self.get(ctx.author)
+        out = '==========DEPTHS=========='
+
+        if len(character.depths) == 0:
+            out += '\nNone'
+        else:
+            for zone_name in character.depths.keys():
+                out += f'\n{zone_name}: {character.depths[zone_name]}'
+
+        await ctx.author.send(out)
+
+    @commands.command()
+    @commands.check(check_idle)
+    async def level(self, ctx):
+        """Consumes a level point, allowing you to choose from a set of improvements to your character."""
+        character = self.get(ctx.author)
+
+        if character.points <= 0:
+            await ctx.author.send(utilities.red('You do not have any available level points.'))
+        else:
+            await ctx.author.send(character.display_level_up_menu())
+
+            def check_level_up_menu_selection(m):
+                if str(m.author) == character.name and m.content in ['1', '2', '3', '4', '5', '6', '7']:
+                    return True
+
+            try:
+                msg = await self.bot.wait_for('message', check=check_level_up_menu_selection, timeout=30)
+                choice = int(msg.content)
+            except asyncio.TimeoutError:
+                await ctx.author.send(utilities.yellow('Selection timed out. Please use \\level again when you are ready.'))
+                return
+
+            if choice == 1:
+                character.strength += 3
+                character.save()
+                await ctx.author.send('Your base strength has been permanently increased by 3.')
+            elif choice == 2:
+                character.intelligence += 3
+                await ctx.author.send('Your base intelligence has been permanently increased by 3.')
+            elif choice == 3:
+                character.dexterity += 3
+                await ctx.author.send('Your base dexterity has been permanently increased by 3.')
+            elif choice == 4:
+                character.willpower += 3
+                await ctx.author.send('Your base willpower has been permanently increased by 3.')
+            elif choice == 5:
+                character.health += 5
+                await ctx.author.send('Your base health has been permanently increased by 5.')
+            elif choice == 6:
+                character.stamina += 5
+                await ctx.author.send('Your base stamina has been permanently increased by 5.')
+            elif choice == 7:
+                character.mana += 5
+                await ctx.author.send('Your base mana has been permanently increased by 5.')
+            else:
+                await ctx.channel.send(utilities.red(f'Invalid level up reward selection {msg}.'))
+                return
+
+            character.points -= 1
+            character.level += 1
+            character.save()
+            await ctx.channel.send(utilities.green(f'{character.name} has grown in power!'))

@@ -83,7 +83,7 @@ class Fight:
         chance = None
 
         if isinstance(ab, skill.Skill):
-            chance = min(char.equipped['weapon'].base_crit_chance, 0.5)
+            chance = min(char.equipped['weapon']['base_crit_chance'], 0.5)
         elif isinstance(ab, spell.Spell):
             chance = min(ab.base_crit_chance, 0.5)
 
@@ -113,6 +113,19 @@ class Fight:
             if _target.current_health <= 0:
                 self.enemies.remove(_target)
 
+        for stat in ab.cost.keys():
+            cost = ab.cost[stat]
+
+            if stat == 'h':
+                char.current_health -= cost
+            elif stat == 's':
+                char.current_stamina -= cost
+            elif stat == 'm':
+                char.current_mana -= cost
+            else:
+                raise Exception(f'{char.name} used ability {ab.name} with unsupported cost {cost} {stat}')
+
+        char.save()
         return out
 
     def display_enemy_menu(self):
@@ -152,13 +165,16 @@ class Fight:
             if character.ability_slots[str(i)] is not None:
                 _ability = utilities.get_ability_by_name(character.ability_slots[str(i)])
                 cost = f'{_ability.cost}'
+                ability_type = 'Error'
 
-                if _ability is skill.Skill:
+                if isinstance(_ability, skill.Skill):
+                    ability_type = 'Skill'
                     cost += 's'
-                elif _ability is spell.Spell:
-                    cost = 'm'
+                elif isinstance(_ability, spell.Spell):
+                    ability_type = 'Spell'
+                    cost += 'm'
 
-                out += f'\n {str(i)} - {_ability.name} - {cost}'
+                out += f'\n {str(i)} - {_ability.name} ({ability_type}) - {cost}'
 
         return out
 

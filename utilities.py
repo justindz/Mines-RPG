@@ -82,9 +82,9 @@ def stat_check(total: int, difficulty: int, scaling: float, depth: int):
     return False
 
 
-def scale_xp(xp: int, l1: int, l2: int):
-    penalty = 0.01 * 10 * abs(l1 - l2) ** 3
-    return max(round(xp * 1 - penalty), 1)
+# def scale_xp(xp: int, l1: int, l2: int):
+#     penalty = 0.01 * 10 * abs(l1 - l2) ** 3
+#     return max(round(xp * 1 - penalty), 1)
 
 
 def clamp(n, smallest, largest):
