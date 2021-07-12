@@ -357,7 +357,7 @@ class Character(Document):
         elif element == Elements.water:
             stat = self.willpower + self.bonus_willpower
         else:
-            raise Exception(f'{self.name} called get_element_scaling with invalid element {element.name}')
+            raise Exception(f'{self.name} called character get_element_scaling with invalid element {element.name}')
 
         return 1.0 + (stat / 1000)
 
@@ -388,22 +388,24 @@ class Character(Document):
                 else:
                     dmgs.append((int(random.randint(min, max) * element_scaling), effect.element))
         else:
-            raise Exception(f'{self.name} called deal damage with invalid effect type {type(effect)}')
+            raise Exception(f'{self.name} called character deal damage with invalid effect type {type(effect)}')
 
         return dmgs
 
     def take_damage(self, dmgs: list):
         for dmg in dmgs:
-            if dmg[1] == Elements.earth:
-                dmg[0] *= (1.0 - self.earth_res)
-            elif dmg[1] == Elements.fire:
-                dmg[0] *= (1.0 - self.fire_res)
-            elif dmg[1] == Elements.electricity:
-                dmg[0] *= (1.0 - self.electricity_res)
-            elif dmg[1] == Elements.water:
-                dmg[0] *= (1.0 - self.water_res)
+            amt = dmg[0]
 
-            self.current_health -= round(dmg[0])
+            if dmg[1] == Elements.earth:
+                amt *= (1.0 - self.earth_res)
+            elif dmg[1] == Elements.fire:
+                amt *= (1.0 - self.fire_res)
+            elif dmg[1] == Elements.electricity:
+                amt *= (1.0 - self.electricity_res)
+            elif dmg[1] == Elements.water:
+                amt *= (1.0 - self.water_res)
+
+            self.current_health -= round(amt)
             self.current_health = max(0, self.current_health)
 
         return dmgs

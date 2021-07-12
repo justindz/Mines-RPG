@@ -133,7 +133,7 @@ class Fight:
         i = 1
 
         for e in self.enemies:
-            out += f'\n{i} - {e.name} ({e.level}) {e.current_health}h {e.current_stamina}s {e.current_mana}m'
+            out += f'\n{i} - {e.name} ({e.level}) {e.current_health}h'
             i += 1
 
         return out

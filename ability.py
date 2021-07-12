@@ -3,22 +3,18 @@ from enum import Enum
 
 class EffectType(Enum):
     damage_health = 1
-    damage_stamina = 2
-    damage_mana = 3
-    restore_health = 4
-    restore_stamina = 5
-    restore_mana = 6
-    drain_health = 7
-    drain_stamina = 8
-    drain_mana = 9
-    buff_crit = 10
-    debuff_crit = 11
-    buff_damage = 12
-    debuff_damage = 13
-    buff_resist = 14
-    debuff_resist = 15
-    buff_area = 16
-    debuff_area = 17
+    restore_health = 2
+    restore_stamina = 3
+    restore_mana = 4
+    drain_health = 5
+    buff_crit = 6
+    debuff_crit = 7
+    buff_damage = 8
+    debuff_damage = 9
+    buff_resist = 10
+    debuff_resist = 11
+    buff_area = 12
+    debuff_area = 13
 
 
 class Ability:
