@@ -268,14 +268,13 @@ class DelveController(commands.Cog):
                     except asyncio.TimeoutError:
                         await delve.channel.send('{} did not take an action in time.'.format(actor.name))
                 else:  # Enemy
-                    # TODO convert to planner
-                    target = random.choice(fight.characters)
-                    out = actor.actions[0].do(actor, target, fight.characters, fight.enemies, [])
+                    out = actor.take_a_turn(fight)
                     await delve.channel.send(out)
 
-                    if target.current_health <= 0:
-                        await self.player_dead(delve, target.player)
-                        fight.remove_character(target)
+                    for target in fight.characters:
+                        if target.current_health <= 0:
+                            await self.player_dead(delve, target.player)
+                            fight.remove_character(target)
 
                 await asyncio.sleep(3)
 

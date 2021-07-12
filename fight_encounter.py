@@ -44,6 +44,7 @@ class Fight:
         self.level = int(self.level / len(self.enemies))
         self.inits = characters + enemies
         self.update_turn_order()
+        self.states = []
 
     def update_turn_order(self):
         self.inits.sort(key=lambda x: x.init + x.bonus_init, reverse=True)

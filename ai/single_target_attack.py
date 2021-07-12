@@ -23,7 +23,7 @@ class SingleTargetAttack(Action):
         self.area = 0
         self.area_modifiable = False
 
-    def do(self, user, target: Character, characters: [Character], enemies: [], states: [Elements]):
+    def do(self, user, target: Character, fight):
         out = f'{user.name} used {self.name} on {target.name}.'
         crit = False
         targets = [target]
@@ -32,11 +32,11 @@ class SingleTargetAttack(Action):
             i = self.area
 
             while i > 0:
-                if characters.index(target) + i <= len(characters) - 1:
-                    targets.append(characters.index(target) + i)
+                if fight.characters.index(target) + i <= len(fight.characters) - 1:
+                    targets.append(fight.characters.index(target) + i)
 
-                if characters.index(target) - i > 0:
-                    targets.insert(0, characters.index(target) - i)
+                if fight.characters.index(target) - i > 0:
+                    targets.insert(0, fight.characters.index(target) - i)
 
                 i -= 1
 

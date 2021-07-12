@@ -6,7 +6,7 @@ class Action:
     def __init__(self):
         self.name = 'Default Action'
         self.description = 'Report a bug and reference the enemy that used this ability!'
-        self.element = Elements.earth
+        self.effects = []
         self.cooldown = 0
         self.turns_remaining = 0
         self.state_requirements = []

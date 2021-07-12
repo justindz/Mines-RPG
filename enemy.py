@@ -1,17 +1,54 @@
 from elements import Elements
 from ability import EffectType
 from spell import SpellEffect
-from ai.single_target_attack import SingleTargetAttack
 import utilities
+from ai.single_target_attack import SingleTargetAttack
 
 import random
+from enum import Enum
+
+
+class GoalType(Enum):
+    damage_player = 1
+    debuff_player = 2
+    heal_ally = 3
+    buff_ally = 4
+    # summon = 5
+
+
+class Goal:
+    def __init__(self, goal_type: GoalType, value: int):
+        self.goal_type = goal_type
+        self.value = value
+
+    @staticmethod
+    def get_contributor_effects_by_goal_type(goal_type: GoalType):
+        if goal_type == GoalType.damage_player:
+            contribs = [EffectType.damage_health]
+        elif goal_type == GoalType.debuff_player:
+            contribs = [EffectType.debuff_area, EffectType.debuff_crit, EffectType.debuff_damage, EffectType.debuff_resist]
+        elif goal_type == GoalType.heal_ally:
+            contribs = [EffectType.restore_health]
+        elif goal_type == GoalType.buff_ally:
+            contribs = [EffectType.buff_crit, EffectType.buff_area, EffectType.buff_damage, EffectType.buff_resist]
+        else:
+            raise Exception(f'GoalType {goal_type} has no configured contributing effects')
+
+        return contribs
+
+
+class Plan:
+    def __init__(self):
+        self.action = None
+        self.debug = ''
+        self.score = 0
 
 
 class Enemy:
     def __init__(self, name, strength, strength_growth, intelligence, intelligence_growth, dexterity, dexterity_growth,
                  willpower, willpower_growth, health, health_growth, init, init_growth, earth_res, earth_res_growth,
                  fire_res, fire_res_growth, electricity_res, electricity_res_growth, water_res, water_res_growth,
-                 actions):
+                 actions, goals):
         self.name = name
         self.level = 1
 
@@ -41,7 +78,9 @@ class Enemy:
         self.water_res = water_res
         self.water_res_growth = water_res_growth
 
+        # AI
         self.actions = actions
+        self.goals = goals
 
     def scale(self, depth):
         self.level = depth
@@ -54,6 +93,90 @@ class Enemy:
         self.current_health = self.health
         self.init += round(self.init_growth * gap)
         self.name = prefixes[utilities.clamp(int(depth / 10), 1, len(prefixes))] + " " + self.name
+
+    def take_a_turn(self, fight):
+        plans = self.get_action_plans(fight)
+
+        if len(plans) > 0:
+            for plan in plans:
+                print(plan.debug)
+
+            plans.sort(key=lambda x: x.score, reverse=True)
+            the_plan = plans[0]
+            print(f'The chosen plan is: --{the_plan.debug}-- w/ score {the_plan.score}')
+            return the_plan.action()
+        else:
+            return f'{self.name} took no action.'
+
+    def get_action_plans(self, fight):
+        plans = self.get_kill_player_action_plans(fight)
+
+        if len(plans) > 0:
+            return plans
+
+        # damage_player goal
+        goal = [x for x in self.goals if x.goal_type == GoalType.damage_player]
+
+        if len(goal) > 0:
+            plans += self.get_damage_player_plans(goal[0], fight)
+
+        # debuff_player goal
+        # goal = [x for x in self.goals if x.goal_type == GoalType.debuff_player]
+        #
+        # if len(goal) > 0:
+        #     plans.append(self.get_debuff_player_plans(goal[0], fight))
+
+        # heal_ally goal
+        # goal = [x for x in self.goals if x.goal_type == GoalType.heal_ally]
+        #
+        # if len(goal) > 0:
+        #     plans.append(self.get_heal_ally_plans(goal[0], fight))
+
+        # buff_ally goal
+        # goal = [x for x in self.goals if x.goal_type == GoalType.buff_ally]
+        #
+        # if len(goal) > 0:
+        #     plans.append(self.get_buff_ally_plans(goal[0], fight))
+
+        return plans
+
+    def get_kill_player_action_plans(self, fight):
+        plans = []
+
+        for action in self.actions:
+            if action.targets_players and action.is_usable(fight.states, fight.characters):
+                effects = list(filter(lambda effect: effect.type == EffectType.damage_health, action.effects))
+
+                if len(effects) > 0:
+                    for character in fight.characters:
+                        dmg = character.estimate_damage_from_enemy_action(self, action)
+
+                        if dmg >= character.current_health:
+                            plan = Plan()
+                            plan.score = 9999999
+                            plan.action = lambda: action.do(self, character, fight)
+                            plan.debug = f'kill {character.name} w/ {action.name}'
+                            plans.append(plan)
+
+        return plans
+
+    def get_damage_player_plans(self, goal, fight):
+        plans = []
+
+        for action in self.actions:
+            if action.targets_players and action.is_usable([], fight.characters):
+                effects = list(filter(lambda effect: effect.type == EffectType.damage_health, action.effects))
+
+                if len(effects) > 0:
+                    for character in fight.characters:
+                        dmg = character.estimate_damage_from_enemy_action(self, action)
+                        plan = Plan()
+                        plan.score = goal.value + int(100.0 * dmg / character.health)
+                        plan.action = lambda: action.do(self, character, fight)
+                        plan.debug = f'damage {character.name} w/ {action.name}'
+                        plans.append(plan)
+
+        return plans
 
     def get_element_scaling(self, element: Elements):
         if element == Elements.earth:
@@ -129,10 +252,10 @@ prefixes = {
 enemies = {
     'slime': Enemy('Slime', 1, 0.3, 1, 0.3, 1, 0.3, 1, 0.3, 10, 0.1, 5, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                    [SingleTargetAttack('Headbutt', '', 0.05,
-                                       [SpellEffect(EffectType.damage_health, Elements.earth, 1, 4)]
-                                       )]),
+                                       [SpellEffect(EffectType.damage_health, Elements.earth, 1, 4)])],
+                   [Goal(GoalType.damage_player, 500)]),
     'imp': Enemy('Imp', 1, 0.3, 2, 0.4, 1, 0.3, 1, 0.3, 10, 0.1, 5, 0.2, 0.03, 0.01, 0.08, 0.03, 0.03, 0.01, 0.0, 0.01,
                  [SingleTargetAttack('Claw', '', 0.05,
-                                     [SpellEffect(EffectType.damage_health, Elements.earth, 2, 4)]
-                                     )]),
+                                     [SpellEffect(EffectType.damage_health, Elements.earth, 2, 4)])],
+                 [Goal(GoalType.damage_player, 500)]),
 }

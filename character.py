@@ -297,7 +297,7 @@ class Character(Document):
         start = self.current_health
 
         if source is not None and isinstance(source, Character):
-            self.current_health += amount * source.get_element_scaling(Elements.water)
+            self.current_health += int(amount * source.get_element_scaling(Elements.water))
         else:
             self.current_health += amount
 
@@ -310,7 +310,7 @@ class Character(Document):
         start = self.current_stamina
 
         if source is not None and isinstance(source, Character):
-            self.current_stamina += amount * source.get_element_scaling(Elements.water)
+            self.current_stamina += int(amount * source.get_element_scaling(Elements.water))
         else:
             self.current_stamina += amount
 
@@ -323,7 +323,7 @@ class Character(Document):
         start = self.current_mana
 
         if source is not None and isinstance(source, Character):
-            self.current_mana += amount * source.get_element_scaling(Elements.water)
+            self.current_mana += int(amount * source.get_element_scaling(Elements.water))
         else:
             self.current_mana += amount
 
@@ -361,6 +361,17 @@ class Character(Document):
 
         return 1.0 + (stat / 1000)
 
+    def apply_element_damage_resistances(self, amt, element):
+        if element == Elements.earth:
+            amt *= (1.0 - self.earth_res)
+        elif element == Elements.fire:
+            amt *= (1.0 - self.fire_res)
+        elif element == Elements.electricity:
+            amt *= (1.0 - self.electricity_res)
+        elif element == Elements.water:
+            amt *= (1.0 - self.water_res)
+        return amt
+
     def deal_damage(self, effect, critical=False):
         dmgs = []
 
@@ -394,21 +405,25 @@ class Character(Document):
 
     def take_damage(self, dmgs: list):
         for dmg in dmgs:
-            amt = dmg[0]
-
-            if dmg[1] == Elements.earth:
-                amt *= (1.0 - self.earth_res)
-            elif dmg[1] == Elements.fire:
-                amt *= (1.0 - self.fire_res)
-            elif dmg[1] == Elements.electricity:
-                amt *= (1.0 - self.electricity_res)
-            elif dmg[1] == Elements.water:
-                amt *= (1.0 - self.water_res)
-
+            amt = self.apply_element_damage_resistances(dmg[0], dmg[1])
             self.current_health -= round(amt)
             self.current_health = max(0, self.current_health)
 
         return dmgs
+
+    def estimate_damage_from_enemy_action(self, enemy, action):
+        amt = 0
+
+        for effect in action.effects:
+            element_scaling = enemy.get_element_scaling(effect.element)
+            scaled_min = int(effect.min * element_scaling)
+            scaled_max = int(effect.max * element_scaling)
+            avg = (scaled_min + scaled_max) / 2
+            avg += int((scaled_max - avg) * action.base_crit_chance)
+            amt += avg
+            amt = self.apply_element_damage_resistances(amt, effect.element)
+
+        return amt
 
     def has_completed_tutorial(self):
         if 'Boon Mine' in self.depths.keys() and self.depths['Boon Mine'] >= 10:
