@@ -8,7 +8,7 @@ import random
 
 
 class SingleTargetAttack(Action):
-    def __init__(self, name, description, base_crit_chance, effects: [SpellEffect]):
+    def __init__(self, name: str, description: str, cooldown: int, base_crit_chance: float, effects: [SpellEffect]):
         for effect in effects:
             if effect.type != EffectType.damage_health:
                 raise Exception(f'SingleTargetAttack {name} has an unsupported effect type {effect.type}')
@@ -16,6 +16,7 @@ class SingleTargetAttack(Action):
         super().__init__()
         self.name = name
         self.description = description
+        self.cooldown = cooldown
         self.base_crit_chance = base_crit_chance
         self.effects = effects
         self.targets_players = True

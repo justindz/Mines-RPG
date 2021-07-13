@@ -1,5 +1,4 @@
 from elements import Elements
-from character import Character
 
 
 class Action:
@@ -16,10 +15,7 @@ class Action:
         self.area_modifiable = False
         self.summon = None
 
-    def is_usable(self, states: [Elements], enemies: [Character]):
-        if self.targets_allies and len(enemies) == 1:
-            return False
-
+    def is_usable(self, states: [Elements]):
         return not self.is_on_cooldown() and self.meets_state_requirements(states)
 
     def is_on_cooldown(self):
