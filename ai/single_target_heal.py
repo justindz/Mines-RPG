@@ -6,14 +6,13 @@ import random
 
 
 class SingleTargetHeal(Action):
-    def __init__(self, name: str, description: str, cooldown: int, effects: [SpellEffect]):
+    def __init__(self, name: str, cooldown: int, effects: [SpellEffect]):
         for effect in effects:
             if effect.type != EffectType.restore_health:
                 raise Exception(f'SingleTargetHeal {name} has an unsupported effect type {effect.type}')
 
         super().__init__()
         self.name = name
-        self.description = description
         self.cooldown = cooldown
         self.effects = effects
         self.targets_players = False
@@ -42,4 +41,6 @@ class SingleTargetHeal(Action):
                 heal = target.restore_health(random.randint(effect.min, effect.max), user)
                 out += f'\n{target.name} regained {heal} health.'
 
+        out += self.handle_elements(fight)
+        self.check_cooldown()
         return out

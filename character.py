@@ -425,6 +425,9 @@ class Character(Document):
 
         return amt
 
+    def end_of_turn(self):
+        pass
+
     def has_completed_tutorial(self):
         if 'Boon Mine' in self.depths.keys() and self.depths['Boon Mine'] >= 10:
             return True

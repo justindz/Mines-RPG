@@ -44,7 +44,12 @@ class Fight:
         self.level = int(self.level / len(self.enemies))
         self.inits = characters + enemies
         self.update_turn_order()
-        self.states = []
+        self.elements_strong = []
+        self.elements_weak = []
+
+    @property
+    def states(self):
+        return self.elements_strong + self.elements_weak
 
     def update_turn_order(self):
         self.inits.sort(key=lambda x: x.init + x.bonus_init, reverse=True)
@@ -56,6 +61,29 @@ class Fight:
     def remove_enemy(self, enemy_to_remove: Enemy):
         self.enemies.remove(enemy_to_remove)
         self.inits.remove(enemy_to_remove)
+
+    def activate(self, element: Elements):
+        if element in self.elements_weak:
+            self.elements_strong.append(element)
+            self.elements_weak.remove(element)
+        elif element not in self.elements_weak and element not in self.elements_strong:
+            self.elements_strong.append(element)
+
+    def consume(self, element: Elements):
+        if element in self.elements_weak:
+            self.elements_weak.remove(element)
+        elif element in self.elements_strong:
+            self.elements_strong.remove(element)
+
+    def end_of_turn(self):
+        check = len(self.elements_weak) + len(self.elements_strong)
+        self.elements_weak = self.elements_strong.copy()
+        self.elements_strong = []
+
+        if check > 0:
+            return True
+
+        return False
 
     def use_ability(self, char: Character, ab, target):
         out = f'{char.name} used {ab.name} on {target.name}.'
@@ -126,7 +154,31 @@ class Fight:
             else:
                 raise Exception(f'{char.name} used ability {ab.name} with unsupported cost {cost} {stat}')
 
+        for state in ab.consumes:
+            self.consume(state)
+            out += f'\n{state.name.capitalize()} has been consumed.'
+
+        for state in ab.activates:
+            self.activate(state)
+            out += f'\n{state.name.capitalize()} has been infused.'
+
         char.save()
+        return out
+
+    def display_active_elements(self):
+        if len(self.elements_strong) + len(self.elements_weak) > 0:
+            out = 'Strong: '
+
+            for ele in self.elements_strong:
+                out += f'{utilities.get_elemental_symbol(ele)} '
+
+            out += '\nWeak: '
+
+            for ele in self.elements_weak:
+                out += f'{utilities.get_elemental_symbol(ele)} '
+        else:
+            out = 'No elements are infused in the environment.'
+
         return out
 
     def display_enemy_menu(self):

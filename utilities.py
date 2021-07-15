@@ -2,6 +2,7 @@ import random
 
 import spell
 import skill
+from elements import Elements
 
 
 #  DISPLAY  #
@@ -42,6 +43,17 @@ def get_rarity_symbol(rarity: int):
         return ':small_orange_diamond:'
 
     return ''
+
+
+def get_elemental_symbol(element: Elements) -> str:
+    if element == Elements.earth:
+        return ':rock:'
+    elif element == Elements.fire:
+        return ':fire:'
+    elif element == Elements.electricity:
+        return ':zap:'
+    elif element == Elements.water:
+        return ':droplet:'
 
 
 def dmgs_to_str(dmgs):

@@ -36,6 +36,9 @@ async def check_ability_requirements_and_use(ability, actor, delve, target, figh
     elif isinstance(ability, skill.Skill) and actor.equipped['weapon']['_weapon_type'] != ability.weapon_type.value:
         await delve.channel.send(f'This skill requires a {ability.weapon_type}.')
         return False
+    elif not set(ability.consumes).issubset(set(fight.states)):
+        await delve.channel.send(f'{ability.name} requires infused elements.')
+        return False
     else:
         await delve.channel.send(fight.use_ability(actor, ability, target))
         return True
@@ -186,6 +189,7 @@ class DelveController(commands.Cog):
         turn_count = 1
         while delve.status == 'fighting':
             await asyncio.sleep(2)
+            await delve.channel.send(fight.display_active_elements())
 
             for el in fight.enemies:
                 await delve.channel.send(utilities.underline('{} ({}/{})'.format(el.name, el.current_health, el.health)))
@@ -279,7 +283,15 @@ class DelveController(commands.Cog):
                 await asyncio.sleep(3)
 
             fight.update_turn_order()
+
+            for actor in fight.inits:
+                actor.end_of_turn()
+
             turn_count += 1
+
+            if fight.end_of_turn():
+                await delve.channel.send('Elements have dissipated.')
+
             await delve.channel.send('End of turn {}.'.format(turn_count))
 
             for character in delve.characters:

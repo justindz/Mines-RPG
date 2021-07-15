@@ -12,9 +12,9 @@ class SpellEffect:
 
 
 class Spell(ability.Ability):
-    def __init__(self, _name, _description, _level, _cost, _effects, _area=0, _area_modifiable=False,
+    def __init__(self, _name, _description, _level, _cost, _effects, _activates, _consumes, _area=0, _area_modifiable=False,
                  _base_crit_chance=0.05, _targets_enemies=True, _summon=None):
-        super().__init__(_name, _description, _level, _cost, _effects, _area, _area_modifiable)
+        super().__init__(_name, _description, _level, _cost, _effects, _activates, _consumes, _area, _area_modifiable)
 
         if _summon is None:
             _summon = []
@@ -26,10 +26,11 @@ class Spell(ability.Ability):
 
 spells = {
     'stalagmite': Spell('Stalagmite', 'Stalagmite description.', 1, {'h': 0, 's': 0, 'm': 5},
-                        [SpellEffect(EffectType.damage_health, Elements.earth, 3, 6)], _targets_enemies=True),
+                        [SpellEffect(EffectType.damage_health, Elements.earth, 3, 6)], [], [Elements.earth],
+                        _targets_enemies=True),
     'mend_wounds': Spell('Mend Wounds', 'Mend description.', 1, {'h': 0, 's': 0, 'm': 5},
                          [SpellEffect(EffectType.restore_health, Elements.water, 5, 10),
                           SpellEffect(EffectType.restore_stamina, Elements.water, 5, 10),
                           SpellEffect(EffectType.restore_mana, Elements.water, 5, 10)],
-                         _base_crit_chance=0.01, _targets_enemies=False),
+                         [], [], _base_crit_chance=0.01, _targets_enemies=False),
 }

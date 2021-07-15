@@ -95,6 +95,11 @@ class Enemy:
         self.init += round(self.init_growth * gap)
         self.name = prefixes[utilities.clamp(int(depth / 10), 1, len(prefixes))] + " " + self.name
 
+    def end_of_turn(self):
+        for action in self.actions:
+            if action.turns_remaining > 0:
+                action.turns_remaining -= 1
+
     def take_a_turn(self, fight):
         plans = self.get_action_plans(fight)
 
@@ -173,7 +178,7 @@ class Enemy:
                     for character in fight.characters:
                         dmg = character.estimate_damage_from_enemy_action(self, action)
                         plan = Plan()
-                        plan.score = goal.value + int(100.0 * dmg / character.health)
+                        plan.score = goal.value + 100 - int(max(character.current_health - dmg, 1) / (character.current_health + character.bonus_health) * 100)
                         plan.action = lambda action=action, character=character: action.do(self, character, fight)
                         plan.debug = f'damage {character.name} w/ {action.name} score {plan.score}'
                         plans.append(plan)
@@ -283,14 +288,14 @@ prefixes = {
 
 enemies = {
     'slime': Enemy('Slime', 1, 0.3, 1, 0.3, 1, 0.3, 1, 0.3, 10, 0.1, 5, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                   [SingleTargetAttack('Headbutt', '', 0, 0.05,
+                   [SingleTargetAttack('Headbutt', 0, 0.05,
                                        [SpellEffect(EffectType.damage_health, Elements.earth, 1, 4)]),
-                    SingleTargetHeal('Regenerate', '', 3,
+                    SingleTargetHeal('Regenerate', 3,
                                      [SpellEffect(EffectType.restore_health, Elements.water, 2, 5)])],
                    [Goal(GoalType.damage_player, 500), Goal(GoalType.heal_ally, 450)]),
 
     'imp': Enemy('Imp', 1, 0.3, 2, 0.4, 1, 0.3, 1, 0.3, 10, 0.1, 5, 0.2, 0.03, 0.01, 0.08, 0.03, 0.03, 0.01, 0.0, 0.01,
-                 [SingleTargetAttack('Claw', '', 0, 0.05,
+                 [SingleTargetAttack('Claw', 0, 0.05,
                                      [SpellEffect(EffectType.damage_health, Elements.earth, 2, 4)])],
                  [Goal(GoalType.damage_player, 500)]),
 }
