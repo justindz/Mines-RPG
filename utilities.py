@@ -1,5 +1,6 @@
 import random
 
+import ability
 import spell
 import skill
 from elements import Elements
@@ -69,7 +70,7 @@ def dmgs_to_str(dmgs):
 #  LOOKUPS  #
 
 
-def get_ability_by_name(ability_name):
+def get_ability_by_name(ability_name: str) -> ability:
     try:
         if ability_name.startswith('spell-'):
             return spell.spells[ability_name[6:]]
@@ -79,6 +80,44 @@ def get_ability_by_name(ability_name):
             raise Exception(f'utilities.get_ability_name called for unknown type: {ability_name}')
     except KeyError:
         raise Exception(f'utilities.get_ability_name called for unknown type: {ability_name}')
+
+
+def ability_to_str(ability_name: str) -> str:
+    ab = get_ability_by_name(ability_name)
+    out = f'''
+=========={ab.name} ({"Skill" if isinstance(ab, skill.Skill) else "Spell"})==========
+{ab.description}
+
+{'Requires: ' + ab.weapon_type.name.capitalize() if isinstance(ab, skill.Skill) else ''}
+Targets: {"Enemies" if isinstance(ab, spell.Spell) and ab.targets_enemies else "Allies"}
+Cost: {ab.ability_cost_to_str()}'''
+
+    if isinstance(ab, spell.Spell):
+        out += f'\nBase crit chance: {int(ab.base_crit_chance * 100)}%'
+
+    if len(ab.activates) > 0:
+        out += '\nActivates: '
+
+        for ele in ab.activates:
+            out += get_elemental_symbol(ele)
+
+    if len(ab.consumes) > 0:
+        out += '\nConsumes: '
+
+        for ele in ab.consumes:
+            out += get_elemental_symbol(ele)
+
+    out += f'\nArea of Effect: {"None" if ab.area == 0 else ab.area}{ "(modifiable)" if ab.area_modifiable else "" }'
+    out += f'\n\nEffects:'
+
+    if isinstance(ab, skill.Skill):
+        for effect in ab.effects:
+            out += f'\n- {effect.type.name} : {effect.damage_scaling} base weapon damage multiplier'
+    elif isinstance(ab, spell.Spell):
+        for effect in ab.effects:
+            out += f'\n- {effect.type.name} : {effect.min}-{effect.max} {get_elemental_symbol(effect.element)}'
+
+    return out
 
 
 #  MATHS  #

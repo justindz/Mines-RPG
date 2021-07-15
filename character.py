@@ -4,11 +4,7 @@ from mongokit_ng import Document
 
 import ability
 from item import ItemType
-from weapon import Weapon
-from armor import Armor
-from consumable import Consumable
 from elements import Elements
-import utilities
 import skill
 import spell
 
@@ -113,6 +109,23 @@ class Character(Document):
         self.current_health = self.health + self.bonus_health
         self.current_stamina = self.stamina + self.bonus_stamina
         self.current_mana = self.mana + self.bonus_mana
+
+    def add_ability(self, ability_string: str) -> bool:
+        if ability_string not in self.abilities:
+            self.abilities.append(ability_string)
+            self.save()
+            return True
+
+        return False
+
+    def assign_ability_to_slot(self, index: int, slot: int) -> bool:
+        if 0 < slot < 7 and 0 <= index < len(self.abilities):
+            slot = str(slot)
+            self.ability_slots[slot] = self.abilities[index]
+            self.save()
+            return True
+
+        return False
 
     def add_to_inventory(self, item, ignore_carry, unequipping=False):
         if ignore_carry or self.current_carry + item['weight'] <= self.carry + self.bonus_carry:

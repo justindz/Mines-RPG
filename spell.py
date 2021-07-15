@@ -30,7 +30,6 @@ spells = {
                         _targets_enemies=True),
     'mend_wounds': Spell('Mend Wounds', 'Mend description.', 1, {'h': 0, 's': 0, 'm': 5},
                          [SpellEffect(EffectType.restore_health, Elements.water, 5, 10),
-                          SpellEffect(EffectType.restore_stamina, Elements.water, 5, 10),
-                          SpellEffect(EffectType.restore_mana, Elements.water, 5, 10)],
+                          SpellEffect(EffectType.restore_stamina, Elements.water, 5, 10)],
                          [], [], _base_crit_chance=0.01, _targets_enemies=False),
 }

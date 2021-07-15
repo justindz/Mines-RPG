@@ -165,6 +165,49 @@ Value: {}
         else:
             await ctx.author.send('No item equipped in that slot.')
 
+    @commands.command(aliases=['skills', 'spells'])
+    async def abilities(self, ctx):
+        character = self.get(ctx.author)
+        """List your prepared abilities, and all abilities known to your character."""
+        out = f'''
+==========Prepared==========
+1: {"None" if character.ability_slots["1"] is None else utilities.get_ability_by_name(character.ability_slots["1"]).name}
+2: {"None" if character.ability_slots["2"] is None else utilities.get_ability_by_name(character.ability_slots["2"]).name}
+3: {"None" if character.ability_slots["3"] is None else utilities.get_ability_by_name(character.ability_slots["3"]).name}
+4: {"None" if character.ability_slots["4"] is None else utilities.get_ability_by_name(character.ability_slots["4"]).name}
+5: {"None" if character.ability_slots["5"] is None else utilities.get_ability_by_name(character.ability_slots["5"]).name}
+6: {"None" if character.ability_slots["6"] is None else utilities.get_ability_by_name(character.ability_slots["6"]).name}
+'''
+
+        i = 0
+        out += '\n==========Known==========\n'
+
+        for ab in character.abilities:
+            out += f'{i} - {utilities.get_ability_by_name(ab).name}\n'
+            i += 1
+
+        await ctx.author.send(out)
+
+    @commands.command(aliases=['skill', 'spell'])
+    async def ability(self, ctx, index=0):
+        """Show the details of a specific ability known to your character."""
+        character = self.get(ctx.author)
+
+        try:
+            await ctx.author.send(utilities.ability_to_str(character.abilities[index]))
+        except IndexError:
+            await ctx.author.send(utilities.red('Invalid ability index.'))
+
+    @commands.command(aliases=['assign'])
+    async def prepare(self, ctx, index: int, slot: int):
+        """Prepare a known ability, assigning it to an action slot (1-6) for use in fights."""
+        character = self.get(ctx.author)
+
+        if character.assign_ability_to_slot(index, slot):
+            await ctx.author.send(f'Ability prepared in slot {slot}.')
+        else:
+            await ctx.author.send(utilities.red('Invalid ability index or slot.'))
+
     @commands.command(aliases=['eq'])
     @commands.check(check_idle)
     async def equip(self, ctx, pos: int):

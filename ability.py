@@ -28,3 +28,17 @@ class Ability:
         self.consumes = _consumes
         self.area = _area
         self.area_modifiable = _area_modifiable
+
+    def ability_cost_to_str(self) -> str:
+        out = ''
+
+        if self.cost['h'] != 0:
+            out += f'{self.cost["h"]}h '
+
+        if self.cost['s'] != 0:
+            out += f'{self.cost["s"]}s '
+
+        if self.cost['m'] != 0:
+            out += f'{self.cost["m"]}m '
+
+        return out.rstrip(' ')
