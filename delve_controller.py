@@ -19,25 +19,31 @@ async def check_ability_requirements_and_use(ability, actor, delve, target, figh
 
         if cost > 0:
             if stat == 'h' and actor.current_health < cost:
-                await delve.channel.send(f'You need more health to use {ability.name}')
+                await delve.channel.send(f'You need more health to use {ability.name}.')
+                await DelveController.recover(actor, delve)
                 return False
             elif stat == 's' and actor.current_stamina < cost:
-                await delve.channel.send(f'You need more stamina to use {ability.name}')
+                await delve.channel.send(f'You need more stamina to use {ability.name}.')
+                await DelveController.recover(actor, delve)
                 return False
             elif stat == 'm' and actor.current_mana < cost:
-                await delve.channel.send(f'You need more mana to use {ability.name}')
+                await delve.channel.send(f'You need more mana to use {ability.name}.')
+                await DelveController.recover(actor, delve)
                 return False
             elif stat not in ['h', 's', 'm']:
                 raise Exception(f'Invalid stat {stat} cost checked in check_ability_requirements_and_use for ability {ability.name}')
 
     if isinstance(ability, skill.Skill) and actor.equipped['weapon'] is None:
         await delve.channel.send('You cannot use this skill without an equipped weapon.')
+        await DelveController.recover(actor, delve)
         return False
     elif isinstance(ability, skill.Skill) and actor.equipped['weapon']['_weapon_type'] != ability.weapon_type.value:
         await delve.channel.send(f'This skill requires a {ability.weapon_type}.')
+        await DelveController.recover(actor, delve)
         return False
     elif not set(ability.consumes).issubset(set(fight.states)):
         await delve.channel.send(f'{ability.name} requires infused elements.')
+        await DelveController.recover(actor, delve)
         return False
     else:
         await delve.channel.send(fight.use_ability(actor, ability, target))
@@ -267,10 +273,10 @@ class DelveController(commands.Cog):
                             choice = msg.content
                             await delve.channel.send(actor.use_consumable(actor.inventory[indices[int(choice) - 1]]))
                         elif action == '3':  # Recover
-                            h, s, m = actor.recover()
-                            await delve.channel.send(f'{actor.name} recovered {h}h, {s}s, {m}m.')
+                            await self.recover(actor, delve)
                     except asyncio.TimeoutError:
                         await delve.channel.send('{} did not take an action in time.'.format(actor.name))
+                        await self.recover(actor, delve)
                 else:  # Enemy
                     out = actor.take_a_turn(fight)
                     await delve.channel.send(out)
@@ -301,6 +307,11 @@ class DelveController(commands.Cog):
                     await delve.channel.send(f'{character.name} regenerates {h}h {s}s {m}m.')
 
         delve.current_room.encounter = None
+
+    @staticmethod
+    async def recover(actor, delve):
+        h, s, m = actor.recover()
+        await delve.channel.send(f'{actor.name} recovered {h}h, {s}s, {m}m.')
 
     async def encounter_loot(self, delve):
         loot = delve.current_room.encounter

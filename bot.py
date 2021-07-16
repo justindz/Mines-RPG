@@ -7,6 +7,7 @@ import secrets
 import character_controller
 import party_controller
 import delve_controller
+import market_controller
 from character import Character
 from armor import Armor
 from consumable import Consumable
@@ -34,6 +35,7 @@ bot = commands.Bot(command_prefix='\\', intents=intents)
 bot.add_cog(character_controller.CharacterController(bot, connection))
 bot.add_cog(party_controller.PartyController(bot))
 bot.add_cog(delve_controller.DelveController(bot, connection))
+bot.add_cog(market_controller.MarketController(bot, connection))
 
 
 @bot.check

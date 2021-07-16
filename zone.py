@@ -20,7 +20,7 @@ class Zone(object):
             room = self.biome.get_random_room()
 
         if depth % 5 == 0:
-            room.encounter = loot_encounter.Loot(connection, characters, depth)
+            room.encounter = loot_encounter.Loot(connection, characters)
         else:
             room.encounter = fight_encounter.get_random_fight(self.biome.enemy_tags, characters, depth)
 

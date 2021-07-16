@@ -5,16 +5,17 @@ from character import Character
 
 
 class Loot:
-    def __init__(self, connection, characters: [Character], depth: int):
+    def __init__(self, connection, characters: [Character]):
         self.connection = connection
         self.characters = characters
+        self.level = int(sum([x.level for x in characters]) / len(characters))
         self.description = 'You discover an equipment cache!'
-        self.roll_item = generate_random_item(connection, depth, rarity=Rarity.rare)
+        self.roll_item = generate_random_item(connection, self.level, rarity=Rarity.rare)
         self.roll_list = []
         self.has_rolled = []
 
         for character in self.characters:
-            item = generate_random_item(connection, depth, rarity=None)
+            item = generate_random_item(connection, self.level, rarity=None)
             character.add_to_inventory(item, True)
             self.description += f'\n {character["name"]} found: {item["name"]} {utilities.get_rarity_symbol(item["rarity"])}'
 

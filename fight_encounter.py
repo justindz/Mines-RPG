@@ -227,7 +227,22 @@ class Fight:
                     ability_type = 'Spell'
                     cost += 'm'
 
-                out += f'\n {str(i)} - {_ability.name} ({ability_type}) - {cost}'
+                activates = ''
+                consumes = ''
+
+                if len(_ability.activates) > 0:
+                    activates += ' Activates: '
+
+                    for ele in _ability.activates:
+                        activates += utilities.get_elemental_symbol(ele) + ' '
+
+                if len(_ability.consumes) > 0:
+                    consumes += ' Consumes: '
+
+                    for ele in _ability.consumes:
+                        consumes += utilities.get_elemental_symbol(ele) + ' '
+
+                out += f'\n {str(i)} - {_ability.name} ({ability_type}) - {cost}{consumes}{activates}'
 
         return out
 

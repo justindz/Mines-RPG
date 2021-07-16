@@ -1,5 +1,4 @@
 import asyncio
-
 import discord
 from discord.ext import commands
 
@@ -199,6 +198,7 @@ Value: {}
             await ctx.author.send(utilities.red('Invalid ability index.'))
 
     @commands.command(aliases=['assign'])
+    @commands.check(check_idle)
     async def prepare(self, ctx, index: int, slot: int):
         """Prepare a known ability, assigning it to an action slot (1-6) for use in fights."""
         character = self.get(ctx.author)
@@ -239,7 +239,6 @@ Value: {}
                 await ctx.author.send('{} unequipped.'.format(utilities.underline(item['name'])))
 
     @commands.command()
-    @commands.check(check_idle)
     async def depths(self, ctx):
         """Displays your maximum depths achieved in each mine you have entered."""
         character = self.get(ctx.author)
