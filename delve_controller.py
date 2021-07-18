@@ -191,8 +191,8 @@ class DelveController(commands.Cog):
         delve.status = 'fighting'
         await delve.channel.send('The enemies attack!')
         fight = delve.current_room.encounter
+        turn_count = 0
 
-        turn_count = 1
         while delve.status == 'fighting':
             await asyncio.sleep(2)
             await delve.channel.send(fight.display_active_elements())
@@ -271,7 +271,7 @@ class DelveController(commands.Cog):
 
                             msg = await self.bot.wait_for('message', check=check_item_menu, timeout=30)
                             choice = msg.content
-                            await delve.channel.send(actor.use_consumable(actor.inventory[indices[int(choice) - 1]]))
+                            await delve.channel.send(actor.use_consumable(self.connection, actor.inventory[indices[int(choice) - 1]]))
                         elif action == '3':  # Recover
                             await self.recover(actor, delve)
                     except asyncio.TimeoutError:

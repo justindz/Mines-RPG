@@ -12,6 +12,7 @@ from character import Character
 from armor import Armor
 from consumable import Consumable
 from weapon import Weapon
+from book import Book
 
 #   LOGGING CONFIG   #
 logger = logging.getLogger('discord')
@@ -26,6 +27,7 @@ connection.register([Character])
 connection.register([Armor])
 connection.register([Consumable])
 connection.register([Weapon])
+connection.register([Book])
 
 #   BOT CONFIG   #
 intents = discord.Intents.default()

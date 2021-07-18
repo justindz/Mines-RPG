@@ -3,12 +3,13 @@ from enum import Enum
 from mongokit_ng import RequireFieldError
 
 import armor
+import book
 import consumable
 import weapon
 from armor import armors
 from consumable import consumables
 from weapon import weapons
-from elements import Elements
+from book import books
 
 
 class ItemType(Enum):
@@ -22,6 +23,7 @@ class ItemType(Enum):
     ring = 8
     food = 9
     potion = 10
+    book = 11
 
 
 class Rarity(Enum):
@@ -127,6 +129,83 @@ def generate_random_item(connection, level: int, item_type=None, rarity=None, lu
         print(f'Random item generation for {item_type} at rarity {rarity} and level {level} found zero candidates.')
 
     return None
+
+
+def generate_book(connection, key: str, rarity=None, lucky=False):
+    value = 0
+
+    try:
+        base = books[key]
+        item = connection.Book()
+        value += 10 * base['level']
+
+        for k, v in base.items():
+            item[k] = v
+
+        if rarity is None:
+            roll = random.randint(1, 100)
+
+            if roll > 95:
+                rarity = Rarity.rare
+                item['rarity'] = Rarity.rare.value
+            elif roll > 70:
+                rarity = Rarity.uncommon
+                item['rarity'] = Rarity.uncommon.value
+            else:
+                rarity = Rarity.common
+                item['rarity'] = Rarity.common.value
+        else:
+            item['rarity'] = rarity.value
+
+        if rarity == Rarity.rare:
+            value += 10 * item['level']
+        elif rarity == rarity.uncommon:
+            value += 5 * item['level']
+
+        item['value'] = value
+
+        try:
+            item.save()
+            return item
+        except RequireFieldError:
+            print(f'generate_item failed on RequireFieldError for key: {key}')
+            return None
+    except KeyError:
+        print(f'generate_book failed on KeyError for key: {key}')
+        return None
+
+
+def generate_random_book(connection, level: int, rarity=None, lucky=False):
+    lvl_check = [level - 1, level, level + 1]
+
+    if not lucky:
+        lvl_check.append(level - 2)
+
+    candidates = {k: v for k, v in books.items() if v['level'] in lvl_check}
+
+    if len(candidates) > 0:
+        key = random.choice(list(candidates.keys()))
+        return generate_book(connection, key, rarity=rarity, lucky=lucky)
+    else:
+        print(f'Random book generation at rarity {rarity} and level {level} found zero candidates.')
+
+    return None
+
+
+def delete_item(connection, item):
+    _id = item['_id']
+
+    if item['_itype'] in [ItemType.head.value, ItemType.boots.value, ItemType.amulet.value, ItemType.belt.value,
+                          ItemType.gloves.value, ItemType.chest.value, ItemType.ring.value]:
+        connection.delverpg.armor.remove(_id)
+    elif item['_itype'] == ItemType.weapon.value:
+        connection.delverpg.weapons.remove(_id)
+    elif item['_itype'] == ItemType.potion.value or item['_itype'] == ItemType.food.value:
+        connection.delverpg.consumables.remove(_id)
+    elif item['_itype'] == ItemType.book.value:
+        connection.delverpg.books.remove(_id)
+    else:
+        raise Exception(f'delete_item called on unknown item type {item["_itype"]} w/ id {_id}')
 
 
 def add_affix(item, name, affix):

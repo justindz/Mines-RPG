@@ -2,12 +2,11 @@ import asyncio
 import discord
 from discord.ext import commands
 
-import item
 import utilities
 import weapon
 from weapon import WeaponType
 import armor
-from item import ItemType, Rarity
+from item import delete_item, generate_random_item, generate_random_book, ItemType, Rarity
 
 
 class CharacterController(commands.Cog):
@@ -22,12 +21,12 @@ class CharacterController(commands.Cog):
             character = self.connection.Character()
             character.name = str(player)
             character.set_current_hsm()
-            character.add_to_inventory(item.generate_random_item(self.connection, 1, item_type=ItemType.weapon,
-                                                                 rarity=Rarity.common), False)
-            character.add_to_inventory(item.generate_random_item(self.connection, 1, item_type=ItemType.head,
-                                                                 rarity=Rarity.common), False)
-            character.add_to_inventory(item.generate_random_item(self.connection, 1, item_type=ItemType.potion,
-                                                                 rarity=Rarity.common), False)
+            character.add_to_inventory(generate_random_item(self.connection, 1, item_type=ItemType.weapon,
+                                                            rarity=Rarity.common), False)
+            character.add_to_inventory(generate_random_item(self.connection, 1, item_type=ItemType.head,
+                                                            rarity=Rarity.common), False)
+            character.add_to_inventory(generate_random_item(self.connection, 1, item_type=ItemType.potion,
+                                                            rarity=Rarity.common), False)
             character.save()
             print(f'Created new character for {str(player)}')  # TODO make a logging call
 
@@ -146,7 +145,8 @@ Crit Damage: +{}
 
 Bonuses
 -------
-{}'''.format(WeaponType(it['_weapon_type']).name, weapon.get_damages_display_string(it), it['crit_damage'], weapon.get_bonuses_display_string(it))
+{}'''.format(WeaponType(it['_weapon_type']).name, weapon.get_damages_display_string(it), it['crit_damage'],
+             weapon.get_bonuses_display_string(it))
             elif it['_itype'] in [ItemType.head.value, ItemType.chest.value, ItemType.belt.value,
                                   ItemType.boots.value, ItemType.gloves.value, ItemType.amulet.value,
                                   ItemType.ring.value]:
@@ -208,11 +208,32 @@ Value: {}
         else:
             await ctx.author.send(utilities.red('Invalid ability index or slot.'))
 
+    @commands.command(aliases=['read'])
+    @commands.check(check_idle)
+    async def learn(self, ctx, index: int):
+        """Consume a manual or tome to learn a new ability."""
+        character = self.get(ctx.author)
+        book = character.inventory[index]
+
+        try:
+            if character.learn(book):
+                await ctx.author.send(utilities.bold('You have learned a new ability!'))
+                delete_item(self.connection, book)
+            else:
+                await ctx.author.send(utilities.yellow(
+                    f'You are unable to learn anything by reading the {character.inventory[index]["name"]}.'))
+        except IndexError:
+            await ctx.author.send(utilities.red('Invalid inventory position.'))
+        except KeyError:
+            await ctx.author.send(
+                utilities.yellow(f'You find it difficult to read the {character.inventory[index]["name"]}.'))
+
     @commands.command(aliases=['eq'])
     @commands.check(check_idle)
     async def equip(self, ctx, pos: int):
         """Attempts to equip the item from your inventory at the specified position. Will first unequip anything already equipped in that same slot."""
         character = self.get(ctx.author)
+
         try:
             item = character.inventory[pos]
         except IndexError:
@@ -271,7 +292,8 @@ Value: {}
                 msg = await self.bot.wait_for('message', check=check_level_up_menu_selection, timeout=30)
                 choice = int(msg.content)
             except asyncio.TimeoutError:
-                await ctx.author.send(utilities.yellow('Selection timed out. Please use \\level again when you are ready.'))
+                await ctx.author.send(
+                    utilities.yellow('Selection timed out. Please use \\level again when you are ready.'))
                 return
 
             if choice == 1:
@@ -302,5 +324,11 @@ Value: {}
 
             character.points -= 1
             character.level += 1
-            character.save()
+            items = []
+
+            for _ in range(2):
+                items.append(generate_random_item(self.connection, character.level, rarity=Rarity.common))
+                items.append(generate_random_book(self.connection, character.level))
+
+            character.restock(items)
             await ctx.channel.send(utilities.green(f'{character.name} has grown in power!'))

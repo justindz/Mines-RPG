@@ -4,6 +4,7 @@ from discord.ext import commands, tasks
 import random
 
 import utilities
+from item import delete_item
 from secrets import market_channel_id
 
 
@@ -15,6 +16,7 @@ class MarketController(commands.Cog):
         self.get = self.bot.get_cog('CharacterController').get
         self.name = 'Bigsby'
         self.buy_rate = 0.5
+        self.sell_rate = 1.25
 
     #  CHECKS  #
     async def check_idle(ctx):
@@ -62,6 +64,14 @@ class MarketController(commands.Cog):
     async def list(self, ctx):
         """Display the NPC vendor's current inventory."""
         character = self.get(ctx.author)
+        out = f'=========={self.name}\'s Inventory==========='
+        i = 0
+
+        for item in character.shop:
+            out += f'\n{i} - {item["name"]} ({int(item["value"] * self.sell_rate)}c)'
+            i += 1
+
+        await ctx.author.send(out)
 
     @commands.command()
     @commands.check(check_idle)
@@ -69,6 +79,23 @@ class MarketController(commands.Cog):
     async def buy(self, ctx, index: int):
         """Buy a listed item from the NPC vendor."""
         character = self.get(ctx.author)
+
+        try:
+            item = character.shop[index]
+            price = int(item["value"] * self.sell_rate)
+
+            if character.coins >= price:
+                if character.add_to_inventory(item, False):
+                    character.coins -= price
+                    character.shop.remove(item)
+                    character.save()
+                    await ctx.channel.send(f'{character.name} bought: {item["name"]}')
+                else:
+                    await ctx.author.send(utilities.yellow('You are carrying too much to buy that.'))
+            else:
+                await ctx.author.send(f'{self.name} informs you, sharply, that you are too poor to afford that.')
+        except IndexError:
+            await ctx.author.send(utilities.red('Invalid shop inventory position.'))
 
     @commands.command()
     @commands.check(check_idle)
@@ -98,6 +125,7 @@ class MarketController(commands.Cog):
             offer = int(item['value'] * self.buy_rate)
             character.coins += offer
             character.remove_from_inventory(item, False)
+            delete_item(self.connection, item)
             await ctx.channel.send(f'{character.name} sold {n} to {self.name} for {offer} coins."')
         except KeyError:
             await ctx.author.send(utilities.red('Invalid inventory position.'))

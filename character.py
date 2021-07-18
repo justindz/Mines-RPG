@@ -3,8 +3,10 @@ import datetime
 from mongokit_ng import Document
 
 import ability
-from item import ItemType
+import item
+from item import ItemType, generate_random_item
 from elements import Elements
+import book
 import skill
 import spell
 
@@ -54,6 +56,7 @@ class Character(Document):
         'ability_slots': dict,
         'equipped': dict,
         'inventory': None,
+        'shop': None,
         'depths': dict,
     }
     required_fields = ['name']
@@ -94,12 +97,13 @@ class Character(Document):
         'water_res': 0.0,
 
         'points': 0,
-        'abilities': ['spell-stalagmite', 'skill-slash', 'spell-mend_wounds'],
-        'ability_slots': {'1': 'spell-stalagmite', '2': 'skill-slash', '3': 'spell-mend_wounds', '4': None, '5': None,
+        'abilities': ['spell-stalagmite', 'skill-slash'],
+        'ability_slots': {'1': 'skill-slash', '2': 'spell-stalagmite', '3': None, '4': None, '5': None,
                           '6': None},
         'equipped': {'weapon': None, 'head': None, 'chest': None, 'belt': None, 'boots': None, 'gloves': None,
                      'amulet': None, 'ring': None},
         'inventory': [],
+        'shop': [],
         'depths': {},
     }
     use_dot_notation = True
@@ -109,6 +113,13 @@ class Character(Document):
         self.current_health = self.health + self.bonus_health
         self.current_stamina = self.stamina + self.bonus_stamina
         self.current_mana = self.mana + self.bonus_mana
+
+    def learn(self, _book) -> bool:
+        if _book['level'] <= self.level and self.add_ability(book.get_ability_string(_book)):
+            self.remove_from_inventory(_book)
+            return True
+
+        return False
 
     def add_ability(self, ability_string: str) -> bool:
         if ability_string not in self.abilities:
@@ -258,7 +269,7 @@ class Character(Document):
         self.electricity_res -= armor['electricity_res']
         self.water_res -= armor['water_res']
 
-    def use_consumable(self, consumable):
+    def use_consumable(self, connection, consumable):
         if consumable['_itype'] not in [ItemType.potion.value, ItemType.food.value]:
             raise Exception(f'Invalid consumable {consumable["name"]} of type {ItemType(consumable["_itype"]).name} used by {self.name}.')
         elif consumable['uses'] <= 0:
@@ -294,6 +305,7 @@ class Character(Document):
 
             if consumable['uses'] < 1:
                 self.remove_from_inventory(consumable)
+                item.delete_item(connection, consumable)
                 out += '\n... and was consumed'
 
             self.save()
@@ -471,6 +483,14 @@ class Character(Document):
             self.points += 1
             self.save()
             return True
+
+    def restock(self, items: []):
+        for item in self.shop:
+            item.delete()
+
+        self.shop += items
+        self.save()
+
 
     @staticmethod
     def display_level_up_menu():
