@@ -4,7 +4,7 @@ from mongokit_ng import Document
 
 import ability
 import item
-from item import ItemType, generate_random_item
+from item import ItemType
 from elements import Elements
 import book
 import skill
@@ -56,6 +56,8 @@ class Character(Document):
         'ability_slots': dict,
         'equipped': dict,
         'inventory': None,
+        'bank': None,
+        'bank_limit': int,
         'shop': None,
         'depths': dict,
     }
@@ -103,6 +105,8 @@ class Character(Document):
         'equipped': {'weapon': None, 'head': None, 'chest': None, 'belt': None, 'boots': None, 'gloves': None,
                      'amulet': None, 'ring': None},
         'inventory': [],
+        'bank': [],
+        'bank_limit': 10,
         'shop': [],
         'depths': {},
     }
@@ -218,6 +222,30 @@ class Character(Document):
                 self.remove_armor_bonuses(item)
 
         self.save()
+
+    def deposit(self, index: int) -> bool:
+        if len(self.inventory) - 1 < index < 0 or len(self.bank) >= self.bank_limit:
+            return False
+
+        it = self.inventory[index]
+        self.bank.append(it)
+        self.remove_from_inventory(it)
+        return True
+
+    def withdraw(self, index: int) -> bool:
+        if len(self.bank) - 1 < index < 0:
+            return False
+
+        it = self.bank[index]
+
+        if self.add_to_inventory(it, False):
+            cost = len(self.bank)
+            self.bank.remove(it)
+            self.coins -= cost
+            self.save()
+            return True
+
+        return False
 
     def apply_weapon_bonuses(self, weapon):
         self.bonus_strength += weapon['bonus_strength']
@@ -403,6 +431,7 @@ class Character(Document):
         if effect.type == ability.EffectType.damage_health:
             if type(effect) == skill.SkillEffect:
                 weapon = self.equipped['weapon']
+
                 for dmg in weapon['damages']:
                     element_scaling = self.get_element_scaling(Elements(dmg[2]))
                     max = int(dmg[1] * effect.damage_scaling * element_scaling)
@@ -428,7 +457,7 @@ class Character(Document):
 
         return dmgs
 
-    def take_damage(self, dmgs: list):
+    def take_damage(self, dmgs: list) -> list:
         for dmg in dmgs:
             amt = self.apply_element_damage_resistances(dmg[0], dmg[1])
             self.current_health -= round(amt)
@@ -436,7 +465,7 @@ class Character(Document):
 
         return dmgs
 
-    def estimate_damage_from_enemy_action(self, enemy, action):
+    def estimate_damage_from_enemy_action(self, enemy, action) -> int:
         amt = 0
 
         for effect in action.effects:
@@ -453,19 +482,19 @@ class Character(Document):
     def end_of_turn(self):
         pass
 
-    def has_completed_tutorial(self):
+    def has_completed_tutorial(self) -> bool:
         if 'Boon Mine' in self.depths.keys() and self.depths['Boon Mine'] >= 10:
             return True
 
         return False
 
-    def get_depth_progress(self, zone_name: str):
+    def get_depth_progress(self, zone_name: str) -> int:
         if zone_name in self.depths.keys():
             return self.depths[zone_name]
         else:
             return 0
 
-    def update_depth_progress(self, zone, depth):
+    def update_depth_progress(self, zone, depth: int) -> bool:
         if zone.name in self.depths.keys() and depth <= self.depths[zone.name]:
             return False
 
@@ -479,18 +508,16 @@ class Character(Document):
         self.save()
 
         if depth % 5 == 0 and depth > highest:
-            self.level += 1
             self.points += 1
             self.save()
             return True
 
-    def restock(self, items: []):
+    def restock(self, items: list):
         for item in self.shop:
             item.delete()
 
         self.shop += items
         self.save()
-
 
     @staticmethod
     def display_level_up_menu():

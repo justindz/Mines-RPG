@@ -15,8 +15,21 @@ class CharacterController(commands.Cog):
         self.connection = connection
 
     def get(self, player: discord.Member):
+        # if the player is delving, get that reference instead of reloading from the DB
+        delves = self.bot.get_cog('DelveController').delves
+
+        for channel_name in delves.keys():
+            delve = delves[channel_name]
+
+            if player in delve.players:
+                for char in delve.characters:
+                    if char.name == str(player):
+                        return char
+
+        # if the player is not delving, get the DB reference
         character = self.connection.Character.find_one({'name': str(player)})
 
+        # otherwise, this is a new player and we want to create a new character
         if character is None:
             character = self.connection.Character()
             character.name = str(player)
@@ -298,7 +311,6 @@ Value: {}
 
             if choice == 1:
                 character.strength += 3
-                character.save()
                 await ctx.author.send('Your base strength has been permanently increased by 3.')
             elif choice == 2:
                 character.intelligence += 3
@@ -324,6 +336,7 @@ Value: {}
 
             character.points -= 1
             character.level += 1
+            character.save()
             items = []
 
             for _ in range(2):

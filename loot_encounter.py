@@ -9,7 +9,7 @@ class Loot:
         self.connection = connection
         self.characters = characters
         self.level = int(sum([x.level for x in characters]) / len(characters))
-        self.description = 'You discover an equipment cache!'
+        self.description = random.choice(descs)
         self.roll_item = generate_random_item(connection, self.level, rarity=Rarity.rare)
         self.roll_list = []
         self.has_rolled = []
@@ -34,3 +34,13 @@ class Loot:
 
         winner = sorted(self.roll_list, key=lambda x: x[1], reverse=True)[0][0]
         return winner
+
+
+descs = [
+    'You discover an equipment cache.',
+    'You find some items half-buried near unidentifiable remains.',
+    'An abandoned campsite here has some salvageable goods.',
+    'You find something useful on what appears to be a makeshift altar.',
+    'You almost trip over a partially buried chest.',
+    'A cave-in here has revealed some ancient artifacts.',
+]

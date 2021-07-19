@@ -211,21 +211,32 @@ class Fight:
             return '1 - Ability\n2 - Item (None)\n3 - Recover'
 
     @staticmethod
+    def display_ability_cost(cost: dict):
+        out = ''
+
+        if cost['h'] > 0:
+            out += f'{cost["h"]}h '
+        if cost['s'] > 0:
+            out += f'{cost["s"]}s '
+        if cost['m'] > 0:
+            out += f'{cost["m"]}m'
+
+        return out
+
+    @staticmethod
     def display_ability_menu(character):
         out = 'Abilities:'
 
         for i in range(1, 6):
             if character.ability_slots[str(i)] is not None:
                 _ability = utilities.get_ability_by_name(character.ability_slots[str(i)])
-                cost = f'{_ability.cost}'
+                cost = f'{Fight.display_ability_cost(_ability.cost)}'
                 ability_type = 'Error'
 
                 if isinstance(_ability, skill.Skill):
                     ability_type = 'Skill'
-                    cost += 's'
                 elif isinstance(_ability, spell.Spell):
                     ability_type = 'Spell'
-                    cost += 'm'
 
                 activates = ''
                 consumes = ''

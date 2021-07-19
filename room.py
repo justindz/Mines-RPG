@@ -13,9 +13,9 @@ rooms = {
         Room('Partying', 'You can form a party with up to two other players. This will increase the difficulty of enemies proportionally, as well as the loot rewards.'),
         Room('Loot', 'Every five* depth tiers you reach in a mine will reward the party with loot. While inside a mine, but not fighting, you can change around your equipment. If you found an upgrade, now might be the time to equip it!'),
         Room('Leveling Up', 'You may have noticed in the last room that you gained a level. Unlike many RPGs which award xp for fights, in DelveRPG, levels are achieved by reaching specific depths in any mine, either solo or in a party. Use the \\level command after the fight to claim your level up reward.'),
-        Room('Death', 'Currently, there are no negative consequences for death, other than being forcibly exited from the mine. That will change.\n\n*evil laughter echoes from the depths*'),
+        Room('Death', 'Should you die during a delve, your character will survive, but your equipped gear and inventory will be lost. The delve will end automatically when the last party member dies.'),
         Room('Professions', 'Upon reaching a specific level, you will select a profession. Professions are optional, but allow you to make certain improvements to items that can aid in your progression.'),
-        Room('Maps', 'In your journey, you may acquire maps. These allow you to enter specific mines at specific depths, including possibly mines not otherwise accessible. They also apply modifiers which change the risk/reward of the delve.'),
+        Room('Maps', 'In your journey, you may acquire maps. These allow you to enter specific mines, possibly including mines not otherwise accessible. They also apply modifiers which change the risk/reward of the delve.'),
         Room('Congratulations', 'Reaching this depth means you have successfully completed Boon Mine. In addition to the knowledge, levels, and loot you have gained, reaching this point unlocks new mines for you to explore. You are free to repeat Boon Mine as many times as you like, but you will not gain further levels here.'),
     ],
     'infernal': [

@@ -130,6 +130,59 @@ class MarketController(commands.Cog):
         except KeyError:
             await ctx.author.send(utilities.red('Invalid inventory position.'))
 
+    @commands.command()
+    @commands.check(check_idle)
+    @commands.check(check_market_channel)
+    async def bank(self, ctx):
+        """View a list of the items stored in your bank."""
+        character = self.get(ctx.author)
+        out = f'=========={character.name}\'s Storage==========='
+        i = 0
+
+        for item in character.bank:
+            out += f'\n{i} - {item["name"]}'
+            i += 1
+
+        await ctx.author.send(out)
+
+    @commands.command()
+    @commands.check(check_idle)
+    @commands.check(check_market_channel)
+    async def deposit(self, ctx, index: int):
+        """Deposit an item into your bank from your inventory."""
+        character = self.get(ctx.author)
+
+        try:
+            name = character.inventory[index]['name']
+        except IndexError:
+            await ctx.author.send(utilities.red('Invalid inventory position.'))
+            return
+
+        if len(character.bank) >= character.bank_limit:
+            await ctx.author.send(utilities.yellow(f'Your bank account is at the current limit of {character.bank_limit} items.'))
+        elif character.deposit(index):
+            await ctx.channel.send(f'{character.name} deposited {name} to the bank.')
+
+    @commands.command()
+    @commands.check(check_idle)
+    @commands.check(check_market_channel)
+    async def withdraw(self, ctx, index: int):
+        """Add an item from your bank to your inventory. This action costs 1 coin per item in your bank account."""
+        character = self.get(ctx.author)
+
+        try:
+            name = character.bank[index]['name']
+        except IndexError:
+            await ctx.author.send(utilities.red('Invalid bank position.'))
+            return
+
+        if character.coins < len(character.bank):
+            await ctx.author.send(utilities.yellow(f'You need {len(character.bank)} coins to pay your withdrawal fee.'))
+        elif character.withdraw(index):
+            await ctx.channel.send(f'{character.name} withdrew {name} from the bank.')
+        else:
+            await ctx.author.send(utilities.red(f'Unable to withdraw an item. You may be at maximum carry weight.'))
+
 
 monolog = [
     "Have fun toiling in the mines. I'll just be here. Making money.",

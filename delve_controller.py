@@ -1,4 +1,5 @@
 import discord
+from discord.errors import NotFound
 from discord.ext import commands
 import asyncio
 import random
@@ -11,6 +12,7 @@ from delve import Delve
 from character import Character
 from fight_encounter import Fight
 from loot_encounter import Loot
+from item import delete_item
 
 
 async def check_ability_requirements_and_use(ability, actor, delve, target, fight):
@@ -148,6 +150,10 @@ class DelveController(commands.Cog):
         """The party leader can end the delve, without risking going further. This can only be performed when the party is idle."""
         delve = self.delves[ctx.channel.name]
         await delve.channel.send('{} has chosen to end the delve. The party will exit the mine in 5 seconds.'.format(ctx.author.name))
+
+        for character in delve.characters:
+            character.set_current_hsm()
+
         self.delves.pop(delve.channel.name)
         await asyncio.sleep(5)
         await delve.channel.delete()
@@ -175,7 +181,7 @@ class DelveController(commands.Cog):
 
         for char in delve.characters:
             if char.update_depth_progress(delve.zone, delve.depth):
-                await delve.channel.send(utilities.green(f'{char.name} has reached a new depth and is now level {char.level}!'))
+                await delve.channel.send(utilities.green(f'{char.name} has reached a new depth and gained a level up!'))
 
         await asyncio.sleep(2)
         await delve.channel.send(utilities.blue('{}\n\n{}'.format(delve.current_room.name, delve.current_room.description)))
@@ -195,15 +201,18 @@ class DelveController(commands.Cog):
 
         while delve.status == 'fighting':
             await asyncio.sleep(2)
+            await delve.channel.send(utilities.underline('Turn order:'))
+
+            for fighter in fight.inits:
+                await delve.channel.send(utilities.underline(f'- {fighter.name} ({fighter.current_health}/{fighter.health})'))
+
             await delve.channel.send(fight.display_active_elements())
 
-            for el in fight.enemies:
-                await delve.channel.send(utilities.underline('{} ({}/{})'.format(el.name, el.current_health, el.health)))
-
-            # TODO show turn order here with hsm instead of just listing enemies?
-
             for actor in fight.inits:
-                await delve.channel.send(utilities.bold(f'{actor.name} goes next.'))
+                try:
+                    await delve.channel.send(utilities.bold(f'{actor.name} goes next.'))
+                except NotFound:
+                    return  # The channel has been deleted
 
                 if isinstance(actor, Character):  # Player
                     def check_action_menu(m):
@@ -283,8 +292,7 @@ class DelveController(commands.Cog):
 
                     for target in fight.characters:
                         if target.current_health <= 0:
-                            await self.player_dead(delve, target.player)
-                            fight.remove_character(target)
+                            await self.player_dead(delve, target)
 
                 await asyncio.sleep(3)
 
@@ -341,8 +349,18 @@ class DelveController(commands.Cog):
 
         delve.current_room.encounter = None
 
-    async def player_dead(self, delve, player: discord.Member):
-        await delve.channel.send('{} has died'.format(player.name))
+    async def player_dead(self, delve, character):
+        for slot in character.equipped.keys():
+            character.unequip(slot)
+
+        for item in character.inventory:
+            delete_item(self.connection, item)
+
+        character.inventory = []
+        character.current_carry = 0
+        character.set_current_hsm()
+        character.save()
+        await delve.channel.send(utilities.red('{} has died.'.format(character.name)))
 
         if len(delve.players) == 1:
             await delve.channel.send(utilities.red('Thus ends the delve.'))
@@ -350,4 +368,6 @@ class DelveController(commands.Cog):
             await asyncio.sleep(3)
             await delve.channel.delete()
         else:
-            await delve.remove_player(player)
+            for player in delve.players:
+                if str(player) == character.name:
+                    await delve.remove_player(character)
