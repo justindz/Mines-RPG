@@ -62,40 +62,33 @@ class CharacterController(commands.Cog):
     async def stats(self, ctx):
         """Displays your character's vital statistics, including base stats and any current modifiers due to equipment or active effects."""
         character = self.get(ctx.author)
-        await ctx.author.send('''
+        await ctx.author.send(f'''
 --<-(@  --<-(@  --<-(@  --<-(@
-| Name: {}
-| Level: {}
-| XP: {}
-| Coins: {}
-| Level Points: {}
+| Name: {character.name}
+| Level: {character.level}
+| XP: {character.xp}
+| Coins: {character.coins}
+| Level Points: {character.points}
 |----
-| Strength: {:-} ({:+})
-| Intelligence: {:-} ({:+})
-| Dexterity: {:-} ({:+})
-| Willpwer: {:-} ({:+})
+| Strength: {character.strength} ({character.bonus_strength:+})
+| Intelligence: {character.intelligence} ({character.bonus_intelligence:+})
+| Dexterity: {character.dexterity} ({character.bonus_dexterity:+})
+| Willpower: {character.willpower} ({character.bonus_willpower:+})
 |----
-| Health: {}/{} ({:+})
-| Stamina: {}/{} ({:+})
-| Mana: {}/{} ({:+})
+| Health: {character.current_health}/{character.health} ({character.bonus_health:+})
+| Stamina: {character.current_stamina}/{character.stamina} ({character.bonus_stamina:+})
+| Mana: {character.current_mana}/{character.mana} ({character.bonus_mana:+})
 |----
-| Initiative: {:-} ({:+})
-| Carry Weight: {}/{} ({:+})
+| Initiative: {character.init} ({character.bonus_init:+})
+| Carry Weight: {character.current_carry}/{character.carry} ({character.bonus_carry:+})
 |----
-| Earth Res: {}
-| Fire Res: {}
-| Electricity Res: {}
-| Water Res: {}
---<-(@  --<-(@  --<-(@  --<-(@
-        '''.format(character.name, character.level, character.xp, character.coins, character.points,
-                   character.strength, character.bonus_strength, character.intelligence, character.bonus_intelligence,
-                   character.dexterity, character.bonus_dexterity, character.willpower, character.bonus_willpower,
-                   character.current_health, character.health, character.bonus_health, character.current_stamina,
-                   character.stamina, character.bonus_stamina, character.current_mana, character.mana,
-                   character.bonus_mana,
-                   character.init, character.bonus_init, character.current_carry, character.carry,
-                   character.bonus_carry,
-                   character.earth_res, character.fire_res, character.electricity_res, character.water_res))
+| Earth Res: {character.earth_res} ({character.bonus_earth_res:+})
+| Fire Res: {character.fire_res} ({character.bonus_fire_res:+})
+| Electricity Res: {character.electricity_res} ({character.bonus_electricity_res:+})
+| Water Res: {character.water_res} ({character.bonus_water_res:+})
+|----
+| Deaths: {character.deaths}
+--<-(@  --<-(@  --<-(@  --<-(@''')
 
     @commands.command(aliases=['inventory'])
     async def inv(self, ctx):
@@ -145,34 +138,33 @@ class CharacterController(commands.Cog):
         if it is not None:
             item_string = '''
 ====================ITEM===================='''
-            item_string += '''
-{} - Level {} {}
+            item_string += f'''
+{it["name"]} - Level {it["level"]} {utilities.get_rarity_symbol(it['rarity'])}
 
-"{}"
-'''.format(it["name"], it["level"], utilities.get_rarity_symbol(it['rarity']), it["description"])
+"{it["description"]}"
+'''
             if it['_itype'] == ItemType.weapon.value:
-                item_string += '''
-Class: {}
-Damage: {}
-Crit Damage: +{}
+                item_string += f'''
+Class: {WeaponType(it['_weapon_type']).name}
+Damage: {weapon.get_damages_display_string(it)}
+Crit Damage: +{it['crit_damage']}
 
 Bonuses
 -------
-{}'''.format(WeaponType(it['_weapon_type']).name, weapon.get_damages_display_string(it), it['crit_damage'],
-             weapon.get_bonuses_display_string(it))
+{weapon.get_bonuses_display_string(it)}'''
             elif it['_itype'] in [ItemType.head.value, ItemType.chest.value, ItemType.belt.value,
                                   ItemType.boots.value, ItemType.gloves.value, ItemType.amulet.value,
                                   ItemType.ring.value]:
-                item_string += '''
-Class: {}
+                item_string += f'''
+Class: {ItemType(it['_itype']).name}
 
 Bonuses
 -------
-{}'''.format(ItemType(it['_itype']).name, armor.get_bonuses_display_string(it))
-            item_string += '''
-Weight: {}
-Value: {}
-============================================'''.format(it["weight"], it["value"])
+{armor.get_bonuses_display_string(it)}'''
+            item_string += f'''
+Weight: {it["weight"]}
+Value: {it["value"]}
+============================================'''
             await ctx.author.send(item_string)
         else:
             await ctx.author.send('No item equipped in that slot.')
@@ -255,9 +247,9 @@ Value: {}
 
         if item is not None:
             if character.equip(item):
-                await ctx.author.send('{} equipped.'.format(utilities.underline(item['name'])))
+                await ctx.author.send(f'{utilities.underline(item["name"])} equipped.')
             else:
-                await ctx.author.send('You do not meet the requirements to equip {}.'.format(item['name']))
+                await ctx.author.send(f'You do not meet the requirements to equip {item["name"]}.')
 
     @commands.command(aliases=['uneq'])
     @commands.check(check_idle)
@@ -270,7 +262,7 @@ Value: {}
             item = character.unequip(slot)
 
             if item is not None:
-                await ctx.author.send('{} unequipped.'.format(utilities.underline(item['name'])))
+                await ctx.author.send(f'{utilities.underline(item["name"])} unequipped.')
 
     @commands.command()
     async def depths(self, ctx):

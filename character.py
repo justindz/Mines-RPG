@@ -47,9 +47,13 @@ class Character(Document):
         'current_carry': int,
 
         'earth_res': float,
+        'bonus_earth_res': float,
         'fire_res': float,
+        'bonus_fire_res': float,
         'electricity_res': float,
+        'bonus_electricity_res': float,
         'water_res': float,
+        'bonus_water_res': float,
 
         'points': int,
         'abilities': [str],
@@ -60,6 +64,7 @@ class Character(Document):
         'bank_limit': int,
         'shop': None,
         'depths': dict,
+        'deaths': int,
     }
     required_fields = ['name']
     default_values = {
@@ -94,9 +99,13 @@ class Character(Document):
         'bonus_carry': 0,
 
         'earth_res': 0.0,
+        'bonus_earth_res': 0.0,
         'fire_res': 0.0,
+        'bonus_fire_res': 0.0,
         'electricity_res': 0.0,
+        'bonus_electricity_res': 0.0,
         'water_res': 0.0,
+        'bonus_water_res': 0.0,
 
         'points': 0,
         'abilities': ['spell-stalagmite', 'skill-slash'],
@@ -109,6 +118,7 @@ class Character(Document):
         'bank_limit': 10,
         'shop': [],
         'depths': {},
+        'deaths': 0,
     }
     use_dot_notation = True
     use_autorefs = True
@@ -277,10 +287,10 @@ class Character(Document):
         self.bonus_mana += armor['bonus_mana']
         self.bonus_init += armor['bonus_init']
         self.bonus_carry += armor['bonus_carry']
-        self.earth_res += armor['earth_res']
-        self.fire_res += armor['fire_res']
-        self.electricity_res += armor['electricity_res']
-        self.water_res += armor['water_res']
+        self.earth_res += armor['bonus_earth_res']
+        self.fire_res += armor['bonus_fire_res']
+        self.electricity_res += armor['bonus_electricity_res']
+        self.water_res += armor['bonus_water_res']
 
     def remove_armor_bonuses(self, armor):
         self.bonus_strength -= armor['bonus_strength']
@@ -292,10 +302,10 @@ class Character(Document):
         self.bonus_mana -= armor['bonus_mana']
         self.bonus_init -= armor['bonus_init']
         self.bonus_carry -= armor['bonus_carry']
-        self.earth_res -= armor['earth_res']
-        self.fire_res -= armor['fire_res']
-        self.electricity_res -= armor['electricity_res']
-        self.water_res -= armor['water_res']
+        self.earth_res -= armor['bonus_earth_res']
+        self.fire_res -= armor['bonus_fire_res']
+        self.electricity_res -= armor['bonus_electricity_res']
+        self.water_res -= armor['bonus_water_res']
 
     def use_consumable(self, connection, consumable):
         if consumable['_itype'] not in [ItemType.potion.value, ItemType.food.value]:
@@ -416,13 +426,13 @@ class Character(Document):
 
     def apply_element_damage_resistances(self, amt, element):
         if element == Elements.earth:
-            amt *= (1.0 - self.earth_res)
+            amt *= (1.0 - self.earth_res + self.bonus_earth_res)
         elif element == Elements.fire:
-            amt *= (1.0 - self.fire_res)
+            amt *= (1.0 - self.fire_res + self.bonus_fire_res)
         elif element == Elements.electricity:
-            amt *= (1.0 - self.electricity_res)
+            amt *= (1.0 - self.electricity_res + self.bonus_electricity_res)
         elif element == Elements.water:
-            amt *= (1.0 - self.water_res)
+            amt *= (1.0 - self.water_res + self.bonus_water_res)
         return amt
 
     def deal_damage(self, effect, critical=False):

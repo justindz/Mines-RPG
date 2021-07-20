@@ -358,6 +358,7 @@ class DelveController(commands.Cog):
 
         character.inventory = []
         character.current_carry = 0
+        character.deaths += 1
         character.set_current_hsm()
         character.save()
         await delve.channel.send(utilities.red('{} has died.'.format(character.name)))

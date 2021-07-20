@@ -106,9 +106,6 @@ def generate_random_item(connection, level: int, item_type=None, rarity=None, lu
     selection = weapons
     lvl_check = [level - 1, level, level + 1]
 
-    if not lucky:
-        lvl_check.append(level - 2)
-
     if item_type is None:
         selection = random.choice([armors, consumables, weapons])
     else:
