@@ -4,16 +4,23 @@ from ability import EffectType
 
 
 class SpellEffect:
-    def __init__(self, _type, _element, _min, _max):
+    def __init__(self, _type, _element, _min, _max=None, _stat=None, _status_effect_name=None, _status_effect_turns=None):
+        if _type in [EffectType.buff, EffectType.debuff] and (_status_effect_name is None or _stat is None or
+                                                              _status_effect_turns is None):
+            raise Exception(f'Malformed status effect for SpellEffect: {_type}, {_element}, {_min}')
+
         self.type = _type
         self.element = _element
         self.min = _min
-        self.max = _max
+        self.max = _max  # unused for status effects (buff, debuff)
+        self.status_effect_name = _status_effect_name
+        self.stat = _stat
+        self.status_effect_turns = _status_effect_turns
 
 
 class Spell(ability.Ability):
-    def __init__(self, _name, _description, _level, _cost, _effects, _activates, _consumes, _area=0, _area_modifiable=False,
-                 _base_crit_chance=0.05, _targets_enemies=True, _summon=None):
+    def __init__(self, _name, _description, _level, _cost, _effects, _activates, _consumes, _area=0,
+                 _area_modifiable=False, _base_crit_chance=0.05, _targets_enemies=True, _summon=None):
         super().__init__(_name, _description, _level, _cost, _effects, _activates, _consumes, _area, _area_modifiable)
 
         if _summon is None:
@@ -32,4 +39,10 @@ spells = {
                          [SpellEffect(EffectType.restore_health, Elements.water, 5, 10),
                           SpellEffect(EffectType.restore_stamina, Elements.water, 5, 10)],
                          [], [], _base_crit_chance=0.01, _targets_enemies=False),
+    'ennervation': Spell('Ennervation', 'Ennervation description.', 1, {'h': 0, 's': 0, 'm': 8},
+                         [SpellEffect(EffectType.debuff, Elements.electricity, -5, _stat='bonus_init',
+                                      _status_effect_name='Slow', _status_effect_turns=2)], [], []),
+    'haste': Spell('Haste', 'Haste description.', 1, {'h': 0, 's': 0, 'm': 8},
+                   [SpellEffect(EffectType.buff, Elements.electricity, 5, _stat='bonus_init',
+                    _status_effect_name='Speed', _status_effect_turns=2)], [], [], _targets_enemies=False)
 }

@@ -6,15 +6,8 @@ class EffectType(Enum):
     restore_health = 2
     restore_stamina = 3
     restore_mana = 4
-    drain_health = 5
-    buff_crit = 6
-    debuff_crit = 7
-    buff_damage = 8
-    debuff_damage = 9
-    buff_resist = 10
-    debuff_resist = 11
-    buff_area = 12
-    debuff_area = 13
+    buff = 5
+    debuff = 6
 
 
 class Ability:

@@ -112,9 +112,9 @@ class Fight:
         chance = None
 
         if isinstance(ab, skill.Skill):
-            chance = min(char.equipped['weapon']['base_crit_chance'], 0.5)
+            chance = char.equipped['weapon']['base_crit_chance']
         elif isinstance(ab, spell.Spell):
-            chance = min(ab.base_crit_chance, 0.5)
+            chance = ab.base_crit_chance
 
         if random.random() <= chance:
             crit = True
@@ -136,6 +136,13 @@ class Fight:
                 elif effect.type == ability.EffectType.restore_mana:
                     mana = _target.restore_mana(random.randint(effect.min, effect.max), char)
                     out += f'\n{_target.name} regained {mana} mana.'
+                elif effect.type in [ability.EffectType.buff, ability.EffectType.debuff]:
+                    overwrite = _target.apply_status_effect(effect.status_effect_name, effect.stat, effect.min,
+                                                            effect.status_effect_turns)
+                    out += f'\n{_target.name} has been affected by {effect.status_effect_name}.'
+
+                    if overwrite is not None:
+                        out += f' The existing {overwrite} was replaced.'
                 else:
                     raise Exception(f'{char.name} used ability {ab.name} with unsupported effect type {effect.type}')
 

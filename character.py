@@ -65,6 +65,7 @@ class Character(Document):
         'shop': None,
         'depths': dict,
         'deaths': int,
+        'status_effects': None,
     }
     required_fields = ['name']
     default_values = {
@@ -108,8 +109,8 @@ class Character(Document):
         'bonus_water_res': 0.0,
 
         'points': 0,
-        'abilities': ['spell-stalagmite', 'skill-slash'],
-        'ability_slots': {'1': 'skill-slash', '2': 'spell-stalagmite', '3': None, '4': None, '5': None,
+        'abilities': ['spell-stalagmite', 'skill-slash', 'spell-ennervation', 'spell-haste'],
+        'ability_slots': {'1': 'skill-slash', '2': 'spell-stalagmite', '3': 'spell-ennervation', '4': 'spell-haste', '5': None,
                           '6': None},
         'equipped': {'weapon': None, 'head': None, 'chest': None, 'belt': None, 'boots': None, 'gloves': None,
                      'amulet': None, 'ring': None},
@@ -119,14 +120,17 @@ class Character(Document):
         'shop': [],
         'depths': {},
         'deaths': 0,
+        'status_effects': [],  # list of dicts w/ keys = name, stat, value, turns_remaining
     }
     use_dot_notation = True
     use_autorefs = True
 
-    def set_current_hsm(self):
+    def reset_stats(self):
         self.current_health = self.health + self.bonus_health
         self.current_stamina = self.stamina + self.bonus_stamina
         self.current_mana = self.mana + self.bonus_mana
+        self.remove_all_status_effects()
+        self.save()
 
     def learn(self, _book) -> bool:
         if _book['level'] <= self.level and self.add_ability(book.get_ability_string(_book)):
@@ -489,8 +493,58 @@ class Character(Document):
 
         return amt
 
+    def apply_status_effect(self, name: str, stat: str, value: int, turns_remaining: int):
+        remove = None
+        ret = None
+
+        for se in self.status_effects:
+            if se['name'] == name:
+                remove = se
+                break
+
+        if remove is not None:
+            self.remove_status_effect(remove)
+
+        self.status_effects.append({'name': name, 'stat': stat, 'value': value, 'turns_remaining': turns_remaining})
+        self[stat] += value
+        self.save()
+
+        if remove is not None:
+            ret = remove['name']
+
+        return ret
+
+    def remove_status_effect(self, se):
+        try:
+            self[se['stat']] -= se['value']
+            self.status_effects.remove(se)
+        except KeyError:
+            raise Exception(f'remove_status_effect failed for {self.name}: {se["name"]}, {se["stat"]}')
+
+    def remove_all_status_effects(self):
+        for se in self.status_effects:
+            self.remove_status_effect(se)
+
+    def countdown_status_effects(self):
+        removes = []
+        out = ''
+
+        for se in self.status_effects:
+            if se['turns_remaining'] > 1:
+                se['turns_remaining'] -= 1
+            else:
+                removes.append(se)
+
+        if len(removes) > 0:
+            for se in removes:
+                out += f'{se["name"]} expired on {self.name}\n'
+                self.remove_status_effect(se)
+
+        self.save()
+        return out
+
     def end_of_turn(self):
-        pass
+        return self.countdown_status_effects()
 
     def has_completed_tutorial(self) -> bool:
         if 'Boon Mine' in self.depths.keys() and self.depths['Boon Mine'] >= 10:

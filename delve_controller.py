@@ -152,7 +152,7 @@ class DelveController(commands.Cog):
         await delve.channel.send('{} has chosen to end the delve. The party will exit the mine in 5 seconds.'.format(ctx.author.name))
 
         for character in delve.characters:
-            character.set_current_hsm()
+            character.reset_stats()
 
         self.delves.pop(delve.channel.name)
         await asyncio.sleep(5)
@@ -200,6 +200,7 @@ class DelveController(commands.Cog):
         turn_count = 0
 
         while delve.status == 'fighting':
+            fight.update_turn_order()
             await asyncio.sleep(2)
             await delve.channel.send(utilities.underline('Turn order:'))
 
@@ -268,6 +269,10 @@ class DelveController(commands.Cog):
 
                             if len(fight.enemies) == 0:
                                 await delve.channel.send('The enemies have been defeated.')
+
+                                for character in delve.characters:
+                                    character.remove_all_status_effects()
+
                                 delve.status = 'idle'
                         elif action == '2':  # Item
                             menu, indices = Fight.display_item_menu(actor)
@@ -296,10 +301,11 @@ class DelveController(commands.Cog):
 
                 await asyncio.sleep(3)
 
-            fight.update_turn_order()
-
             for actor in fight.inits:
-                actor.end_of_turn()
+                out = actor.end_of_turn()
+
+                if out != '':
+                    await delve.channel.send(out)
 
             turn_count += 1
 
@@ -359,7 +365,7 @@ class DelveController(commands.Cog):
         character.inventory = []
         character.current_carry = 0
         character.deaths += 1
-        character.set_current_hsm()
+        character.reset_stats()
         character.save()
         await delve.channel.send(utilities.red('{} has died.'.format(character.name)))
 

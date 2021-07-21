@@ -33,7 +33,7 @@ class CharacterController(commands.Cog):
         if character is None:
             character = self.connection.Character()
             character.name = str(player)
-            character.set_current_hsm()
+            character.reset_stats()
             character.add_to_inventory(generate_random_item(self.connection, 1, item_type=ItemType.weapon,
                                                             rarity=Rarity.common), False)
             character.add_to_inventory(generate_random_item(self.connection, 1, item_type=ItemType.head,

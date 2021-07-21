@@ -68,6 +68,7 @@ class Enemy:
         self.init = init
         self.init_growth = init_growth
         self.bonus_init = 0  # exists for the purpose of init sorting in fight encounters with characters
+        self.status_effects = []  # list of dicts w/ keys = name, stat, value, turns_remaining
 
         # Resistances
         self.earth_res = earth_res
@@ -95,10 +96,56 @@ class Enemy:
         self.init += round(self.init_growth * gap)
         self.name = prefixes[utilities.clamp(int(depth / 10), 1, len(prefixes))] + " " + self.name
 
+    def apply_status_effect(self, name: str, stat: str, value: int, turns_remaining: int):
+        remove = None
+        ret = None
+
+        for se in self.status_effects:
+            if se['name'] == name:
+                remove = se
+                break
+
+        if remove is not None:
+            self.remove_status_effect(remove)
+
+        self.status_effects.append({'name': name, 'stat': stat, 'value': value, 'turns_remaining': turns_remaining})
+        setattr(self, stat, getattr(self, stat) + value)
+
+        if remove is not None:
+            ret = remove['name']
+
+        return ret
+
+    def remove_status_effect(self, se):
+        try:
+            setattr(self, se['stat'], getattr(self, se['stat']) - se['value'])
+            self.status_effects.remove(se)
+        except KeyError:
+            raise Exception(f'remove_status_effect failed for {self.name}: {se["name"]}, {se["stat"]}')
+
+    def countdown_status_effects(self):
+        removes = []
+        out = ''
+
+        for se in self.status_effects:
+            if se['turns_remaining'] > 1:
+                se['turns_remaining'] -= 1
+            else:
+                removes.append(se)
+
+        if len(removes) > 0:
+            for se in removes:
+                out += f'{se["name"]} expired on {self.name}\n'
+                self.remove_status_effect(se)
+
+        return out
+
     def end_of_turn(self):
         for action in self.actions:
             if action.turns_remaining > 0:
                 action.turns_remaining -= 1
+
+        return self.countdown_status_effects()
 
     def take_a_turn(self, fight):
         plans = self.get_action_plans(fight)
@@ -287,7 +334,7 @@ prefixes = {
 }
 
 enemies = {
-    'slime': Enemy('Slime', 1, 0.3, 1, 0.3, 1, 0.3, 1, 0.3, 10, 0.1, 5, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    'slime': Enemy('Slime', 1, 0.3, 1, 0.3, 1, 0.3, 1, 0.3, 10, 0.1, 4, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                    [SingleTargetAttack('Headbutt', 0, 0.05,
                                        [SpellEffect(EffectType.damage_health, Elements.earth, 1, 4)]),
                     SingleTargetHeal('Regenerate', 3,

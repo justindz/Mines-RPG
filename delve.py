@@ -15,7 +15,9 @@ class Delve(object):
         cc = bot.get_cog('CharacterController')
 
         for player in players:
-            self.characters.append(cc.get(player))
+            char = cc.get(player)
+            char.reset_stats()
+            self.characters.append(char)
 
         self.zone = zone
 
