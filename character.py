@@ -109,8 +109,8 @@ class Character(Document):
         'bonus_water_res': 0.0,
 
         'points': 0,
-        'abilities': ['spell-stalagmite', 'skill-slash', 'spell-ennervation', 'spell-haste'],
-        'ability_slots': {'1': 'skill-slash', '2': 'spell-stalagmite', '3': 'spell-ennervation', '4': 'spell-haste', '5': None,
+        'abilities': ['spell-stalagmite', 'skill-slash', 'spell-slow', 'spell-haste'],
+        'ability_slots': {'1': 'skill-slash', '2': 'spell-stalagmite', '3': 'spell-slow', '4': 'spell-haste', '5': None,
                           '6': None},
         'equipped': {'weapon': None, 'head': None, 'chest': None, 'belt': None, 'boots': None, 'gloves': None,
                      'amulet': None, 'ring': None},
@@ -524,6 +524,14 @@ class Character(Document):
     def remove_all_status_effects(self):
         for se in self.status_effects:
             self.remove_status_effect(se)
+
+    def list_active_effects(self):
+        out = ''
+
+        for se in self.status_effects:
+            out += se['name'] + ', '
+
+        return out.rstrip(', ')
 
     def countdown_status_effects(self):
         removes = []

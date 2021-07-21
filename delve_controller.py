@@ -57,6 +57,7 @@ class DelveController(commands.Cog):
         self.bot = bot
         self.delves = {}
         self.connection = connection
+        self.get = self.bot.get_cog('CharacterController').get
 
     async def check_correct_delve_channel(ctx):
         try:
@@ -167,6 +168,19 @@ class DelveController(commands.Cog):
 
     @commands.command()
     @commands.check(check_correct_delve_channel)
+    async def status(self, ctx):
+        """View the status effects currently affecting you."""
+        character = self.get(ctx.author)
+        out = f'{character.name} is affected by:'
+
+        if len(character.status_effects) > 0:
+            for se in character.status_effects:
+                out += f'\n- {se["name"]}: {se["value"]:+} {se["stat"]} ({se["turns_remaining"]} turns)'
+
+        await ctx.channel.send(out)
+
+    @commands.command()
+    @commands.check(check_correct_delve_channel)
     @commands.check(check_is_leader)
     @commands.check(check_room_complete)
     async def proceed(self, ctx):
@@ -205,7 +219,9 @@ class DelveController(commands.Cog):
             await delve.channel.send(utilities.underline('Turn order:'))
 
             for fighter in fight.inits:
-                await delve.channel.send(utilities.underline(f'- {fighter.name} ({fighter.current_health}/{fighter.health})'))
+                await delve.channel.send(utilities.underline(
+                    f'- {fighter.name} {fighter.current_health}/{fighter.health}'
+                    + (f' [{fighter.list_active_effects()}]' if len(fighter.status_effects) > 0 else '')))
 
             await delve.channel.send(fight.display_active_elements())
 
@@ -213,7 +229,7 @@ class DelveController(commands.Cog):
                 try:
                     await delve.channel.send(utilities.bold(f'{actor.name} goes next.'))
                 except NotFound:
-                    return  # The channel has been deleted
+                    return  # The channel has been deleted because the delve ended
 
                 if isinstance(actor, Character):  # Player
                     def check_action_menu(m):

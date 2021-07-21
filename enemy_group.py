@@ -5,7 +5,7 @@ class EnemyGroup(object):
 
 enemy_groups = {
     'basic': [
-        [['slime'], ['slime', 'slime'], ['slime', 'slime', 'slime']],
+        [['slime', 'slime'], ['slime', 'slime', 'slime'], ['slime', 'slime', 'slime', 'slime']],
     ],
     'infernal': [
         [['imp'], ['imp', 'slime'], ['imp', 'imp', 'slime']],

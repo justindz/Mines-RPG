@@ -29,10 +29,10 @@ class SingleTargetHeal(Action):
 
             while i > 0:
                 if fight.enemies.index(target) + i <= len(fight.enemies) - 1:
-                    targets.append(fight.enemies.index(target) + i)
+                    targets.append(fight.enemies[fight.enemies.index(target) + i])
 
                 if fight.enemies.index(target) - i > 0:
-                    targets.insert(0, fight.enemies.index(target) - i)
+                    targets.insert(0, fight.enemies[fight.enemies.index(target) - i])
 
                 i -= 1
 

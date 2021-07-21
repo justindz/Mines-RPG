@@ -39,10 +39,10 @@ spells = {
                          [SpellEffect(EffectType.restore_health, Elements.water, 5, 10),
                           SpellEffect(EffectType.restore_stamina, Elements.water, 5, 10)],
                          [], [], _base_crit_chance=0.01, _targets_enemies=False),
-    'ennervation': Spell('Ennervation', 'Ennervation description.', 1, {'h': 0, 's': 0, 'm': 8},
-                         [SpellEffect(EffectType.debuff, Elements.electricity, -5, _stat='bonus_init',
-                                      _status_effect_name='Slow', _status_effect_turns=2)], [], []),
+    'slow': Spell('Slow', 'Slow description.', 1, {'h': 0, 's': 0, 'm': 8},
+                  [SpellEffect(EffectType.debuff, Elements.electricity, -5, _stat='bonus_init',
+                               _status_effect_name='Slowed', _status_effect_turns=2)], [], []),
     'haste': Spell('Haste', 'Haste description.', 1, {'h': 0, 's': 0, 'm': 8},
                    [SpellEffect(EffectType.buff, Elements.electricity, 5, _stat='bonus_init',
-                    _status_effect_name='Speed', _status_effect_turns=2)], [], [], _targets_enemies=False)
+                    _status_effect_name='Hasted', _status_effect_turns=2)], [], [], _targets_enemies=False)
 }

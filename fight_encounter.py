@@ -88,25 +88,23 @@ class Fight:
     def use_ability(self, char: Character, ab, target):
         out = f'{char.name} used {ab.name} on {target.name}.'
         targets = [target]
+        i = ab.area
 
-        if ab.area > 0:
-            i = ab.area
+        while i > 0:
+            if ab is spell.Spell and not ab.targets_enemies:
+                if self.characters.index(target) + i <= len(self.characters) - 1:
+                    targets.append(self.characters[self.characters.index(target) + i])
 
-            while i > 0:
-                if ab is spell.Spell and not ab.targets_enemies:
-                    if self.characters.index(target) + i <= len(self.characters) - 1:
-                        targets.append(self.characters.index(target) + i)
+                if self.characters.index(target) - i > 0:
+                    targets.insert(0, self.characters[self.characters.index(target) - i])
+            else:
+                if self.enemies.index(target) + i <= len(self.enemies) - 1:
+                    targets.append(self.enemies[self.enemies.index(target) + i])
 
-                    if self.characters.index(target) - i > 0:
-                        targets.insert(0, self.characters.index(target) - i)
-                else:
-                    if self.enemies.index(target) + i <= len(self.enemies) - 1:
-                        targets.append(self.enemies.index(target) + i)
+                if self.enemies.index(target) - i > 0:
+                    targets.insert(0, self.enemies[self.enemies.index(target) - i])
 
-                    if self.enemies.index(target) - i > 0:
-                        targets.insert(0, self.enemies.index(target) - i)
-
-                i -= 1
+            i -= 1
 
         crit = False
         chance = None

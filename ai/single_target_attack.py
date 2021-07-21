@@ -33,10 +33,10 @@ class SingleTargetAttack(Action):
 
             while i > 0:
                 if fight.characters.index(target) + i <= len(fight.characters) - 1:
-                    targets.append(fight.characters.index(target) + i)
+                    targets.append(fight.characters[fight.characters.index(target) + i])
 
                 if fight.characters.index(target) - i > 0:
-                    targets.insert(0, fight.characters.index(target) - i)
+                    targets.insert(0, fight.characters[fight.characters.index(target) - i])
 
                 i -= 1
 

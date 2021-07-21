@@ -4,6 +4,7 @@ from spell import SpellEffect
 import utilities
 from ai.single_target_attack import SingleTargetAttack
 from ai.single_target_heal import SingleTargetHeal
+from ai.status_effect import StatusEffect
 
 import random
 from enum import Enum
@@ -27,11 +28,11 @@ class Goal:
         if goal_type == GoalType.damage_player:
             contribs = [EffectType.damage_health]
         elif goal_type == GoalType.debuff_player:
-            contribs = [EffectType.debuff_area, EffectType.debuff_crit, EffectType.debuff_damage, EffectType.debuff_resist]
+            contribs = [EffectType.debuff]
         elif goal_type == GoalType.heal_ally:
             contribs = [EffectType.restore_health]
         elif goal_type == GoalType.buff_ally:
-            contribs = [EffectType.buff_crit, EffectType.buff_area, EffectType.buff_damage, EffectType.buff_resist]
+            contribs = [EffectType.buff]
         else:
             raise Exception(f'GoalType {goal_type} has no configured contributing effects')
 
@@ -140,6 +141,14 @@ class Enemy:
 
         return out
 
+    def list_active_effects(self):
+        out = ''
+
+        for se in self.status_effects:
+            out += se['name'] + ', '
+
+        return out.rstrip(', ')
+
     def end_of_turn(self):
         for action in self.actions:
             if action.turns_remaining > 0:
@@ -175,10 +184,10 @@ class Enemy:
             plans += self.get_damage_player_plans(goal[0], fight)
 
         # debuff_player goal
-        # goal = [x for x in self.goals if x.goal_type == GoalType.debuff_player]
-        #
-        # if len(goal) > 0:
-        #     plans += self.get_debuff_player_plans(goal[0], fight)
+        goal = [x for x in self.goals if x.goal_type == GoalType.debuff_player]
+
+        if len(goal) > 0:
+            plans += self.get_debuff_player_plans(goal[0], fight)
 
         # heal_ally goal
         goal = [x for x in self.goals if x.goal_type == GoalType.heal_ally]
@@ -187,10 +196,10 @@ class Enemy:
             plans += self.get_heal_ally_plans(goal[0], fight)
 
         # buff_ally goal
-        # goal = [x for x in self.goals if x.goal_type == GoalType.buff_ally]
-        #
-        # if len(goal) > 0:
-        #     plans += self.get_buff_ally_plans(goal[0], fight)
+        goal = [x for x in self.goals if x.goal_type == GoalType.buff_ally]
+
+        if len(goal) > 0:
+            plans += self.get_buff_ally_plans(goal[0], fight)
 
         return plans
 
@@ -232,6 +241,23 @@ class Enemy:
 
         return plans
 
+    def get_debuff_player_plans(self, goal, fight):
+        plans = []
+
+        for action in self.actions:
+            if action.targets_players and action.is_usable(fight.states):
+                effects = list(filter(lambda effect: effect.type == EffectType.debuff, action.effects))
+
+                if len(effects) > 0:
+                    for character in fight.characters:
+                        plan = Plan()
+                        plan.score = goal.value + 100 - (25 * len(character.status_effects))
+                        plan.action = lambda action=action, character=character: action.do(self, character, fight)
+                        plan.debug = f'debuff {character.name} w/ {action.name} score {plan.score}'
+                        plans.append(plan)
+
+        return plans
+
     def get_heal_ally_plans(self, goal, fight):
         plans = []
 
@@ -245,6 +271,23 @@ class Enemy:
                         plan.score = goal.value + 100 - int(enemy.current_health / enemy.health * 100)
                         plan.action = lambda action=action, enemy=enemy: action.do(self, enemy, fight)
                         plan.debug = f'heal {enemy.name} w/ {action.name} score {plan.score}'
+                        plans.append(plan)
+
+        return plans
+
+    def get_buff_ally_plans(self, goal, fight):
+        plans = []
+
+        for action in self.actions:
+            if action.targets_allies and action.is_usable(fight.states):
+                effects = list(filter(lambda effect: effect.type == EffectType.buff, action.effects))
+
+                if len(effects) > 0:
+                    for enemy in fight.enemies:
+                        plan = Plan()
+                        plan.score = goal.value + (25 * len(enemy.status_effects))
+                        plan.action = lambda action=action, enemy=enemy: action.do(self, enemy, fight)
+                        plan.debug = f'buff {enemy.name} w/ {action.name} score {plan.score}'
                         plans.append(plan)
 
         return plans
@@ -338,8 +381,16 @@ enemies = {
                    [SingleTargetAttack('Headbutt', 0, 0.05,
                                        [SpellEffect(EffectType.damage_health, Elements.earth, 1, 4)]),
                     SingleTargetHeal('Regenerate', 3,
-                                     [SpellEffect(EffectType.restore_health, Elements.water, 2, 5)])],
-                   [Goal(GoalType.damage_player, 500), Goal(GoalType.heal_ally, 450)]),
+                                     [SpellEffect(EffectType.restore_health, Elements.water, 2, 5)]),
+                    StatusEffect('Slime', 3,
+                                 [SpellEffect(EffectType.debuff, Elements.water, -10, _stat='bonus_strength',
+                                              _status_effect_name='Soaked', _status_effect_turns=2)], debuff=True),
+                    StatusEffect('Symbiosis', 4,
+                                 [SpellEffect(EffectType.buff, Elements.water, 10, _stat='bonus_strength',
+                                              _status_effect_name='Reinforced', _status_effect_turns=3)]),
+                    ],
+                   [Goal(GoalType.damage_player, 500), Goal(GoalType.heal_ally, 450), Goal(GoalType.debuff_player, 425),
+                    Goal(GoalType.buff_ally, 450)]),
 
     'imp': Enemy('Imp', 1, 0.3, 2, 0.4, 1, 0.3, 1, 0.3, 10, 0.1, 5, 0.2, 0.03, 0.01, 0.08, 0.03, 0.03, 0.01, 0.0, 0.01,
                  [SingleTargetAttack('Claw', 0, 0.05,
