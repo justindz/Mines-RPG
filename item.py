@@ -3,7 +3,6 @@ from enum import Enum
 from mongokit_ng import RequireFieldError
 
 import armor
-import book
 import consumable
 import weapon
 from armor import armors
@@ -32,7 +31,7 @@ class Rarity(Enum):
     rare = 3
 
 
-def generate_item(connection, key: str, selection: dict, rarity=None, lucky=False):
+def generate_item(connection, key: str, selection: dict, level: int, rarity=None, lucky=False):
     value = 0
 
     try:
@@ -89,10 +88,10 @@ def generate_item(connection, key: str, selection: dict, rarity=None, lucky=Fals
 
         if rarity == Rarity.rare:
             key = random.choice(list(suffixes.keys()))
-            item = add_affix(item, key, suffixes[key])
+            item = add_affix(item, key, suffixes[key], level)
 
         key = random.choice(list(prefixes.keys()))
-        item = add_affix(item, key, prefixes[key])
+        item = add_affix(item, key, prefixes[key], level)
 
     try:
         item.save()
@@ -121,7 +120,7 @@ def generate_random_item(connection, level: int, item_type=None, rarity=None, lu
 
     if len(candidates) > 0:
         key = random.choice(list(candidates.keys()))
-        return generate_item(connection, key, selection, rarity=rarity, lucky=lucky)
+        return generate_item(connection, key, selection, level, rarity=rarity, lucky=lucky)
     else:
         print(f'Random item generation for {item_type} at rarity {rarity} and level {level} found zero candidates.')
 
@@ -205,8 +204,14 @@ def delete_item(connection, item):
         raise Exception(f'delete_item called on unknown item type {item["_itype"]} w/ id {_id}')
 
 
-def add_affix(item, name, affix):
-    affix = affix[1]  # TODO select the appropriate tier based on depth level
+def add_affix(item, name, affix, level):
+    while True:
+        try:
+            affix = affix[level]
+            break
+        except KeyError:
+            print(f'No {level} affix tier for {name}, trying {level - 1} next...')
+            level -= 1
 
     item['name'] = f'{name} {item["name"]}'
 
