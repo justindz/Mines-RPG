@@ -22,19 +22,7 @@ class SingleTargetHeal(Action):
 
     def do(self, user, target, fight):
         out = f'{user.name} used {self.name} on {target.name}.'
-        targets = [target]
-
-        if self.area > 0:
-            i = self.area
-
-            while i > 0:
-                if fight.enemies.index(target) + i <= len(fight.enemies) - 1:
-                    targets.append(fight.enemies[fight.enemies.index(target) + i])
-
-                if fight.enemies.index(target) - i > 0:
-                    targets.insert(0, fight.enemies[fight.enemies.index(target) - i])
-
-                i -= 1
+        targets = super().get_aoe_targets(fight.enemies, target)
 
         for target in targets:
             for effect in self.effects:

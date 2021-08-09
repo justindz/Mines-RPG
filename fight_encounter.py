@@ -6,6 +6,7 @@ from character import Character
 import enemy
 from enemy import Enemy
 import enemy_group
+from enemies import enemies
 from elements import Elements
 from item import ItemType
 import ability
@@ -15,22 +16,22 @@ import skill
 
 def get_random_fight(tags: [str], characters: [Character], depth: int):
     candidates = []
-    enemies = []
+    _enemies = []
 
     for tag in tags:
         candidates.append(random.choice(enemy_group.enemy_groups[tag]))
 
     for enemy_str in random.choice(candidates)[len(characters) - 1]:
-        e = copy.deepcopy(enemy.enemies[enemy_str])
+        e = copy.deepcopy(enemies[enemy_str])
         e.scale(depth)
-        enemies.append(e)
+        _enemies.append(e)
 
-    return Fight(enemies, characters)
+    return Fight(_enemies, characters)
 
 
 class Fight:
-    def __init__(self, enemies: [enemy.Enemy], characters: [Character]):
-        self.enemies = enemies
+    def __init__(self, _enemies: [enemy.Enemy], characters: [Character]):
+        self.enemies = _enemies
         self.characters = characters
         self.level = self.coins = 0
         self.description = 'You see:'
@@ -40,7 +41,7 @@ class Fight:
             self.level += e.level
 
         self.level = int(self.level / len(self.enemies))
-        self.inits = characters + enemies
+        self.inits = self.characters + self.enemies
         self.update_turn_order()
         self.elements_strong = []
         self.elements_weak = []
@@ -93,13 +94,13 @@ class Fight:
                 if self.characters.index(target) + i <= len(self.characters) - 1:
                     targets.append(self.characters[self.characters.index(target) + i])
 
-                if self.characters.index(target) - i > 0:
+                if self.characters.index(target) - i >= 0:
                     targets.insert(0, self.characters[self.characters.index(target) - i])
             else:
                 if self.enemies.index(target) + i <= len(self.enemies) - 1:
                     targets.append(self.enemies[self.enemies.index(target) + i])
 
-                if self.enemies.index(target) - i > 0:
+                if self.enemies.index(target) - i >= 0:
                     targets.insert(0, self.enemies[self.enemies.index(target) - i])
 
             i -= 1

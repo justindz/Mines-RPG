@@ -26,19 +26,11 @@ class StatusEffect(Action):
 
     def do(self, user, target, fight):
         out = f'{user.name} used {self.name} on {target.name}.'
-        targets = [target]
 
-        if self.area > 0:
-            i = self.area
-
-            while i > 0:
-                if fight.enemies.index(target) + i <= len(fight.enemies) - 1:
-                    targets.append(fight[fight.enemies.index(target) + i])
-
-                if fight.enemies.index(target) - i > 0:
-                    targets.insert(0, fight[fight.enemies.index(target) - i])
-
-                i -= 1
+        if self.targets_allies:
+            targets = super().get_aoe_targets(fight.enemies, target)
+        else:
+            targets = super().get_aoe_targets(fight.characters, target)
 
         for target in targets:
             for effect in self.effects:

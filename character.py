@@ -456,7 +456,6 @@ class Character(Document):
                 for dmg in weapon['damages']:
                     element_scaling = self.get_element_scaling(Elements(dmg[2]))
                     max = int(dmg[1] * effect.damage_scaling * element_scaling)
-                    # TODO apply active character effects
 
                     if critical:
                         dmgs.append((max + weapon['crit_damage'], dmg[2]))
@@ -467,7 +466,6 @@ class Character(Document):
                 element_scaling = self.get_element_scaling(effect.element)
                 min = effect.min
                 max = effect.max
-                # TODO apply active character effects
 
                 if critical:
                     dmgs.append((int(max * element_scaling), effect.element))

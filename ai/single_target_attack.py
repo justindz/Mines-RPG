@@ -26,19 +26,7 @@ class SingleTargetAttack(Action):
     def do(self, user, target: Character, fight):
         out = f'{user.name} used {self.name} on {target.name}.'
         crit = False
-        targets = [target]
-
-        if self.area > 0:
-            i = self.area
-
-            while i > 0:
-                if fight.characters.index(target) + i <= len(fight.characters) - 1:
-                    targets.append(fight.characters[fight.characters.index(target) + i])
-
-                if fight.characters.index(target) - i > 0:
-                    targets.insert(0, fight.characters[fight.characters.index(target) - i])
-
-                i -= 1
+        targets = super().get_aoe_targets(fight.characters, target)
 
         if random.random() <= self.base_crit_chance:
             crit = True

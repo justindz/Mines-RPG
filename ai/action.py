@@ -51,3 +51,20 @@ class Action:
             out += f'\n{state.name.capitalize()} has been infused.'
 
         return out
+
+    def get_aoe_targets(self, group: list, target) -> list:
+        targets = [target]
+
+        if self.area > 0:
+            i = self.area
+
+            while i > 0:
+                if group.index(target) + i <= len(group) - 1:
+                    targets.append(group[group.index(target) + i])
+
+                if group.index(target) - i >= 0:
+                    targets.insert(0, group[group.index(target) - i])
+
+                i -= 1
+
+        return targets
