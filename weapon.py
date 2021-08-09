@@ -42,11 +42,16 @@ class Weapon(Document):
         'required_intelligence': int,
         'required_dexterity': int,
         'required_willpower': int,
+        'earth_penetration': float,
+        'fire_penetration': float,
+        'electricity_penetration': float,
+        'water_penetration': float,
     }
     required_fields = ['name', 'description', 'level', 'rarity', 'weight', '_itype', '_weapon_type', 'bonus_strength',
                        'bonus_intelligence', 'bonus_dexterity', 'bonus_willpower', 'bonus_health', 'bonus_stamina',
                        'bonus_mana', 'bonus_init', 'base_crit_chance', 'damages', 'crit_damage', 'value',
-                       'required_strength', 'required_intelligence', 'required_dexterity', 'required_willpower']
+                       'required_strength', 'required_intelligence', 'required_dexterity', 'required_willpower',
+                       'earth_penetration', 'fire_penetration', 'electricity_penetration', 'water_penetration']
     use_dot_notation = True
     use_autorefs = True
 
@@ -62,14 +67,18 @@ def get_damages_display_string(item):
 
 def get_bonuses_display_string(item):
     display_string = ''
-    display_string += '\nStrength {:+}'.format(item['bonus_strength']) if item['bonus_strength'] != 0 else ''
-    display_string += '\nIntelligence {:+}'.format(item['bonus_intelligence']) if item['bonus_intelligence'] != 0 else ''
-    display_string += '\nDexterity {:+}'.format(item['bonus_dexterity']) if item['bonus_dexterity'] != 0 else ''
-    display_string += '\nWillpower {:+}'.format(item['bonus_willpower']) if item['bonus_willpower'] != 0 else ''
-    display_string += '\nHealth {:+}'.format(item['bonus_health']) if item['bonus_health'] != 0 else ''
-    display_string += '\nStamina {:+}'.format(item['bonus_stamina']) if item['bonus_stamina'] != 0 else ''
-    display_string += '\nMana {:+}'.format(item['bonus_mana']) if item['bonus_mana'] != 0 else ''
-    display_string += '\nInitiative {:+}'.format(item['bonus_init']) if item['bonus_init'] != 0 else ''
+    display_string += f'\nStrength {item["bonus_strength"]:+}' if item['bonus_strength'] != 0 else ''
+    display_string += f'\nIntelligence {item["bonus_intelligence"]:+}' if item['bonus_intelligence'] != 0 else ''
+    display_string += f'\nDexterity {item["bonus_dexterity"]:+}' if item['bonus_dexterity'] != 0 else ''
+    display_string += f'\nWillpower {item["bonus_willpower"]:+}' if item['bonus_willpower'] != 0 else ''
+    display_string += f'\nHealth {item["bonus_health"]:+}' if item['bonus_health'] != 0 else ''
+    display_string += f'\nStamina {item["bonus_stamina"]:+}' if item['bonus_stamina'] != 0 else ''
+    display_string += f'\nMana {item["bonus_mana"]:+}' if item['bonus_mana'] != 0 else ''
+    display_string += f'\nInitiative {item["bonus_init"]:+}' if item['bonus_init'] != 0 else ''
+    display_string += f'\nEarth Penetration {item["earth_penetration"]:.0%}' if item['earth_penetration'] > 0 else ''
+    display_string += f'\nFire Penetration {item["fire_penetration"]:.0%}' if item['fire_penetration'] > 0 else ''
+    display_string += f'\nElectricity Penetration {item["electricity_penetration"]:.0%}' if item['electricity_penetration'] > 0 else ''
+    display_string += f'\nWater Penetration {item["water_penetration"]:.0%}' if item['water_penetration'] > 0 else ''
     return display_string
 
 
@@ -78,7 +87,9 @@ weapons = {
                    '_weapon_type': WeaponType.sword.value, 'bonus_strength': 1, 'bonus_intelligence': 0,
                    'bonus_dexterity': 0, 'bonus_willpower': 0, 'bonus_health': 0, 'bonus_stamina': 0, 'bonus_mana': 0,
                    'bonus_init': 0, 'base_crit_chance': 0.5, 'damages': [[1, 4, Elements.earth.value]], 'crit_damage': 0,
-                   'required_strength': 0, 'required_intelligence': 0, 'required_dexterity': 0, 'required_willpower': 0}
+                   'required_strength': 0, 'required_intelligence': 0, 'required_dexterity': 0, 'required_willpower': 0,
+                   'earth_penetration': 0.0, 'fire_penetration': 0.0, 'electricity_penetration': 0.0,
+                   'water_penetration': 0.0}
 }
 
 prefixes = {
@@ -132,6 +143,18 @@ prefixes = {
     'Flowing': {
         1: {'effect': 'damage_convert', 'value': Elements.water.value},
     },
+    'Shattering': {
+        1: {'effect': 'earth_penetration', 'value': 0.05},
+    },
+    'Quenching': {
+        1: {'effect': 'fire_penetration', 'value': 0.05},
+    },
+    'Grounding': {
+        1: {'effect': 'electricity_penetration', 'value': 0.05},
+    },
+    'Absorbing': {
+        1: {'effect': 'water_penetration', 'value': 0.05},
+    },
 }
 
 suffixes = {
@@ -150,7 +173,7 @@ suffixes = {
     'Drenched': {
         1: {'effect': 'damage_mode', 'value': [1, 2, Elements.water.value]}
     },
-    'Consistent': {
+    'True': {
         1: {'effect': 'damage_narrow', 'value': 10}
     },
     'Wild': {

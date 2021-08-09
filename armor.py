@@ -41,19 +41,19 @@ class Armor(Document):
 
 def get_bonuses_display_string(item):
     display_string = ''
-    display_string += '\nStrength {:+}'.format(item['bonus_strength']) if item['bonus_strength'] != 0 else ''
-    display_string += '\nIntelligence {:+}'.format(item['bonus_intelligence']) if item['bonus_intelligence'] != 0 else ''
-    display_string += '\nDexterity {:+}'.format(item['bonus_dexterity']) if item['bonus_dexterity'] != 0 else ''
-    display_string += '\nWillpower {:+}'.format(item['bonus_willpower']) if item['bonus_willpower'] != 0 else ''
-    display_string += '\nHealth {:+}'.format(item['bonus_health']) if item['bonus_health'] != 0 else ''
-    display_string += '\nStamina {:+}'.format(item['bonus_stamina']) if item['bonus_stamina'] != 0 else ''
-    display_string += '\nMana {:+}'.format(item['bonus_mana']) if item['bonus_mana'] != 0 else ''
-    display_string += '\nInitiative {:+}'.format(item['bonus_init']) if item['bonus_init'] != 0 else ''
-    display_string += '\nCarry {:+}'.format(item['bonus_carry']) if item['bonus_carry'] != 0 else ''
-    display_string += '\nEarth Res {:+}'.format(item['bonus_earth_res']) if item['bonus_earth_res'] != 0.0 else ''
-    display_string += '\nFire Res {:+}'.format(item['bonus_fire_res']) if item['bonus_fire_res'] != 0.0 else ''
-    display_string += '\nElectricity Res {:+}'.format(item['bonus_electricity_res']) if item['bonus_electricity_res'] != 0.0 else ''
-    display_string += '\nWater Res {:+}'.format(item['bonus_water_res']) if item['bonus_water_res'] != 0.0 else ''
+    display_string += f'\nStrength {item["bonus_strength"]:+}' if item['bonus_strength'] != 0 else ''
+    display_string += f'\nIntelligence {item["bonus_intelligence"]:+}' if item['bonus_intelligence'] != 0 else ''
+    display_string += f'\nDexterity {item["bonus_dexterity"]:+}' if item['bonus_dexterity'] != 0 else ''
+    display_string += f'\nWillpower {item["bonus_willpower"]:+}' if item['bonus_willpower'] != 0 else ''
+    display_string += f'\nHealth {item["bonus_health"]:+}' if item['bonus_health'] != 0 else ''
+    display_string += f'\nStamina {item["bonus_stamina"]:+}' if item['bonus_stamina'] != 0 else ''
+    display_string += f'\nMana {item["bonus_mana"]:+}' if item['bonus_mana'] != 0 else ''
+    display_string += f'\nInitiative {item["bonus_init"]:+}' if item['bonus_init'] != 0 else ''
+    display_string += f'\nCarry {item["bonus_carry"]:+}' if item['bonus_carry'] != 0 else ''
+    display_string += f'\nEarth Res {item["bonus_earth_res"]:+.0%}' if item['bonus_earth_res'] != 0.0 else ''
+    display_string += f'\nFire Res {item["bonus_fire_res"]:+.0%}' if item['bonus_fire_res'] != 0.0 else ''
+    display_string += f'\nElectricity Res {item["bonus_electricity_res"]:+.0%}' if item['bonus_electricity_res'] != 0.0 else ''
+    display_string += f'\nWater Res {item["bonus_water_res"]:+.0%}' if item['bonus_water_res'] != 0.0 else ''
     return display_string
 
 
@@ -121,15 +121,15 @@ suffixes = {
         1: {'effect': 'value', 'value': 100}
     },
     'Reinforcing': {
-        1: {'effect': 'bonus_earth_res', 'value': 0.15}
+        1: {'effect': 'bonus_earth_res', 'value': 0.05}
     },
     'Chilling': {
-        1: {'effect': 'bonus_fire_res', 'value': 0.15}
+        1: {'effect': 'bonus_fire_res', 'value': 0.05}
     },
     'Conducting': {
-        1: {'effect': 'bonus_electricity_res', 'value': 0.15}
+        1: {'effect': 'bonus_electricity_res', 'value': 0.05}
     },
     'Absorbing': {
-        1: {'effect': 'bonus_water_res', 'value': 0.15}
+        1: {'effect': 'bonus_water_res', 'value': 0.05}
     },
 }

@@ -32,14 +32,12 @@ class Fight:
     def __init__(self, enemies: [enemy.Enemy], characters: [Character]):
         self.enemies = enemies
         self.characters = characters
-        self.xp = self.level = self.coins = 0
+        self.level = self.coins = 0
         self.description = 'You see:'
 
         for e in self.enemies:
             self.description += '\n {}'.format(e.name)
             self.level += e.level
-            self.xp += e.level * 10
-            self.coins += e.level
 
         self.level = int(self.level / len(self.enemies))
         self.inits = characters + enemies
@@ -121,7 +119,7 @@ class Fight:
         for _target in targets:
             for effect in ab.effects:
                 if effect.type == ability.EffectType.damage_health:
-                    dmgs = _target.take_damage(char.deal_damage(effect, critical=crit))
+                    dmgs = _target.take_damage(char.deal_damage(effect, critical=crit), char.get_ele_pens())
 
                     for dmg in dmgs:
                         out += f'\n{_target.name} suffered {dmg[0]} {Elements(dmg[1]).name} damage.'
@@ -232,7 +230,7 @@ class Fight:
     def display_ability_menu(character):
         out = 'Abilities:'
 
-        for i in range(1, 6):
+        for i in range(1, len(character.ability_slots)):
             if character.ability_slots[str(i)] is not None:
                 _ability = utilities.get_ability_by_name(character.ability_slots[str(i)])
                 cost = f'{Fight.display_ability_cost(_ability.cost)}'

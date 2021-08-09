@@ -324,18 +324,18 @@ class Enemy:
 
         return dmgs
 
-    def take_damage(self, dmgs: list):
+    def take_damage(self, dmgs: list, ele_pens: tuple) -> list:
         for dmg in dmgs:
             amt = dmg[0]
 
             if dmg[1] == Elements.earth:
-                amt *= (1.0 - self.earth_res)
+                amt *= (1.0 - self.earth_res + min(ele_pens[0], self.earth_res))
             elif dmg[1] == Elements.fire:
-                amt *= (1.0 - self.fire_res)
+                amt *= (1.0 - self.fire_res + min(ele_pens[1], self.fire_res))
             elif dmg[1] == Elements.electricity:
-                amt *= (1.0 - self.electricity_res)
+                amt *= (1.0 - self.electricity_res + min(ele_pens[2], self.electricity_res))
             elif dmg[1] == Elements.water:
-                amt *= (1.0 - self.water_res)
+                amt *= (1.0 - self.water_res + min(ele_pens[3], self.water_res))
 
             self.current_health -= round(amt)
             self.current_health = max(0, self.current_health)

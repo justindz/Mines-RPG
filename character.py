@@ -110,8 +110,7 @@ class Character(Document):
 
         'points': 0,
         'abilities': ['spell-stalagmite', 'skill-slash', 'spell-slow', 'spell-haste'],
-        'ability_slots': {'1': 'skill-slash', '2': 'spell-stalagmite', '3': 'spell-slow', '4': 'spell-haste', '5': None,
-                          '6': None},
+        'ability_slots': {'1': 'skill-slash', '2': 'spell-stalagmite', '3': 'spell-slow', '4': 'spell-haste'},
         'equipped': {'weapon': None, 'head': None, 'chest': None, 'belt': None, 'boots': None, 'gloves': None,
                      'amulet': None, 'ring': None},
         'inventory': [],
@@ -211,8 +210,8 @@ class Character(Document):
         return False
 
     def unequip(self, slot: str):
-        if slot not in ['weapon', 'head', 'chest', 'belt', 'boots', 'gloves', 'amulet', 'ring'] or self.equipped[
-                        slot] is None:
+        if slot not in ['weapon', 'head', 'chest', 'belt', 'boots', 'gloves', 'amulet', 'ring']\
+                or self.equipped[slot] is None:
             return False
         else:
             item = self.equipped[slot]
@@ -280,7 +279,7 @@ class Character(Document):
         self.bonus_stamina -= weapon['bonus_stamina']
         self.bonus_mana -= weapon['bonus_mana']
         self.bonus_init -= weapon['bonus_init']
-        
+
     def apply_armor_bonuses(self, armor):
         self.bonus_strength += armor['bonus_strength']
         self.bonus_intelligence += armor['bonus_intelligence']
@@ -313,7 +312,8 @@ class Character(Document):
 
     def use_consumable(self, connection, consumable):
         if consumable['_itype'] not in [ItemType.potion.value, ItemType.food.value]:
-            raise Exception(f'Invalid consumable {consumable["name"]} of type {ItemType(consumable["_itype"]).name} used by {self.name}.')
+            raise Exception(
+                f'Invalid consumable {consumable["name"]} of type {ItemType(consumable["_itype"]).name} used by {self.name}.')
         elif consumable['uses'] <= 0:
             raise Exception(f'Consumable {consumable["name"]} used by {self.name} had {consumable["uses"]} uses.')
         else:
@@ -414,6 +414,13 @@ class Character(Document):
         m = 0
         return self.restore_all(h, s, m)
 
+    def get_ele_pens(self) -> tuple:
+        if self.equipped['weapon'] is None:
+            return 0.0, 0.0, 0.0, 0.0
+
+        return self.equipped['weapon']['earth_penetration'], self.equipped['weapon']['fire_penetration'], \
+               self.equipped['weapon']['electricity_penetration'], self.equipped['weapon']['water_penetration']
+
     def get_element_scaling(self, element: Elements):
         if element == Elements.earth:
             stat = self.strength + self.bonus_strength
@@ -428,15 +435,15 @@ class Character(Document):
 
         return 1.0 + (stat / 1000)
 
-    def apply_element_damage_resistances(self, amt, element):
+    def apply_element_damage_resistances(self, amt: int, element) -> float:
         if element == Elements.earth:
-            amt *= (1.0 - self.earth_res + self.bonus_earth_res)
+            amt *= (1.0 - (self.earth_res + self.bonus_earth_res))
         elif element == Elements.fire:
-            amt *= (1.0 - self.fire_res + self.bonus_fire_res)
+            amt *= (1.0 - (self.fire_res + self.bonus_fire_res))
         elif element == Elements.electricity:
-            amt *= (1.0 - self.electricity_res + self.bonus_electricity_res)
+            amt *= (1.0 - (self.electricity_res + self.bonus_electricity_res))
         elif element == Elements.water:
-            amt *= (1.0 - self.water_res + self.bonus_water_res)
+            amt *= (1.0 - (self.water_res + self.bonus_water_res))
         return amt
 
     def deal_damage(self, effect, critical=False):

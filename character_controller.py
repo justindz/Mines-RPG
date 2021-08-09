@@ -82,10 +82,10 @@ class CharacterController(commands.Cog):
 | Initiative: {character.init} ({character.bonus_init:+})
 | Carry Weight: {character.current_carry}/{character.carry} ({character.bonus_carry:+})
 |----
-| Earth Res: {character.earth_res} ({character.bonus_earth_res:+})
-| Fire Res: {character.fire_res} ({character.bonus_fire_res:+})
-| Electricity Res: {character.electricity_res} ({character.bonus_electricity_res:+})
-| Water Res: {character.water_res} ({character.bonus_water_res:+})
+| Earth Res: {character.earth_res:.0%} ({character.bonus_earth_res:+.0%})
+| Fire Res: {character.fire_res:.0%} ({character.bonus_fire_res:+.0%})
+| Electricity Res: {character.electricity_res:.0%} ({character.bonus_electricity_res:+.0%})
+| Water Res: {character.water_res:.0%} ({character.bonus_water_res:+.0%})
 |----
 | Deaths: {character.deaths}
 --<-(@  --<-(@  --<-(@  --<-(@''')
