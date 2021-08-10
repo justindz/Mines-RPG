@@ -44,9 +44,9 @@ class Plan:
 
 class Enemy:
     def __init__(self, name, strength, strength_growth, intelligence, intelligence_growth, dexterity, dexterity_growth,
-                 willpower, willpower_growth, health, health_growth, init, init_growth, earth_res, earth_res_growth,
-                 fire_res, fire_res_growth, electricity_res, electricity_res_growth, water_res, water_res_growth,
-                 actions, goals):
+                 willpower, willpower_growth, health, health_growth, health_regen, health_regen_growth,
+                 init, init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth,
+                 electricity_res, electricity_res_growth, water_res, water_res_growth, actions, goals):
         self.name = name
         self.level = 1
 
@@ -62,6 +62,8 @@ class Enemy:
         self.health = self.current_health = health
         self.health_growth = health_growth
         self.current_health = self.health
+        self.health_regen = health_regen
+        self.health_regen_growth = health_regen_growth
         self.init = init
         self.init_growth = init_growth
         self.bonus_init = 0  # exists for the purpose of init sorting in fight encounters with characters
@@ -90,6 +92,7 @@ class Enemy:
         self.willpower += round(self.willpower_growth * gap)
         self.health += round(self.health_growth * gap)
         self.current_health = self.health
+        self.health_regen += round(self.health_regen_growth * gap)
         self.init += round(self.init_growth * gap)
         self.name = prefixes[utilities.clamp(int(depth / 10), 1, len(prefixes))] + " " + self.name
 
@@ -146,11 +149,17 @@ class Enemy:
         return out.rstrip(', ')
 
     def end_of_turn(self):
+        out = ''
+
+        if self.health_regen > 0 and self.current_health < self.health:
+            self.current_health += int(self.health_regen)
+            out = f'{self.name} regenerated {int(self.health_regen)} health.\n'
+
         for action in self.actions:
             if action.turns_remaining > 0:
                 action.turns_remaining -= 1
 
-        return self.countdown_status_effects()
+        return out + self.countdown_status_effects()
 
     def take_a_turn(self, fight):
         plans = self.get_action_plans(fight)
