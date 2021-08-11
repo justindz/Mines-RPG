@@ -11,7 +11,8 @@ class GoalType(Enum):
     debuff_player = 2
     heal_ally = 3
     buff_ally = 4
-    summon = 5
+    summon = 5  # intended for use basically whenever off cooldown
+    enrage = 6  # goal value weighted by % current health threshold
 
 
 class Goal:
@@ -29,6 +30,11 @@ class Goal:
             contribs = [EffectType.restore_health]
         elif goal_type == GoalType.buff_ally:
             contribs = [EffectType.buff]
+        elif goal_type == GoalType.summon:
+            contribs = [EffectType.summon]
+        elif goal_type == GoalType.enrage:
+            contribs = [EffectType.damage_health, EffectType.debuff, EffectType.buff, EffectType.restore_health,
+                        EffectType.summon]
         else:
             raise Exception(f'GoalType {goal_type} has no configured contributing effects')
 
@@ -177,7 +183,7 @@ class Enemy:
             return f'{self.name} took no action.'
 
     def get_action_plans(self, fight):
-        plans = self.get_kill_player_action_plans(fight)
+        plans = self.get_kill_player_plans(fight)
 
         if len(plans) > 0:
             return plans
@@ -206,9 +212,17 @@ class Enemy:
         if len(goal) > 0:
             plans += self.get_buff_ally_plans(goal[0], fight)
 
+        # summon goal
+        goal = [x for x in self.goals if x.goal_type == GoalType.summon]
+
+        if len(goal) > 0:
+            plans += self.get_summon_plans(goal[0], fight)
+
+        # TODO enrage goal
+
         return plans
 
-    def get_kill_player_action_plans(self, fight):
+    def get_kill_player_plans(self, fight):
         plans = []
 
         for action in self.actions:
@@ -294,6 +308,22 @@ class Enemy:
                         plan.action = lambda action=action, enemy=enemy: action.do(self, enemy, fight)
                         plan.debug = f'buff {enemy.name} w/ {action.name} score {plan.score}'
                         plans.append(plan)
+
+        return plans
+
+    def get_summon_plans(self, goal, fight):
+        plans = []
+
+        for action in self.actions:
+            if action.is_usable(fight.states):
+                effects = list(filter(lambda effect: effect.type == EffectType.summon, action.effects))
+
+                if len(effects) > 0:
+                    plan = Plan()
+                    plan.score = goal.value
+                    plan.action = lambda action=action: action.do(self, None, fight)
+                    plan.debug = f'summon {action.name} w/ score {plan.score}'
+                    plans.append(plan)
 
         return plans
 

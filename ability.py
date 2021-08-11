@@ -8,6 +8,7 @@ class EffectType(Enum):
     restore_mana = 4
     buff = 5
     debuff = 6
+    summon = 7
 
 
 class Ability:

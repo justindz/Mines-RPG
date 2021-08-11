@@ -5,6 +5,7 @@ from spell import SpellEffect
 from ai.single_target_attack import SingleTargetAttack
 from ai.single_target_heal import SingleTargetHeal
 from ai.status_effect import StatusEffect
+from ai.summon import Summon
 
 enemies = {
     'slime': Enemy('Slime',
@@ -54,7 +55,8 @@ enemies = {
                  0.03, 0.01,
                  0.0, 0.01,
                  [
-                     SingleTargetAttack('Claw', 0, 0.05, [SpellEffect(EffectType.damage_health, Elements.earth, 2, 4)])
+                     SingleTargetAttack('Claw', 0, 0.05, [SpellEffect(EffectType.damage_health, Elements.earth, 2, 4)]),
+                     Summon('Loogie', 99, ['slime'], 'The imp hocks up a disgusting, sentient wad of spit.')
                  ],
                  [Goal(GoalType.damage_player, 500)]),
 }

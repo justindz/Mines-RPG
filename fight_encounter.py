@@ -37,7 +37,7 @@ class Fight:
         self.description = 'You see:'
 
         for e in self.enemies:
-            self.description += '\n {}'.format(e.name)
+            self.description += f'\n {e.name}'
             self.level += e.level
 
         self.level = int(self.level / len(self.enemies))
@@ -52,6 +52,14 @@ class Fight:
 
     def update_turn_order(self):
         self.inits.sort(key=lambda x: x.init + x.bonus_init, reverse=True)
+
+    def add_enemy(self, enemy_str: str):
+        e = copy.deepcopy(enemies[enemy_str])
+        e.scale(self.level)
+        self.enemies.append(e)
+        self.inits.append(e)
+        self.description += f'\n {e.name}'
+        # Note: don't update turn order here, this could cause some enemies to go twice
 
     def remove_character(self, character: Character):
         self.characters.remove(character)
