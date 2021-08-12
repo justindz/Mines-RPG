@@ -8,6 +8,7 @@ enemy_groups = {
         [['slime', 'slime'], ['slime', 'slime', 'slime'], ['slime', 'slime', 'slime', 'slime']],
     ],
     'infernal': [
+        [['bomb'], ['imp', 'bomb'], ['imp', 'imp', 'bomb']],
         [['imp'], ['imp', 'slime'], ['imp', 'imp', 'slime']],
         [['imp'], ['imp', 'imp'], ['imp', 'imp', 'imp']],
     ],

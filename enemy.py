@@ -12,7 +12,7 @@ class GoalType(Enum):
     heal_ally = 3
     buff_ally = 4
     summon = 5  # intended for use basically whenever off cooldown
-    enrage = 6  # goal value weighted by % current health threshold
+    enrage = 6  # guaranteed to be prioritized if current health % is below a threshold
 
 
 class Goal:
@@ -218,7 +218,11 @@ class Enemy:
         if len(goal) > 0:
             plans += self.get_summon_plans(goal[0], fight)
 
-        # TODO enrage goal
+        # enrage goal
+        goal = [x for x in self.goals if x.goal_type == GoalType.enrage]
+
+        if len(goal) > 0:
+            plans += self.get_enrage_plans(goal[0], fight)
 
         return plans
 
@@ -235,7 +239,7 @@ class Enemy:
 
                         if dmg >= character.current_health:
                             plan = Plan()
-                            plan.score = 9999999
+                            plan.score = 9999998
                             plan.action = lambda action=action, character=character: action.do(self, character, fight)
                             plan.debug = f'kill {character.name} w/ {action.name} score {plan.score}'
                             plans.append(plan)
@@ -323,6 +327,29 @@ class Enemy:
                     plan.score = goal.value
                     plan.action = lambda action=action: action.do(self, None, fight)
                     plan.debug = f'summon {action.name} w/ score {plan.score}'
+                    plans.append(plan)
+
+        return plans
+
+    def get_enrage_plans(self, goal, fight):
+        plans = []
+
+        for action in self.actions:
+            if action.is_usable(fight.states) and not action.targets_players and not action.targets_allies:
+                effects = list(filter(lambda effect: effect.type in [EffectType.damage_health, EffectType.debuff,
+                                                                     EffectType.buff, EffectType.restore_health,
+                                                                     EffectType.summon], action.effects))
+
+                if len(effects) > 0:
+                    plan = Plan()
+
+                    if self.current_health / self.health <= 0.2:
+                        plan.score = 9999999
+                    else:
+                        plan.score = 0
+
+                    plan.action = lambda action=action: action.do(self, fight.characters[0], fight)
+                    plan.debug = f'enrage {action.name} w/ score {plan.score}'
                     plans.append(plan)
 
         return plans

@@ -283,13 +283,7 @@ class DelveController(commands.Cog):
                                 ally = fight.characters[ally_choice - 1]
                                 await check_ability_requirements_and_use(ability, actor, delve, ally, fight)
 
-                            if len(fight.enemies) == 0:
-                                await delve.channel.send('The enemies have been defeated.')
-
-                                for character in delve.characters:
-                                    character.remove_all_status_effects()
-
-                                delve.status = 'idle'
+                            await self.check_end_of_fight(delve, fight)
                         elif action == '2':  # Item
                             menu, indices = Fight.display_item_menu(actor)
                             await delve.channel.send(menu)
@@ -315,6 +309,9 @@ class DelveController(commands.Cog):
                         if target.current_health <= 0:
                             await self.player_dead(delve, target)
 
+                    if await self.check_end_of_fight(delve, fight):
+                        break
+
                 await asyncio.sleep(3)
 
             for actor in fight.inits:
@@ -337,6 +334,19 @@ class DelveController(commands.Cog):
                     await delve.channel.send(f'{character.name} regenerates {h}h {s}s {m}m.')
 
         delve.current_room.encounter = None
+
+    @staticmethod
+    async def check_end_of_fight(delve, fight) -> bool:
+        if len(fight.enemies) == 0:
+            await delve.channel.send('The enemies have been defeated.')
+
+            for character in delve.characters:
+                character.remove_all_status_effects()
+
+            delve.status = 'idle'
+            return True
+
+        return False
 
     @staticmethod
     async def recover(actor, delve):

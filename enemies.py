@@ -6,6 +6,7 @@ from ai.single_target_attack import SingleTargetAttack
 from ai.single_target_heal import SingleTargetHeal
 from ai.status_effect import StatusEffect
 from ai.summon import Summon
+from ai.explode import Explode
 
 enemies = {
     'slime': Enemy('Slime',
@@ -59,4 +60,27 @@ enemies = {
                      Summon('Loogie', 99, ['slime'], 'The imp hocks up a disgusting, sentient wad of spit.')
                  ],
                  [Goal(GoalType.damage_player, 500)]),
+
+    'bomb': Enemy('Bomb',
+                  # Stats
+                  1, 0.3,
+                  3, 0.3,
+                  1, 0.3,
+                  1, 0.3,
+                  # Health
+                  20, 0.1,
+                  0, 0.0,
+                  # Init
+                  10, 0.3,
+                  # Res
+                  0.03, 0.01,
+                  0.05, 0.03,
+                  0.03, 0.01,
+                  0.0, 0.01,
+                  [
+                     SingleTargetAttack('Bite', 0, 0.06, [SpellEffect(EffectType.damage_health, Elements.fire, 2, 4)]),
+                     Explode('Explode', [SpellEffect(EffectType.damage_health, Elements.fire, 5, 10)])
+                  ],
+                  [Goal(GoalType.enrage, 0),
+                   Goal(GoalType.damage_player, 400)]),
 }
