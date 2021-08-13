@@ -558,7 +558,13 @@ class Character(Document):
         return out
 
     def end_of_turn(self):
-        return self.countdown_status_effects()
+        out = ''
+        h, s, m = self.regen()
+
+        if h > 0 or s > 0 or m > 0:
+            out += f'{self.name} regenerates {h}h {s}s {m}m.\n'
+
+        return out + self.countdown_status_effects()
 
     def has_completed_tutorial(self) -> bool:
         if 'Boon Mine' in self.depths.keys() and self.depths['Boon Mine'] >= 10:

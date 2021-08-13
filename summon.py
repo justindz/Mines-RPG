@@ -7,13 +7,16 @@ class Summon(Enemy):
                  dexterity_growth,
                  willpower, willpower_growth, health, health_growth, health_regen, health_regen_growth,
                  init, init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth,
-                 electricity_res, electricity_res_growth, water_res, water_res_growth, actions, goals, cost):
+                 electricity_res, electricity_res_growth, water_res, water_res_growth, actions, goals, cost, ele_pens):
         super().__init__(name, strength, strength_growth, intelligence, intelligence_growth, dexterity,
                          dexterity_growth,
                          willpower, willpower_growth, health, health_growth, health_regen, health_regen_growth,
                          init, init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth,
                          electricity_res, electricity_res_growth, water_res, water_res_growth, actions, goals)
         self.cost = cost
+        self.owner = ''
+        self.bonus_health = 0  # used in planners by enemies who may target the summon like a player
+        self.ele_pens = ele_pens
 
     def get_action_plans(self, fight):
         plans = []
@@ -99,7 +102,7 @@ class Summon(Enemy):
                 effects = list(filter(lambda effect: effect.type == EffectType.restore_health, action.effects))
 
                 if len(effects) > 0:
-                    for character in fight.characters:
+                    for character in [x for x in fight.characters if not isinstance(x, Summon)]:
                         plan = Plan()
                         plan.score = goal.value + 100 - int(character.current_health / character.health * 100)
                         plan.action = lambda action=action, character=character: action.do(self, character, fight)
@@ -116,7 +119,7 @@ class Summon(Enemy):
                 effects = list(filter(lambda effect: effect.type == EffectType.buff, action.effects))
 
                 if len(effects) > 0:
-                    for character in fight.characters:
+                    for character in [x for x in fight.characters if not isinstance(x, Summon)]:
                         plan = Plan()
                         plan.score = goal.value + (25 * len(character.status_effects))
                         plan.action = lambda action=action, character=character: action.do(self, character, fight)

@@ -1,5 +1,6 @@
 from elements import Elements
 from ability import EffectType
+from character import Character
 import utilities
 
 import random
@@ -74,7 +75,7 @@ class Enemy:
         self.init_growth = init_growth
         self.bonus_init = 0  # exists for the purpose of init sorting in fight encounters with characters
         self.status_effects = []  # list of dicts w/ keys = name, stat, value, turns_remaining
-        self.ele_pens = (0.0, 0.0, 0.0, 0.0)  # used for enemy on summon and summon on enemy damage calcs
+        self.ele_pens = (0.0, 0.0, 0.0, 0.0)  # used for enemy on summon damage calcs
 
         # Resistances
         self.earth_res = earth_res
@@ -235,7 +236,7 @@ class Enemy:
                 effects = list(filter(lambda effect: effect.type == EffectType.damage_health, action.effects))
 
                 if len(effects) > 0:
-                    for character in fight.characters:
+                    for character in [x for x in fight.characters if isinstance(x, Character)]:
                         dmg = character.estimate_damage_from_enemy_action(self, action)
 
                         if dmg >= character.current_health:
@@ -273,7 +274,7 @@ class Enemy:
                 effects = list(filter(lambda effect: effect.type == EffectType.debuff, action.effects))
 
                 if len(effects) > 0:
-                    for character in fight.characters:
+                    for character in [x for x in fight.characters if isinstance(x, Character)]:
                         plan = Plan()
                         plan.score = goal.value + 100 - (25 * len(character.status_effects))
                         plan.action = lambda action=action, character=character: action.do(self, character, fight)

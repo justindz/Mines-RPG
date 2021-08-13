@@ -10,6 +10,8 @@ import utilities
 from zone import Zone
 from delve import Delve
 from character import Character
+from enemy import Enemy
+from summon import Summon
 from fight_encounter import Fight
 from loot_encounter import Loot
 from item import delete_item
@@ -214,16 +216,7 @@ class DelveController(commands.Cog):
         turn_count = 0
 
         while delve.status == 'fighting':
-            fight.update_turn_order()
-            await asyncio.sleep(2)
-            await delve.channel.send(utilities.underline('Turn order:'))
-
-            for fighter in fight.inits:
-                await delve.channel.send(utilities.underline(
-                    f'- {fighter.name} {fighter.current_health}/{fighter.health}'
-                    + (f' [{fighter.list_active_effects()}]' if len(fighter.status_effects) > 0 else '')))
-
-            await delve.channel.send(fight.display_active_elements())
+            await self.start_of_turn(delve, fight)
 
             for actor in fight.inits:
                 try:
@@ -232,38 +225,6 @@ class DelveController(commands.Cog):
                     return  # The channel has been deleted because the delve ended
 
                 if isinstance(actor, Character):  # Player
-                    for summon in fight.summons[actor.name]:
-                        if actor.current_health <= summon.cost['h']:
-                            await delve.channel.send(f'{actor.name} has insufficient health to maintain their {summon.name}.')
-                            fight.unsummon(summon, actor)
-                            break
-                        if actor.current_stamina < summon.cost['s']:
-                            await delve.channel.send(f'{actor.name} has insufficient stamina to maintain their {summon.name}.')
-                            fight.unsummon(summon, actor)
-                            break
-                        if actor.current_mana < summon.cost['m']:
-                            await delve.channel.send(f'{actor.name} has insufficient mana to maintain their {summon.name}.')
-                            fight.unsummon(summon, actor)
-                            break
-
-                        out = f'{actor.name} spent '
-
-                        if summon.cost['h'] > 0:
-                            actor.current_health -= summon.cost['h']
-                            out += f'{summon.cost["h"]}h, '
-
-                        if summon.cost['s'] > 0:
-                            actor.current_stamina -= summon.cost['s']
-                            out += f'{summon.cost["s"]}s, '
-
-                        if summon.cost['m'] > 0:
-                            actor.current_mana -= summon.cost['m']
-                            out += f'{summon.cost["m"]}m, '
-
-                        out = out.rstrip(", ") + f' to maintain their {summon.name}.'
-                        await delve.channel.send(out)
-                        actor.save()
-
                     def check_action_menu(m):
                         if str(m.author) == actor.name and m.channel == delve.channel:
                             if m.content in ['1', '2', '3']:
@@ -314,8 +275,6 @@ class DelveController(commands.Cog):
                                 ally_choice = int(msg.content)
                                 ally = fight.characters[ally_choice - 1]
                                 await check_ability_requirements_and_use(ability, actor, delve, ally, fight)
-
-                            await self.check_end_of_fight(delve, fight)
                         elif action == '2':  # Item
                             menu, indices = Fight.display_item_menu(actor)
                             await delve.channel.send(menu)
@@ -330,73 +289,108 @@ class DelveController(commands.Cog):
                             await delve.channel.send(actor.use_consumable(self.connection, actor.inventory[indices[int(choice) - 1]]))
                         elif action == '3':  # Recover
                             await self.recover(actor, delve)
-
-                        for s in fight.summons[actor.name]:
-                            await asyncio.sleep(2)
-                            out = s.take_a_turn(fight)
-                            await delve.channel.send(out)
-
-                            for enemy in fight.enemies:
-                                if enemy.current_health <= 0:
-                                    fight.remove_enemy(enemy)
-                                    await delve.channel.send(f'{s.name} defeated {enemy.name}.')
-
-                        await self.check_end_of_fight(delve, fight)
                     except asyncio.TimeoutError:
                         await delve.channel.send('{} did not take an action in time.'.format(actor.name))
                         await self.recover(actor, delve)
-                else:  # Enemy
+                elif isinstance(actor, Summon):
+                    out = actor.take_a_turn(fight)
+                    await delve.channel.send(out)
+
+                    for enemy in fight.enemies:
+                        if enemy.current_health <= 0:
+                            fight.remove_enemy(enemy)
+                            await delve.channel.send(f'{actor.name} defeated {enemy.name}.')
+                elif isinstance(actor, Enemy):
                     out = actor.take_a_turn(fight)
                     await delve.channel.send(out)
 
                     for target in fight.characters:
                         if target.current_health <= 0:
-                            if fight.remove_character(target):
-                                await delve.channel.send(f'{target.name}\'s summons vanished.')
+                            if isinstance(target, Character):
+                                if fight.remove_character(target):
+                                    await delve.channel.send(f'{target.name}\'s summons vanished.')
 
-                            await self.player_dead(delve, target)
-                        else:
-                            for s in fight.summons[target.name]:
-                                if s.current_health <= 0:
-                                    await delve.channel.send(fight.unsummon(s))
-
-                    if await self.check_end_of_fight(delve, fight):
-                        break
-
+                                await self.player_dead(delve, target)
+                            elif isinstance(target, Summon):
+                                await delve.channel.send(fight.unsummon(target))
+                if await self.check_end_of_fight(delve, fight):
+                    break
                 await asyncio.sleep(3)
-
-            for actor in fight.inits:
-                out = actor.end_of_turn()
-
-                if out != '':
-                    await delve.channel.send(out)
-
-            turn_count += 1
-
-            if fight.end_of_turn():
-                await delve.channel.send('Elements have dissipated.')
-
-            await delve.channel.send('End of turn {}.'.format(turn_count))
-
-            for character in delve.characters:
-                h, s, m = character.regen()
-
-                if h > 0 or s > 0 or m > 0:
-                    await delve.channel.send(f'{character.name} regenerates {h}h {s}s {m}m.')
-
+            await self.end_of_turn(delve, fight, turn_count)
         delve.current_room.encounter = None
+
+    async def start_of_turn(self, delve, fight):
+        for actor in [x for x in fight.characters if isinstance(x, Character)]:
+            await asyncio.sleep(1)
+            await self.pay_summon_upkeep(actor, delve, fight)
+
+        fight.update_turn_order()
+        await asyncio.sleep(2)
+        await delve.channel.send(utilities.underline('Turn order:'))
+
+        for fighter in fight.inits:
+            await delve.channel.send(utilities.underline(
+                f'- {fighter.name} {fighter.current_health}/{fighter.health}'
+                + (f' [{fighter.list_active_effects()}]' if len(fighter.status_effects) > 0 else '')))
+
+        await delve.channel.send(fight.display_active_elements())
+
+    @staticmethod
+    async def pay_summon_upkeep(actor, delve, fight):
+        for summon in [x for x in fight.characters if isinstance(x, Summon) and x.owner == actor.name]:
+            if actor.current_health <= summon.cost['h']:
+                await delve.channel.send(f'{actor.name} has insufficient health to sustain {summon.name}.')
+                fight.unsummon(summon, actor)
+                break
+            if actor.current_stamina < summon.cost['s']:
+                await delve.channel.send(f'{actor.name} has insufficient stamina to sustain {summon.name}.')
+                fight.unsummon(summon, actor)
+                break
+            if actor.current_mana < summon.cost['m']:
+                await delve.channel.send(f'{actor.name} has insufficient mana to sustain {summon.name}.')
+                fight.unsummon(summon, actor)
+                break
+
+            out = f'{summon.name} drained '
+
+            if summon.cost['h'] > 0:
+                actor.current_health -= summon.cost['h']
+                out += f'{summon.cost["h"]}h, '
+            if summon.cost['s'] > 0:
+                actor.current_stamina -= summon.cost['s']
+                out += f'{summon.cost["s"]}s, '
+            if summon.cost['m'] > 0:
+                actor.current_mana -= summon.cost['m']
+                out += f'{summon.cost["m"]}m, '
+
+            out = out.rstrip(", ") + f' from {actor.name}.'
+            await delve.channel.send(out)
+            actor.save()
+
+    @staticmethod
+    async def end_of_turn(delve, fight, turn_count):
+        for actor in fight.inits:
+            out = actor.end_of_turn()
+
+            if out != '':
+                await delve.channel.send(out)
+
+        if fight.end_of_turn():
+            await delve.channel.send('Elements have dissipated.')
+
+        turn_count += 1
+        await delve.channel.send('End of turn {}.'.format(turn_count))
 
     @staticmethod
     async def check_end_of_fight(delve, fight) -> bool:
         if len(fight.enemies) == 0:
             await delve.channel.send('The enemies have been defeated.')
 
-            for character in delve.characters:
+            for character in [x for x in delve.characters if isinstance(x, Character)]:
                 character.remove_all_status_effects()
 
             delve.status = 'idle'
             return True
-
         return False
 
     @staticmethod

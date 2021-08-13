@@ -30,5 +30,6 @@ summons = {
                           SingleTargetAttack('Slam', 3, 0.05,
                                              [SpellEffect(EffectType.damage_health, Elements.earth, 3, 5)])],
                          [Goal(GoalType.damage_opponent, 400)],
-                         {'h': 0, 's': 0, 'm': 8}),
+                         {'h': 0, 's': 0, 'm': 8},
+                         (0.0, 0.0, 0.0, 0.0)),
 }

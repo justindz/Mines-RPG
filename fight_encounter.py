@@ -35,16 +35,12 @@ class Fight:
     def __init__(self, _enemies: [enemy.Enemy], characters: [Character]):
         self.enemies = _enemies
         self.characters = characters
-        self.summons = {}
         self.level = self.coins = 0
         self.description = 'You see:'
 
         for e in self.enemies:
             self.description += f'\n {e.name}'
             self.level += e.level
-
-        for c in self.characters:
-            self.summons[c.name] = []
 
         self.level = int(self.level / len(self.enemies))
         self.inits = self.characters + self.enemies
@@ -78,18 +74,26 @@ class Fight:
         self.inits.remove(enemy_to_remove)
 
     def summon(self, summon: Summon, owner: Character):
-        self.summons[owner.name].append(summon)
-        return f'{owner.name} summoned {summon.name}.'
+        summon.owner = owner.name
+        summon.name = f'{owner.name}\'s {summon.name}'
+        self.characters.append(summon)
+        self.inits.append(summon)
+        return f'{summon.owner} summoned {summon.name}.'
 
-    def unsummon(self, summon: Summon, owner: Character) -> str:
-        out = f'{owner.name}\'s {summon.name} vanished.'
-        self.summons[owner.name].remove(summon)
-        return out
+    def unsummon(self, summon: Summon) -> str:
+        self.characters.remove(summon)
+        self.inits.remove(summon)
+        return f'{summon.owner}\'s {summon.name} vanished.'
 
     def unsummon_all(self, owner: Character) -> bool:
-        count = len(self.summons[owner.name])
-        self.summons[owner.name] = []
-        return True if count > 0 else False
+        i = 0
+
+        for s in [x for x in self.characters if isinstance(x, Summon) and x.owner == owner.name]:
+            i += 1
+            self.characters.remove(s)
+            self.inits.remove(s)
+
+        return True if i > 0 else False
 
     def activate(self, element: Elements):
         if element in self.elements_weak:
@@ -174,7 +178,7 @@ class Fight:
                     raise Exception(f'{char.name} used ability {ab.name} with unsupported effect type {effect.type}')
 
             if _target.current_health <= 0:
-                self.enemies.remove(_target)
+                self.remove_enemy(_target)
 
         if isinstance(ab, spell.Spell):
             for summ_str in ab.summon:
@@ -236,7 +240,10 @@ class Fight:
 
         for c in self.characters:
             if c != ally:
-                out += f'\n{i} - {c.name} {c.current_health}h {c.current_stamina}s {c.current_mana}m'
+                if isinstance(c, Character):
+                    out += f'\n{i} - {c.name} {c.current_health}h {c.current_stamina}s {c.current_mana}m'
+                elif isinstance(c, Summon):
+                    out += f'\n{i} - {c.owner}\'s {c.name} {c.current_health}h'
             else:
                 out += f'\n{i} - YOU {c.current_health}h {c.current_stamina}s {c.current_mana}m'
 
