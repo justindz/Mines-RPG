@@ -7,8 +7,8 @@ from enum import Enum
 
 
 class GoalType(Enum):
-    damage_player = 1
-    debuff_player = 2
+    damage_opponent = 1
+    debuff_opponent = 2
     heal_ally = 3
     buff_ally = 4
     summon = 5  # intended for use basically whenever off cooldown
@@ -22,9 +22,9 @@ class Goal:
 
     @staticmethod
     def get_contributor_effects_by_goal_type(goal_type: GoalType):
-        if goal_type == GoalType.damage_player:
+        if goal_type == GoalType.damage_opponent:
             contribs = [EffectType.damage_health]
-        elif goal_type == GoalType.debuff_player:
+        elif goal_type == GoalType.debuff_opponent:
             contribs = [EffectType.debuff]
         elif goal_type == GoalType.heal_ally:
             contribs = [EffectType.restore_health]
@@ -74,6 +74,7 @@ class Enemy:
         self.init_growth = init_growth
         self.bonus_init = 0  # exists for the purpose of init sorting in fight encounters with characters
         self.status_effects = []  # list of dicts w/ keys = name, stat, value, turns_remaining
+        self.ele_pens = (0.0, 0.0, 0.0, 0.0)  # used for enemy on summon and summon on enemy damage calcs
 
         # Resistances
         self.earth_res = earth_res
@@ -189,13 +190,13 @@ class Enemy:
             return plans
 
         # damage_player goal
-        goal = [x for x in self.goals if x.goal_type == GoalType.damage_player]
+        goal = [x for x in self.goals if x.goal_type == GoalType.damage_opponent]
 
         if len(goal) > 0:
             plans += self.get_damage_player_plans(goal[0], fight)
 
         # debuff_player goal
-        goal = [x for x in self.goals if x.goal_type == GoalType.debuff_player]
+        goal = [x for x in self.goals if x.goal_type == GoalType.debuff_opponent]
 
         if len(goal) > 0:
             plans += self.get_debuff_player_plans(goal[0], fight)
@@ -230,7 +231,7 @@ class Enemy:
         plans = []
 
         for action in self.actions:
-            if action.targets_players and action.is_usable(fight.states):
+            if action.targets_opponents and action.is_usable(fight.states):
                 effects = list(filter(lambda effect: effect.type == EffectType.damage_health, action.effects))
 
                 if len(effects) > 0:
@@ -250,7 +251,7 @@ class Enemy:
         plans = []
 
         for action in self.actions:
-            if action.targets_players and action.is_usable(fight.states):
+            if action.targets_opponents and action.is_usable(fight.states):
                 effects = list(filter(lambda effect: effect.type == EffectType.damage_health, action.effects))
 
                 if len(effects) > 0:
@@ -268,7 +269,7 @@ class Enemy:
         plans = []
 
         for action in self.actions:
-            if action.targets_players and action.is_usable(fight.states):
+            if action.targets_opponents and action.is_usable(fight.states):
                 effects = list(filter(lambda effect: effect.type == EffectType.debuff, action.effects))
 
                 if len(effects) > 0:
@@ -335,7 +336,7 @@ class Enemy:
         plans = []
 
         for action in self.actions:
-            if action.is_usable(fight.states) and not action.targets_players and not action.targets_allies:
+            if action.is_usable(fight.states) and not action.targets_opponents and not action.targets_allies:
                 effects = list(filter(lambda effect: effect.type in [EffectType.damage_health, EffectType.debuff,
                                                                      EffectType.buff, EffectType.restore_health,
                                                                      EffectType.summon], action.effects))
@@ -387,21 +388,36 @@ class Enemy:
 
     def take_damage(self, dmgs: list, ele_pens: tuple) -> list:
         for dmg in dmgs:
-            amt = dmg[0]
-
-            if dmg[1] == Elements.earth:
-                amt *= (1.0 - self.earth_res + min(ele_pens[0], self.earth_res))
-            elif dmg[1] == Elements.fire:
-                amt *= (1.0 - self.fire_res + min(ele_pens[1], self.fire_res))
-            elif dmg[1] == Elements.electricity:
-                amt *= (1.0 - self.electricity_res + min(ele_pens[2], self.electricity_res))
-            elif dmg[1] == Elements.water:
-                amt *= (1.0 - self.water_res + min(ele_pens[3], self.water_res))
-
+            amt = self.apply_element_damage_resistances(dmg[0], dmg[1], ele_pens)
             self.current_health -= round(amt)
             self.current_health = max(0, self.current_health)
 
         return dmgs
+
+    def apply_element_damage_resistances(self, amt: int, element, ele_pens) -> float:
+        if element == Elements.earth:
+            amt *= (1.0 - (self.earth_res + min(ele_pens[0], self.earth_res)))
+        elif element == Elements.fire:
+            amt *= (1.0 - (self.fire_res + min(ele_pens[1], self.fire_res)))
+        elif element == Elements.electricity:
+            amt *= (1.0 - (self.electricity_res + min(ele_pens[2], self.electricity_res)))
+        elif element == Elements.water:
+            amt *= (1.0 - (self.water_res + min(ele_pens[3], self.water_res)))
+        return amt
+
+    def estimate_damage_from_enemy_action(self, enemy, action) -> int:
+        amt = 0
+
+        for effect in action.effects:
+            element_scaling = enemy.get_element_scaling(effect.element)
+            scaled_min = int(effect.min * element_scaling)
+            scaled_max = int(effect.max * element_scaling)
+            avg = (scaled_min + scaled_max) / 2
+            avg += int((scaled_max - avg) * action.base_crit_chance)
+            amt += avg
+            amt = self.apply_element_damage_resistances(amt, effect.element, enemy.ele_pens)
+
+        return amt
 
     def restore_health(self, amount: int, source=None):
         start = self.current_health

@@ -232,6 +232,38 @@ class DelveController(commands.Cog):
                     return  # The channel has been deleted because the delve ended
 
                 if isinstance(actor, Character):  # Player
+                    for summon in fight.summons[actor.name]:
+                        if actor.current_health <= summon.cost['h']:
+                            await delve.channel.send(f'{actor.name} has insufficient health to maintain their {summon.name}.')
+                            fight.unsummon(summon, actor)
+                            break
+                        if actor.current_stamina < summon.cost['s']:
+                            await delve.channel.send(f'{actor.name} has insufficient stamina to maintain their {summon.name}.')
+                            fight.unsummon(summon, actor)
+                            break
+                        if actor.current_mana < summon.cost['m']:
+                            await delve.channel.send(f'{actor.name} has insufficient mana to maintain their {summon.name}.')
+                            fight.unsummon(summon, actor)
+                            break
+
+                        out = f'{actor.name} spent '
+
+                        if summon.cost['h'] > 0:
+                            actor.current_health -= summon.cost['h']
+                            out += f'{summon.cost["h"]}h, '
+
+                        if summon.cost['s'] > 0:
+                            actor.current_stamina -= summon.cost['s']
+                            out += f'{summon.cost["s"]}s, '
+
+                        if summon.cost['m'] > 0:
+                            actor.current_mana -= summon.cost['m']
+                            out += f'{summon.cost["m"]}m, '
+
+                        out = out.rstrip(", ") + f' to maintain their {summon.name}.'
+                        await delve.channel.send(out)
+                        actor.save()
+
                     def check_action_menu(m):
                         if str(m.author) == actor.name and m.channel == delve.channel:
                             if m.content in ['1', '2', '3']:
@@ -249,7 +281,7 @@ class DelveController(commands.Cog):
 
                             def check_ability_menu(m):
                                 if str(m.author) == actor.name and m.channel == delve.channel:
-                                    if 0 < int(m.content) <= 6 and actor.ability_slots[m.content] is not None:
+                                    if 0 < int(m.content) <= len(actor.ability_slots) and actor.ability_slots[m.content] is not None:
                                         return True
                                 return False
 
@@ -269,7 +301,7 @@ class DelveController(commands.Cog):
                                 enemy_choice = int(msg.content)
                                 enemy = fight.enemies[enemy_choice - 1]
                                 await check_ability_requirements_and_use(ability, actor, delve, enemy, fight)
-                            else:
+                            elif isinstance(ability, spell.Spell) and not ability.targets_enemies:
                                 await delve.channel.send(fight.display_ally_menu(actor))
 
                                 def check_ally_menu(m):
@@ -298,6 +330,18 @@ class DelveController(commands.Cog):
                             await delve.channel.send(actor.use_consumable(self.connection, actor.inventory[indices[int(choice) - 1]]))
                         elif action == '3':  # Recover
                             await self.recover(actor, delve)
+
+                        for s in fight.summons[actor.name]:
+                            await asyncio.sleep(2)
+                            out = s.take_a_turn(fight)
+                            await delve.channel.send(out)
+
+                            for enemy in fight.enemies:
+                                if enemy.current_health <= 0:
+                                    fight.remove_enemy(enemy)
+                                    await delve.channel.send(f'{s.name} defeated {enemy.name}.')
+
+                        await self.check_end_of_fight(delve, fight)
                     except asyncio.TimeoutError:
                         await delve.channel.send('{} did not take an action in time.'.format(actor.name))
                         await self.recover(actor, delve)
@@ -307,7 +351,14 @@ class DelveController(commands.Cog):
 
                     for target in fight.characters:
                         if target.current_health <= 0:
+                            if fight.remove_character(target):
+                                await delve.channel.send(f'{target.name}\'s summons vanished.')
+
                             await self.player_dead(delve, target)
+                        else:
+                            for s in fight.summons[target.name]:
+                                if s.current_health <= 0:
+                                    await delve.channel.send(fight.unsummon(s))
 
                     if await self.check_end_of_fight(delve, fight):
                         break

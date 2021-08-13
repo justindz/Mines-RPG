@@ -4,7 +4,7 @@ from elements import Elements
 from ai.action import Action
 
 
-class Summon(Action):
+class SummonAction(Action):
     def __init__(self, name: str, cooldown: int, enemy_strs: [str], description: str):
         if len(enemy_strs) == 0:
             raise Exception(f'Incorrect enemies and levels lists provided to summon action {name}')
@@ -21,8 +21,8 @@ class Summon(Action):
         out = f'{user.name} used {self.name}\n{self.description}'
 
         for enemy_str in self.enemy_strs:
-            fight.add_enemy(enemy_str)
-            out += f'\n{enemy_str.capitalize()} appeared!'
+            name = fight.add_enemy(enemy_str)
+            out += f'\n{name} appeared!'
 
         out += self.handle_elements(fight)
         self.check_cooldown()

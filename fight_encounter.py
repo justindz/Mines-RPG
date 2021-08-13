@@ -7,6 +7,8 @@ import enemy
 from enemy import Enemy
 import enemy_group
 from enemies import enemies
+from summon import Summon
+from summons import summons
 from elements import Elements
 from item import ItemType
 import ability
@@ -33,12 +35,16 @@ class Fight:
     def __init__(self, _enemies: [enemy.Enemy], characters: [Character]):
         self.enemies = _enemies
         self.characters = characters
+        self.summons = {}
         self.level = self.coins = 0
         self.description = 'You see:'
 
         for e in self.enemies:
             self.description += f'\n {e.name}'
             self.level += e.level
+
+        for c in self.characters:
+            self.summons[c.name] = []
 
         self.level = int(self.level / len(self.enemies))
         self.inits = self.characters + self.enemies
@@ -60,14 +66,30 @@ class Fight:
         self.inits.append(e)
         self.description += f'\n {e.name}'
         # Note: don't update turn order here, this could cause some enemies to go twice
+        return e.name
 
     def remove_character(self, character: Character):
         self.characters.remove(character)
         self.inits.remove(character)
+        return self.unsummon_all(character)
 
     def remove_enemy(self, enemy_to_remove: Enemy):
         self.enemies.remove(enemy_to_remove)
         self.inits.remove(enemy_to_remove)
+
+    def summon(self, summon: Summon, owner: Character):
+        self.summons[owner.name].append(summon)
+        return f'{owner.name} summoned {summon.name}.'
+
+    def unsummon(self, summon: Summon, owner: Character) -> str:
+        out = f'{owner.name}\'s {summon.name} vanished.'
+        self.summons[owner.name].remove(summon)
+        return out
+
+    def unsummon_all(self, owner: Character) -> bool:
+        count = len(self.summons[owner.name])
+        self.summons[owner.name] = []
+        return True if count > 0 else False
 
     def activate(self, element: Elements):
         if element in self.elements_weak:
@@ -154,6 +176,11 @@ class Fight:
             if _target.current_health <= 0:
                 self.enemies.remove(_target)
 
+        if isinstance(ab, spell.Spell):
+            for summ_str in ab.summon:
+                s = copy.deepcopy(summons[summ_str])
+                out += '\n' + self.summon(s, char)
+
         for stat in ab.cost.keys():
             cost = ab.cost[stat]
 
@@ -239,7 +266,7 @@ class Fight:
     def display_ability_menu(character):
         out = 'Abilities:'
 
-        for i in range(1, len(character.ability_slots)):
+        for i in range(1, len(character.ability_slots) + 1):
             if character.ability_slots[str(i)] is not None:
                 _ability = utilities.get_ability_by_name(character.ability_slots[str(i)])
                 cost = f'{Fight.display_ability_cost(_ability.cost)}'

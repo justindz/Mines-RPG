@@ -15,14 +15,14 @@ class SingleTargetHeal(Action):
         self.name = name
         self.cooldown = cooldown
         self.effects = effects
-        self.targets_players = False
+        self.targets_opponents = False
         self.targets_allies = True
         self.area = 0
         self.area_modifiable = False
 
     def do(self, user, target, fight):
         out = f'{user.name} used {self.name} on {target.name}.'
-        targets = super().get_aoe_targets(fight.enemies, target)
+        targets = super().get_aoe_targets(fight, target)
 
         for target in targets:
             for effect in self.effects:

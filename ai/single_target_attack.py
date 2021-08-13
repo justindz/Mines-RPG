@@ -18,15 +18,15 @@ class SingleTargetAttack(Action):
         self.cooldown = cooldown
         self.base_crit_chance = base_crit_chance
         self.effects = effects
-        self.targets_players = True
+        self.targets_opponents = True
         self.targets_allies = False
         self.area = 0
         self.area_modifiable = False
 
-    def do(self, user, target: Character, fight):
+    def do(self, user, target, fight):
         out = f'{user.name} used {self.name} on {target.name}.'
         crit = False
-        targets = super().get_aoe_targets(fight.characters, target)
+        targets = super().get_aoe_targets(fight, target)
 
         if random.random() <= self.base_crit_chance:
             crit = True
@@ -34,7 +34,7 @@ class SingleTargetAttack(Action):
 
         for target in targets:
             for effect in self.effects:
-                dmgs = target.take_damage(user.deal_damage(effect, critical=crit))
+                dmgs = target.take_damage(user.deal_damage(effect, critical=crit), user.ele_pens)
 
                 for dmg in dmgs:
                     out += f'\n{target.name} suffered {dmg[0]} {Elements(dmg[1]).name} damage.'

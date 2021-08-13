@@ -44,5 +44,7 @@ spells = {
                                _status_effect_name='Slowed', _status_effect_turns=2)], [], []),
     'haste': Spell('Haste', 'Haste description.', 1, {'h': 0, 's': 0, 'm': 8},
                    [SpellEffect(EffectType.buff, Elements.electricity, 5, _stat='bonus_init',
-                    _status_effect_name='Hasted', _status_effect_turns=2)], [], [], _targets_enemies=False)
+                    _status_effect_name='Hasted', _status_effect_turns=2)], [], [], _targets_enemies=False),
+    'summon_coal_golem': Spell('Summon Coal Golem', 'Summon Coal Golem description.', 1, {'h': 0, 's': 0, 'm': 8}, [],
+                               [], [], _targets_enemies=False, _summon=['coal_golem']),
 }

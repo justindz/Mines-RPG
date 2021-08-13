@@ -15,7 +15,7 @@ class Explode(Action):
         self.name = name
         self.cooldown = 999
         self.effects = effects
-        self.targets_players = False
+        self.targets_opponents = False
         self.targets_allies = False
         self.area = 2
         self.area_modifiable = False
@@ -24,12 +24,12 @@ class Explode(Action):
     def do(self, user, target, fight):
         """target parameter is unused, since Explode is designed to always target all characters"""
         out = f'Enraged {user.name} used {self.name}.'
-        targets = super().get_aoe_targets(fight.characters, fight.characters[0])
+        targets = super().get_aoe_targets(fight, fight.characters[0])
 
         for target in targets:
             for effect in self.effects:
                 if effect.type == EffectType.damage_health:
-                    dmgs = target.take_damage(user.deal_damage(effect, critical=False))
+                    dmgs = target.take_damage(user.deal_damage(effect, critical=False), user.ele_pens)
 
                     for dmg in dmgs:
                         out += f'\n{target.name} suffered {dmg[0]} {Elements(dmg[1]).name} damage.'

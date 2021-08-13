@@ -109,8 +109,8 @@ class Character(Document):
         'bonus_water_res': 0.0,
 
         'points': 0,
-        'abilities': ['spell-stalagmite', 'skill-slash', 'spell-slow', 'spell-haste'],
-        'ability_slots': {'1': 'skill-slash', '2': 'spell-stalagmite', '3': 'spell-slow', '4': 'spell-haste'},
+        'abilities': ['spell-stalagmite', 'skill-slash', 'spell-slow', 'spell-haste', 'spell-summon_coal_golem'],
+        'ability_slots': {'1': 'skill-slash', '2': 'spell-stalagmite', '3': 'spell-slow', '4': 'spell-summon_coal_golem'},
         'equipped': {'weapon': None, 'head': None, 'chest': None, 'belt': None, 'boots': None, 'gloves': None,
                      'amulet': None, 'ring': None},
         'inventory': [],
@@ -476,7 +476,8 @@ class Character(Document):
 
         return dmgs
 
-    def take_damage(self, dmgs: list) -> list:
+    def take_damage(self, dmgs: list, ele_pens: tuple) -> list:
+        """ele_pens unused on players, but passed in for compability with summon vs. enemy planners (and vice versa)"""
         for dmg in dmgs:
             amt = self.apply_element_damage_resistances(dmg[0], dmg[1])
             self.current_health -= round(amt)

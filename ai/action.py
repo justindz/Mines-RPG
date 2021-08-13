@@ -10,7 +10,7 @@ class Action:
         self.turns_remaining = 0
         self.activates = []
         self.consumes = []
-        self.targets_players = False
+        self.targets_opponents = False
         self.targets_allies = False
         self.area = 0
         self.area_modifiable = False
@@ -52,8 +52,13 @@ class Action:
 
         return out
 
-    def get_aoe_targets(self, group: list, target) -> list:
+    def get_aoe_targets(self, fight, target) -> list:
         targets = [target]
+
+        if target in fight.characters:
+            group = fight.characters
+        else:
+            group = fight.enemies
 
         if self.area > 0:
             i = self.area
