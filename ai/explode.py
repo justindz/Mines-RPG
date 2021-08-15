@@ -34,7 +34,7 @@ class Explode(Action):
                     for dmg in dmgs:
                         out += f'\n{target.name} suffered {dmg[0]} {Elements(dmg[1]).name} damage.'
                 elif effect.type == EffectType.debuff:
-                    overwrite = target.apply_status_effect(effect.status_effect_name, effect.stat, effect.min,
+                    overwrite = target.apply_status_effect(effect.status_effect_name, effect.stat, effect.status_effect_value,
                                                            effect.status_effect_turns)
                     out += f'\n{target.name} has been affected by {effect.status_effect_name}.'
 

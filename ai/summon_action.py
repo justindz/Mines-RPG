@@ -12,7 +12,7 @@ class SummonAction(Action):
         super().__init__()
         self.name = name
         self.cooldown = cooldown
-        self.effects = [SpellEffect(EffectType.summon, Elements.earth, 1)]  # required for planner to pick up the action
+        self.effects = [SpellEffect(EffectType.summon, Elements.earth, _status_effect_value=1)]  # required for planner to pick up the action
         self.enemy_strs = enemy_strs
         self.description = description
 

@@ -1,8 +1,7 @@
 from ai.action import Action
 from spell import SpellEffect
 from ability import EffectType
-
-import random
+import dice
 
 
 class SingleTargetHeal(Action):
@@ -26,7 +25,7 @@ class SingleTargetHeal(Action):
 
         for target in targets:
             for effect in self.effects:
-                heal = target.restore_health(random.randint(effect.min, effect.max), user)
+                heal = target.restore_health(dice.roll(dice.count(user.level), effect.dice_value), user)
                 out += f'\n{target.name} regained {heal} health.'
 
         out += self.handle_elements(fight)

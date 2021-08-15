@@ -1,6 +1,7 @@
 import random
 
 import ability
+import dice
 import spell
 import skill
 from elements import Elements
@@ -82,7 +83,7 @@ def get_ability_by_name(ability_name: str) -> ability:
         raise Exception(f'utilities.get_ability_name called for unknown type: {ability_name}')
 
 
-def ability_to_str(ability_name: str) -> str:
+def ability_to_str(ability_name: str, level=1) -> str:
     ab = get_ability_by_name(ability_name)
     out = f'''
 =========={ab.name} ({"Skill" if isinstance(ab, skill.Skill) else "Spell"})==========
@@ -115,7 +116,7 @@ Cost: {ab.ability_cost_to_str()}'''
             out += f'\n- {effect.type.name} : {effect.damage_scaling} base weapon damage multiplier'
     elif isinstance(ab, spell.Spell):
         for effect in ab.effects:
-            out += f'\n- {effect.type.name} : {effect.min}-{effect.max} {get_elemental_symbol(effect.element)}'
+            out += f'\n- {effect.type.name} : {dice.count(level)}d{effect.dice_value} {get_elemental_symbol(effect.element)}'
 
     return out
 

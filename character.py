@@ -9,6 +9,7 @@ from elements import Elements
 import book
 import skill
 import spell
+import dice
 
 
 class Character(Document):
@@ -454,23 +455,19 @@ class Character(Document):
                 weapon = self.equipped['weapon']
 
                 for dmg in weapon['damages']:
-                    element_scaling = self.get_element_scaling(Elements(dmg[2]))
-                    max = int(dmg[1] * effect.damage_scaling * element_scaling)
+                    total = dice.roll(dmg[0], dmg[1], critical)
+                    total *= self.get_element_scaling(Elements(dmg[2]))
+                    total = round(total)
 
                     if critical:
-                        dmgs.append((max + weapon['crit_damage'], dmg[2]))
-                    else:
-                        min = int(dmg[0] * effect.damage_scaling * element_scaling)
-                        dmgs.append((random.randint(min, max), dmg[2]))
-            elif type(effect) == spell.SpellEffect:
-                element_scaling = self.get_element_scaling(effect.element)
-                min = effect.min
-                max = effect.max
+                        total += weapon['crit_damage']
 
-                if critical:
-                    dmgs.append((int(max * element_scaling), effect.element))
-                else:
-                    dmgs.append((int(random.randint(min, max) * element_scaling), effect.element))
+                    dmgs.append((total, Elements(dmg[2])))
+            elif type(effect) == spell.SpellEffect:
+                total = dice.roll(dice.count(self.level), effect.dice_value, critical)
+                total *= self.get_element_scaling(effect.element)
+                total = round(total)
+                dmgs.append((total, effect.element))
         else:
             raise Exception(f'{self.name} called character deal damage with invalid effect type {type(effect)}')
 
@@ -490,10 +487,8 @@ class Character(Document):
 
         for effect in action.effects:
             element_scaling = enemy.get_element_scaling(effect.element)
-            scaled_min = int(effect.min * element_scaling)
-            scaled_max = int(effect.max * element_scaling)
-            avg = (scaled_min + scaled_max) / 2
-            avg += int((scaled_max - avg) * action.base_crit_chance)
+            avg = (dice.count(enemy.level) * effect.dice_value) / 2 + element_scaling
+            avg += int((dice.count(enemy.level) * effect.dice_value - avg) * action.base_crit_chance)
             amt += avg
             amt = self.apply_element_damage_resistances(amt, effect.element)
 

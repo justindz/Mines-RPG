@@ -1,6 +1,7 @@
 from enum import Enum
 from mongokit_ng import Document
 
+import utilities
 from elements import Elements
 
 valid_slots = ['weapon', 'head', 'chest', 'belt', 'boots', 'gloves', 'amulet', 'ring']
@@ -60,7 +61,7 @@ def get_damages_display_string(item):
     display_string = ''
 
     for damage in item['damages']:
-        display_string += '{}-{} {}\n'.format(damage[0], damage[1], Elements(damage[2]).name)
+        display_string += '{}d{} {}\n'.format(damage[0], damage[1], utilities.get_elemental_symbol(Elements(damage[2])))
 
     return display_string
 
@@ -132,7 +133,7 @@ prefixes = {
         3: {'effect': 'base_crit_chance', 'value': 0.3},
     },
     'Powerful': {
-        1: {'effect': 'damage_added', 'value': 0.2}
+        1: {'effect': 'dice_added', 'value': 1}
     },
     'Smoldering': {
         1: {'effect': 'damage_convert', 'value': Elements.fire.value},
@@ -174,9 +175,9 @@ suffixes = {
         1: {'effect': 'damage_mode', 'value': [1, 2, Elements.water.value]}
     },
     'True': {
-        1: {'effect': 'damage_narrow', 'value': 10}
+        1: {'effect': 'damage_narrow'}
     },
     'Wild': {
-        1: {'effect': 'damage_spread', 'value': 10}
+        1: {'effect': 'damage_spread'}
     },
 }

@@ -145,7 +145,7 @@ class CharacterController(commands.Cog):
 '''
             if it['_itype'] == ItemType.weapon.value:
                 item_string += f'''
-Class: {WeaponType(it['_weapon_type']).name}
+Class: {WeaponType(it['_weapon_type']).name.capitalize()}
 Damage: {weapon.get_damages_display_string(it)}
 Crit Damage: +{it['crit_damage']}
 
@@ -198,7 +198,7 @@ Value: {it["value"]}
         character = self.get(ctx.author)
 
         try:
-            await ctx.author.send(utilities.ability_to_str(character.abilities[index]))
+            await ctx.author.send(utilities.ability_to_str(character.abilities[index], character.level))
         except IndexError:
             await ctx.author.send(utilities.red('Invalid ability index.'))
 

@@ -2,6 +2,7 @@ from elements import Elements
 from ability import EffectType
 from character import Character
 import utilities
+import dice
 
 import random
 from enum import Enum
@@ -374,14 +375,10 @@ class Enemy:
         dmgs = []
 
         if effect.type == EffectType.damage_health:
-            element_scaling = self.get_element_scaling(effect.element)
-            min = effect.min
-            max = effect.max
-
-            if critical:
-                dmgs.append((int(max * element_scaling), effect.element))
-            else:
-                dmgs.append((int(random.randint(min, max) * element_scaling), effect.element))
+            total = dice.roll(dice.count(self.level), effect.dice_value, critical)
+            total *= self.get_element_scaling(effect.element)
+            total = round(total)
+            dmgs.append((total, effect.element))
         else:
             raise Exception(f'{self.name} called enemy deal damage with invalid effect type {type(effect)}')
 
@@ -411,10 +408,8 @@ class Enemy:
 
         for effect in action.effects:
             element_scaling = enemy.get_element_scaling(effect.element)
-            scaled_min = int(effect.min * element_scaling)
-            scaled_max = int(effect.max * element_scaling)
-            avg = (scaled_min + scaled_max) / 2
-            avg += int((scaled_max - avg) * action.base_crit_chance)
+            avg = (dice.count(enemy.level) * effect.dice_value) / 2 + element_scaling
+            avg += int((dice.count(enemy.level) * effect.dice_value - avg) * action.base_crit_chance)
             amt += avg
             amt = self.apply_element_damage_resistances(amt, effect.element, enemy.ele_pens)
 

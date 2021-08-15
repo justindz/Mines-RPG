@@ -389,6 +389,7 @@ class DelveController(commands.Cog):
             for character in [x for x in delve.characters if isinstance(x, Character)]:
                 character.remove_all_status_effects()
 
+            fight.unsummon_all()
             delve.status = 'idle'
             return True
         return False

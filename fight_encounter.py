@@ -14,6 +14,7 @@ from item import ItemType
 import ability
 import spell
 import skill
+import dice
 
 
 def get_random_fight(tags: [str], characters: [Character], depth: int):
@@ -67,7 +68,7 @@ class Fight:
     def remove_character(self, character: Character):
         self.characters.remove(character)
         self.inits.remove(character)
-        return self.unsummon_all(character)
+        return self.unsummon_all_by_character(character)
 
     def remove_enemy(self, enemy_to_remove: Enemy):
         self.enemies.remove(enemy_to_remove)
@@ -85,7 +86,7 @@ class Fight:
         self.inits.remove(summon)
         return f'{summon.owner}\'s {summon.name} vanished.'
 
-    def unsummon_all(self, owner: Character) -> bool:
+    def unsummon_all_by_character(self, owner: Character) -> bool:
         i = 0
 
         for s in [x for x in self.characters if isinstance(x, Summon) and x.owner == owner.name]:
@@ -94,6 +95,11 @@ class Fight:
             self.inits.remove(s)
 
         return True if i > 0 else False
+
+    def unsummon_all(self):
+        for s in [x for x in self.characters if isinstance(x, Summon)]:
+            self.characters.remove(s)
+            self.inits.remove(s)
 
     def activate(self, element: Elements):
         if element in self.elements_weak:
@@ -159,16 +165,16 @@ class Fight:
                     for dmg in dmgs:
                         out += f'\n{_target.name} suffered {dmg[0]} {Elements(dmg[1]).name} damage.'
                 elif effect.type == ability.EffectType.restore_health:
-                    heal = _target.restore_health(random.randint(effect.min, effect.max), char)
+                    heal = _target.restore_health(dice.roll(dice.count(char.level), effect.dice_value, crit), char)
                     out += f'\n{_target.name} regained {heal} health.'
                 elif effect.type == ability.EffectType.restore_stamina:
-                    stam = _target.restore_stamina(random.randint(effect.min, effect.max), char)
+                    stam = _target.restore_stamina(dice.roll(dice.count(char.level), effect.dice_value, crit), char)
                     out += f'\n{_target.name} regained {stam} stamina.'
                 elif effect.type == ability.EffectType.restore_mana:
-                    mana = _target.restore_mana(random.randint(effect.min, effect.max), char)
+                    mana = _target.restore_mana(dice.roll(dice.count(char.level), effect.dice_value, crit), char)
                     out += f'\n{_target.name} regained {mana} mana.'
                 elif effect.type in [ability.EffectType.buff, ability.EffectType.debuff]:
-                    overwrite = _target.apply_status_effect(effect.status_effect_name, effect.stat, effect.min,
+                    overwrite = _target.apply_status_effect(effect.status_effect_name, effect.stat, effect.status_effect_value,
                                                             effect.status_effect_turns)
                     out += f'\n{_target.name} has been affected by {effect.status_effect_name}.'
 

@@ -9,6 +9,7 @@ from armor import armors
 from consumable import consumables
 from weapon import weapons
 from book import books
+import dice
 
 
 class ItemType(Enum):
@@ -36,6 +37,7 @@ def generate_item(connection, key: str, selection: dict, level: int, rarity=None
 
     try:
         base = selection[key]
+        base['level'] = level
 
         if selection == weapons:
             item = connection.Weapon()
@@ -51,7 +53,13 @@ def generate_item(connection, key: str, selection: dict, level: int, rarity=None
         return None
 
     for k, v in base.items():
-        item[k] = v
+        if k == 'damages':
+            item['damages'] = []
+
+            for _ in v:
+                item['damages'].append([dice.count(level), v[1], v[2]])
+        else:
+            item[k] = v
 
     if rarity is None:
         roll = random.randint(1, 100)
@@ -220,25 +228,16 @@ def add_affix(item, name, affix, level):
         item[affix['effect']] += affix['value']
     elif affix['effect'] == 'damage_convert':
         item['damages'][0][2] = affix['value']
-    elif affix['effect'] == 'damage_added':
-        added_min = int(affix['value'] * float(item['damages'][0][0]))
-        added_max = int(affix['value'] * float(item['damages'][0][1]))
-        item['damages'][0][0] += added_min
-        item['damages'][0][1] += added_max
+    elif affix['effect'] == 'dice_added':
+        item['damages'][0][0] += affix['value']
     elif affix['effect'] == 'damage_mode':
         item['damages'].append(affix['value'])
     elif affix['effect'] == 'damage_narrow':
-        from_max = int(affix['value'] * float(item['damages'][0][1]))
-        from_max = max(from_max, 1)
-        item['damages'][0][0] += from_max
-        item['damages'][0][1] -= from_max
-        item['damages'][0][1] = max(item['damages'][0][1], item['damages'][0][0])
+        item['damages'][0][0] *= 2
+        item['damages'][0][1] = round(item['damages'][0][1] / 2)
     elif affix['effect'] == 'damage_spread':
-        from_min = int(affix['value'] * float(item['damages'][0][0]))
-        from_min = max(from_min, 1)
-        item['damages'][0][0] -= from_min
-        item['damages'][0][1] += from_min
-        item['damages'][0][0] = max(item['damages'][0][0], 1)
+        item['damages'][0][0] = round(item['damages'][0][0] / 2)
+        item['damages'][0][1] *= 2
     else:
         print(f'Unknown affix {name} with effect {affix["effect"]} attempted to add to item {item["name"]}')
 

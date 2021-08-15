@@ -27,13 +27,12 @@ enemies = {
                    0.0, 0.0,
                    [
                        SingleTargetAttack('Headbutt', 0, 0.05,
-                                          [SpellEffect(EffectType.damage_health, Elements.earth, 1, 4)]),
+                                          [SpellEffect(EffectType.damage_health, Elements.earth, _dice_value=4)]),
                        SingleTargetHeal('Regenerate', 3,
-                                        [SpellEffect(EffectType.restore_health, Elements.water, 2, 5)]),
-                       StatusEffect('Symbiosis', 4, [SpellEffect(EffectType.buff, Elements.water, 10,
-                                                                 _stat='bonus_strength',
-                                                                 _status_effect_name='Reinforced',
-                                                                 _status_effect_turns=3)])
+                                        [SpellEffect(EffectType.restore_health, Elements.water, _dice_value=10)]),
+                       StatusEffect('Symbiosis', 4, [
+                           SpellEffect(EffectType.buff, Elements.water, _status_effect_value=10, _stat='bonus_strength',
+                                       _status_effect_name='Reinforced', _status_effect_turns=3)])
                    ],
                    [Goal(GoalType.damage_opponent, 500),
                     Goal(GoalType.heal_ally, 450),
@@ -57,10 +56,11 @@ enemies = {
                     0.0, 0.0,
                     [
                         SingleTargetAttack('Bite', 0, 0.06,
-                                           [SpellEffect(EffectType.damage_health, Elements.earth, 2, 4)]),
+                                           [SpellEffect(EffectType.damage_health, Elements.earth, _dice_value=4)]),
                         StatusEffect('Web', 3,
-                                     [SpellEffect(EffectType.debuff, Elements.earth, -5, _stat='bonus_init',
-                                                  _status_effect_name='Slowed', _status_effect_turns=2)], debuff=True),
+                                     [SpellEffect(EffectType.debuff, Elements.earth, _status_effect_value=-5,
+                                                  _stat='bonus_init', _status_effect_name='Slowed',
+                                                  _status_effect_turns=2)], debuff=True),
                     ],
                     [Goal(GoalType.damage_opponent, 500),
                      Goal(GoalType.debuff_opponent, 425)]),
@@ -83,7 +83,7 @@ enemies = {
                     0.1, 0.0,
                     [
                         SingleTargetAttack('Bite', 0, 0.05,
-                                           [SpellEffect(EffectType.damage_health, Elements.earth, 1, 6)]),
+                                           [SpellEffect(EffectType.damage_health, Elements.earth, _dice_value=6)]),
                         SummonAction('Screech', 10, ['summoned_scarab'], 'The scarab cries for backup.'),
                     ],
                     [Goal(GoalType.summon, 500),
@@ -106,7 +106,7 @@ enemies = {
                              0.1, 0.0,
                              0.1, 0.0,
                              [SingleTargetAttack('Bite', 0, 0.05,
-                                                 [SpellEffect(EffectType.damage_health, Elements.earth, 1, 6)])],
+                                                 [SpellEffect(EffectType.damage_health, Elements.earth, _dice_value=6)])],
                              [Goal(GoalType.damage_opponent, 400)]),
 
     'imp': Enemy('Imp',
@@ -126,7 +126,8 @@ enemies = {
                  0.03, 0.01,
                  0.0, 0.01,
                  [
-                     SingleTargetAttack('Claw', 0, 0.05, [SpellEffect(EffectType.damage_health, Elements.earth, 3, 6)]),
+                     SingleTargetAttack('Claw', 0, 0.05, [SpellEffect(EffectType.damage_health, Elements.earth,
+                                                                      _dice_value=6)]),
                  ],
                  [Goal(GoalType.damage_opponent, 500)]),
 
@@ -147,8 +148,9 @@ enemies = {
                   0.03, 0.01,
                   0.0, 0.01,
                   [
-                      SingleTargetAttack('Bite', 0, 0.06, [SpellEffect(EffectType.damage_health, Elements.fire, 2, 4)]),
-                      Explode('Explode', [SpellEffect(EffectType.damage_health, Elements.fire, 5, 10)])
+                      SingleTargetAttack('Bite', 0, 0.06, [SpellEffect(EffectType.damage_health, Elements.fire,
+                                                                       _dice_value=8)]),
+                      Explode('Explode', [SpellEffect(EffectType.damage_health, Elements.fire, _dice_value=10)])
                   ],
                   [Goal(GoalType.enrage, 0),
                    Goal(GoalType.damage_opponent, 400)]),

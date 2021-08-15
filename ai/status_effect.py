@@ -30,7 +30,7 @@ class StatusEffect(Action):
 
         for target in targets:
             for effect in self.effects:
-                overwrite = target.apply_status_effect(effect.status_effect_name, effect.stat, effect.min,
+                overwrite = target.apply_status_effect(effect.status_effect_name, effect.stat, effect.status_effect_value,
                                                        effect.status_effect_turns)
                 out += f'\n{target.name} has been affected by {effect.status_effect_name}.'
 
