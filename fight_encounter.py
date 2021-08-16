@@ -160,7 +160,7 @@ class Fight:
         for _target in targets:
             for effect in ab.effects:
                 if effect.type == ability.EffectType.damage_health:
-                    dmgs = _target.take_damage(char.deal_damage(effect, critical=crit), char.get_ele_pens())
+                    dmgs = _target.take_damage(char.deal_damage(effect, critical=crit, multi=1.0 if isinstance(ab, spell.Spell) else ab.multiplier), char.get_ele_pens())
 
                     for dmg in dmgs:
                         out += f'\n{_target.name} suffered {dmg[0]} {Elements(dmg[1]).name} damage.'

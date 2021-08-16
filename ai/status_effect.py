@@ -1,10 +1,9 @@
 from ai.action import Action
-from spell import SpellEffect
-from ability import EffectType
+from ability import EffectType, Effect
 
 
 class StatusEffect(Action):
-    def __init__(self, name: str, cooldown: int, effects: [SpellEffect], debuff=True):
+    def __init__(self, name: str, cooldown: int, effects: [Effect], debuff=True):
         for effect in effects:
             if effect.type not in [EffectType.buff, EffectType.debuff]:
                 raise Exception(f'StatusEffect {name} has an unsupported effect type {effect.type}')

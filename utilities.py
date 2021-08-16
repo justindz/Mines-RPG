@@ -113,7 +113,7 @@ Cost: {ab.ability_cost_to_str()}'''
 
     if isinstance(ab, skill.Skill):
         for effect in ab.effects:
-            out += f'\n- {effect.type.name.capitalize()} : {effect.damage_scaling}x Weapon Damage'
+            out += f'\n- {effect.type.name.capitalize()} : {effect.multiplier}x Weapon Damage'
     elif isinstance(ab, spell.Spell):
         for effect in ab.effects:
             out += f'\n- {effect.type.name.capitalize()} : {dice.count(level)}d{effect.dice_value} {get_elemental_symbol(effect.element)}'

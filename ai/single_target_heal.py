@@ -1,11 +1,10 @@
 from ai.action import Action
-from spell import SpellEffect
-from ability import EffectType
+from ability import EffectType, Effect
 import dice
 
 
 class SingleTargetHeal(Action):
-    def __init__(self, name: str, cooldown: int, effects: [SpellEffect]):
+    def __init__(self, name: str, cooldown: int, effects: [Effect]):
         for effect in effects:
             if effect.type != EffectType.restore_health:
                 raise Exception(f'SingleTargetHeal {name} has an unsupported effect type {effect.type}')

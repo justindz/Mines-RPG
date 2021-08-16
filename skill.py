@@ -1,25 +1,27 @@
 from elements import Elements
 import ability
-from ability import EffectType
+from ability import EffectType, Effect
 from weapon import WeaponType
 
 
-class SkillEffect:
-    def __init__(self, _type, _damage_scaling):
-        self.type = _type
-        self.damage_scaling = _damage_scaling  # Scales on equipped weapon base damage
-
-
 class Skill(ability.Ability):
-    def __init__(self, _name, _description, _level, _cost, _effects, _activates, _consumes, _weapon_types, _area=0, _area_modifiable=False):
+    def __init__(self, _name, _description, _level, _cost, _effects, _activates, _consumes, _weapon_types,
+                 _multiplier, _area=0, _area_modifiable=False):
+        for eff in _effects:
+            if eff.type in [EffectType.restore_health, EffectType.restore_stamina, EffectType.restore_mana]:
+                raise Exception(f'Skill {_name} includes effect with unsupported type {eff.type}')
+
         super().__init__(_name, _description, _level, _cost, _effects, _activates, _consumes, _area, _area_modifiable)
         self.weapon_types = _weapon_types
+        self.multiplier = _multiplier
 
 
-skills = {
+skills = {  # Note: Element should always be None for Skill effects--they inherit the weapon element
     'slash': Skill('Slash', 'Slash skill description.', 1,
                    {'h': 0, 's': 5, 'm': 0},
-                   [SkillEffect(EffectType.damage_health, 1.0)],
-                   [Elements.earth], [], [WeaponType.sword, WeaponType.dagger, WeaponType.axe, WeaponType.fist], 1,
-                   _area_modifiable=True),
+                   [Effect(EffectType.damage_health, None),
+                    Effect(EffectType.debuff, None, _status_effect_value=-5, _stat='health_regen',
+                           _status_effect_name='Wounded', _status_effect_turns=2)],
+                   [Elements.earth], [], [WeaponType.sword, WeaponType.dagger, WeaponType.axe, WeaponType.fist], 1.2,
+                   _area=1, _area_modifiable=True),
 }

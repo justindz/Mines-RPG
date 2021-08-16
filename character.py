@@ -447,23 +447,23 @@ class Character(Document):
             amt *= (1.0 - (self.water_res + self.bonus_water_res))
         return amt
 
-    def deal_damage(self, effect, critical=False):
+    def deal_damage(self, effect, critical=False, multi=1.0):
         dmgs = []
 
         if effect.type == ability.EffectType.damage_health:
-            if type(effect) == skill.SkillEffect:
+            if effect.element is None:
                 weapon = self.equipped['weapon']
 
                 for dmg in weapon['damages']:
                     total = dice.roll(dmg[0], dmg[1], critical)
                     total *= self.get_element_scaling(Elements(dmg[2]))
-                    total = round(total)
+                    total = round(total * multi)
 
                     if critical:
                         total += weapon['crit_damage']
 
                     dmgs.append((total, Elements(dmg[2])))
-            elif type(effect) == spell.SpellEffect:
+            elif type(effect) == ability.Effect:
                 total = dice.roll(dice.count(self.level), effect.dice_value, critical)
                 total *= self.get_element_scaling(effect.element)
                 total = round(total)

@@ -1,12 +1,11 @@
-from ability import EffectType
-from spell import SpellEffect
+from ability import EffectType, Effect
 from elements import Elements
 from ai.action import Action
 
 
 class Explode(Action):
     """targets_players and _allies are set to False, which prevents this from being chosen for non-enrage plans."""
-    def __init__(self, name: str, effects: [SpellEffect]):
+    def __init__(self, name: str, effects: [Effect]):
         for effect in effects:
             if effect.type not in [EffectType.damage_health, EffectType.debuff]:
                 raise Exception(f'Explode action {name} has an unsupported effect type {effect.type}')

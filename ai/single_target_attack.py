@@ -1,14 +1,13 @@
 from ai.action import Action
 from character import Character
 from elements import Elements
-from spell import SpellEffect
-from ability import EffectType
+from ability import EffectType, Effect
 
 import random
 
 
 class SingleTargetAttack(Action):
-    def __init__(self, name: str, cooldown: int, base_crit_chance: float, effects: [SpellEffect]):
+    def __init__(self, name: str, cooldown: int, base_crit_chance: float, effects: [Effect]):
         for effect in effects:
             if effect.type != EffectType.damage_health:
                 raise Exception(f'SingleTargetAttack {name} has an unsupported effect type {effect.type}')
