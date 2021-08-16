@@ -24,7 +24,7 @@ class Consumable(Document):
 
 
 consumables = {
-    'test_potion': {'name': 'RND Potion', 'description': 'Shite.', 'level': 1, 'weight': 1,
+    'test_potion': {'name': 'RND Potion', 'description': 'TODO', 'level': 1, 'weight': 1,
                     '_itype': 10, 'uses': 1, 'health': 0, 'stamina': 0, 'mana': 5}
 }
 

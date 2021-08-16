@@ -5,11 +5,10 @@ from mongokit_ng import RequireFieldError
 import armor
 import consumable
 import weapon
-from armor import armors
+from armors import armors
 from consumable import consumables
-from weapon import weapons
+from weapons import weapons
 from book import books
-import dice
 
 
 class ItemType(Enum):
@@ -53,13 +52,7 @@ def generate_item(connection, key: str, selection: dict, level: int, rarity=None
         return None
 
     for k, v in base.items():
-        if k == 'damages':
-            item['damages'] = []
-
-            for _ in v:
-                item['damages'].append([dice.count(level), v[1], v[2]])
-        else:
-            item[k] = v
+        item[k] = v
 
     if rarity is None:
         roll = random.randint(1, 100)
@@ -203,7 +196,7 @@ def delete_item(connection, item):
                           ItemType.gloves.value, ItemType.chest.value, ItemType.ring.value]:
         connection.delverpg.armor.remove(_id)
     elif item['_itype'] == ItemType.weapon.value:
-        connection.delverpg.weapons.remove(_id)
+        weapons.weapons.remove(_id)
     elif item['_itype'] == ItemType.potion.value or item['_itype'] == ItemType.food.value:
         connection.delverpg.consumables.remove(_id)
     elif item['_itype'] == ItemType.book.value:

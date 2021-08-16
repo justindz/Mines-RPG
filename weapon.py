@@ -8,12 +8,16 @@ valid_slots = ['weapon', 'head', 'chest', 'belt', 'boots', 'gloves', 'amulet', '
 
 
 class WeaponType(Enum):
-    dagger = 1
+    hammer = 1
     sword = 2
-    spear = 3
-    axe = 4
-    mace = 5
-    staff = 6
+    dagger = 3
+    staff = 4
+    axe = 5
+    spear = 6
+    flail = 7
+    fist = 8
+    magic = 9
+    thrown = 10
 
 
 class Weapon(Document):
@@ -82,16 +86,6 @@ def get_bonuses_display_string(item):
     display_string += f'\nWater Penetration {item["water_penetration"]:.0%}' if item['water_penetration'] > 0 else ''
     return display_string
 
-
-weapons = {
-    'test_sword': {'name': 'RND Sword', 'description': 'Shite.', 'level': 1, 'weight': 3, '_itype': 1,
-                   '_weapon_type': WeaponType.sword.value, 'bonus_strength': 1, 'bonus_intelligence': 0,
-                   'bonus_dexterity': 0, 'bonus_willpower': 0, 'bonus_health': 0, 'bonus_stamina': 0, 'bonus_mana': 0,
-                   'bonus_init': 0, 'base_crit_chance': 0.5, 'damages': [[1, 4, Elements.earth.value]], 'crit_damage': 0,
-                   'required_strength': 0, 'required_intelligence': 0, 'required_dexterity': 0, 'required_willpower': 0,
-                   'earth_penetration': 0.0, 'fire_penetration': 0.0, 'electricity_penetration': 0.0,
-                   'water_penetration': 0.0}
-}
 
 prefixes = {
     'Honed': {

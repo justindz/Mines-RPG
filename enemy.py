@@ -180,7 +180,7 @@ class Enemy:
 
             plans.sort(key=lambda x: x.score, reverse=True)
             the_plan = plans[0]
-            print(f'The chosen plan is: --{the_plan.debug}-- w/ score {the_plan.score}')
+            print(f'The chosen plan is: --{the_plan.debug}--')
             return the_plan.action()
         else:
             return f'{self.name} took no action.'

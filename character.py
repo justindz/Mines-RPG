@@ -96,7 +96,7 @@ class Character(Document):
 
         'init': 0,
         'bonus_init': 0,
-        'carry': 500,
+        'carry': 100,
         'current_carry': 0,
         'bonus_carry': 0,
 

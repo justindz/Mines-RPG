@@ -57,14 +57,6 @@ def get_bonuses_display_string(item):
     return display_string
 
 
-armors = {
-    'test_helmet': {'name': 'RND Helmet', 'description': 'Shite.', 'level': 1, 'weight': 2, '_itype': 2,
-                    'bonus_strength': 1, 'bonus_intelligence': 0, 'bonus_dexterity': 0, 'bonus_willpower': 0,
-                    'bonus_health': 0, 'bonus_stamina': 0, 'bonus_mana': 0, 'bonus_init': 1, 'bonus_carry': 0,
-                    'bonus_earth_res': 0.0, 'bonus_fire_res': 0.0, 'bonus_electricity_res': 0.0, 'bonus_water_res': 0.0, 'required_strength': 0,
-                    'required_intelligence': 0, 'required_dexterity': 0, 'required_willpower': 0}
-}
-
 prefixes = {
     'Streamlined': {
         1: {'effect': 'required_strength', 'value': -1}
@@ -103,16 +95,16 @@ prefixes = {
         1: {'effect': 'bonus_init', 'value': 1}
     },
     'Hardened': {
-        1: {'effect': 'bonus_earth_res', 'value': 0.1}
+        1: {'effect': 'bonus_earth_res', 'value': 0.05}
     },
     'Insulated': {
-        1: {'effect': 'bonus_fire_res', 'value': 0.1}
+        1: {'effect': 'bonus_fire_res', 'value': 0.05}
     },
     'Grounded': {
-        1: {'effect': 'bonus_electricity_res', 'value': 0.1}
+        1: {'effect': 'bonus_electricity_res', 'value': 0.05}
     },
     'Sealed': {
-        1: {'effect': 'bonus_water_res', 'value': 0.1}
+        1: {'effect': 'bonus_water_res', 'value': 0.05}
     },
 }
 

@@ -28,6 +28,6 @@ def get_ability_string(item) -> str:
 
 
 books = {
-    'mend_wounds': {'name': 'Tome: Mend Wounds', 'description': 'Shite.', 'level': 1, 'rarity': 1,
+    'mend_wounds': {'name': 'Tome: Mend Wounds', 'description': 'TODO', 'level': 1, 'rarity': 1,
                     'weight': 1, '_itype': 11, 'btype': 1, 'key': 'mend_wounds'},
 }
