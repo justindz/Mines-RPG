@@ -54,7 +54,7 @@ def get_bonuses_display_string(item):
     display_string += f'\nFire Res {item["bonus_fire_res"]:+.0%}' if item['bonus_fire_res'] != 0.0 else ''
     display_string += f'\nElectricity Res {item["bonus_electricity_res"]:+.0%}' if item['bonus_electricity_res'] != 0.0 else ''
     display_string += f'\nWater Res {item["bonus_water_res"]:+.0%}' if item['bonus_water_res'] != 0.0 else ''
-    return display_string
+    return display_string.lstrip('\n')
 
 
 prefixes = {

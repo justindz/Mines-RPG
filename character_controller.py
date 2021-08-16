@@ -119,7 +119,6 @@ class CharacterController(commands.Cog):
             i += 1
 
         inv_string += 'Carry: {}/{}\n'.format(character.current_carry, character.carry + character.bonus_carry)
-        inv_string += '========================================='
         await ctx.author.send(inv_string)
 
     @commands.command(aliases=['item'])
@@ -149,6 +148,10 @@ Class: {WeaponType(it['_weapon_type']).name.capitalize()}
 Damage: {weapon.get_damages_display_string(it)}
 Crit Damage: +{it['crit_damage']}
 
+Requirements
+------------
+{utilities.get_requirements_display_string(it)}
+
 Bonuses
 -------
 {weapon.get_bonuses_display_string(it)}'''
@@ -156,15 +159,18 @@ Bonuses
                                   ItemType.boots.value, ItemType.gloves.value, ItemType.amulet.value,
                                   ItemType.ring.value]:
                 item_string += f'''
-Class: {ItemType(it['_itype']).name}
+Class: {ItemType(it['_itype']).name.capitalize()}
+
+Requirements
+------------
+{utilities.get_requirements_display_string(it)}
 
 Bonuses
 -------
 {armor.get_bonuses_display_string(it)}'''
             item_string += f'''
 Weight: {it["weight"]}
-Value: {it["value"]}
-============================================'''
+Value: {it["value"]}'''
             await ctx.author.send(item_string)
         else:
             await ctx.author.send('No item equipped in that slot.')
@@ -174,14 +180,9 @@ Value: {it["value"]}
         character = self.get(ctx.author)
         """List your prepared abilities, and all abilities known to your character."""
         out = f'''
-==========Prepared==========
-1: {"None" if character.ability_slots["1"] is None else utilities.get_ability_by_name(character.ability_slots["1"]).name}
-2: {"None" if character.ability_slots["2"] is None else utilities.get_ability_by_name(character.ability_slots["2"]).name}
-3: {"None" if character.ability_slots["3"] is None else utilities.get_ability_by_name(character.ability_slots["3"]).name}
-4: {"None" if character.ability_slots["4"] is None else utilities.get_ability_by_name(character.ability_slots["4"]).name}
-5: {"None" if character.ability_slots["5"] is None else utilities.get_ability_by_name(character.ability_slots["5"]).name}
-6: {"None" if character.ability_slots["6"] is None else utilities.get_ability_by_name(character.ability_slots["6"]).name}
-'''
+==========Prepared=========='''
+        for i in range(1, len(character.ability_slots) + 1):
+            out += f'\n{i}: {"None" if character.ability_slots[str(i)] is None else utilities.get_ability_by_name(character.ability_slots[str(i)]).name}'
 
         i = 0
         out += '\n==========Known==========\n'

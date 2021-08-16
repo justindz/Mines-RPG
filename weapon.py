@@ -65,7 +65,7 @@ def get_damages_display_string(item):
     display_string = ''
 
     for damage in item['damages']:
-        display_string += '{}d{} {}\n'.format(damage[0], damage[1], utilities.get_elemental_symbol(Elements(damage[2])))
+        display_string += f'\n  {damage[0]}d{damage[1]} {utilities.get_elemental_symbol(Elements(damage[2]))}'
 
     return display_string
 
@@ -84,7 +84,7 @@ def get_bonuses_display_string(item):
     display_string += f'\nFire Penetration {item["fire_penetration"]:.0%}' if item['fire_penetration'] > 0 else ''
     display_string += f'\nElectricity Penetration {item["electricity_penetration"]:.0%}' if item['electricity_penetration'] > 0 else ''
     display_string += f'\nWater Penetration {item["water_penetration"]:.0%}' if item['water_penetration'] > 0 else ''
-    return display_string
+    return display_string.lstrip('\n')
 
 
 prefixes = {

@@ -89,7 +89,7 @@ def ability_to_str(ability_name: str, level=1) -> str:
 =========={ab.name} ({"Skill" if isinstance(ab, skill.Skill) else "Spell"})==========
 {ab.description}
 
-{'Requires: ' + ab.weapon_type.name.capitalize() if isinstance(ab, skill.Skill) else ''}
+{'Requires: ' + ', '.join([x.name.capitalize() for x in ab.weapon_types]) if isinstance(ab, skill.Skill) else ''}
 Targets: {"Enemies" if isinstance(ab, spell.Spell) and ab.targets_enemies else "Allies"}
 Cost: {ab.ability_cost_to_str()}'''
 
@@ -108,18 +108,29 @@ Cost: {ab.ability_cost_to_str()}'''
         for ele in ab.consumes:
             out += get_elemental_symbol(ele)
 
-    out += f'\nArea of Effect: {"None" if ab.area == 0 else ab.area}{ "(modifiable)" if ab.area_modifiable else "" }'
+    out += f'\nArea of Effect: {"None" if ab.area == 0 else ab.area}{ " (modifiable)" if ab.area_modifiable else "" }'
     out += f'\n\nEffects:'
 
     if isinstance(ab, skill.Skill):
         for effect in ab.effects:
-            out += f'\n- {effect.type.name} : {effect.damage_scaling} base weapon damage multiplier'
+            out += f'\n- {effect.type.name.capitalize()} : {effect.damage_scaling}x Weapon Damage'
     elif isinstance(ab, spell.Spell):
         for effect in ab.effects:
-            out += f'\n- {effect.type.name} : {dice.count(level)}d{effect.dice_value} {get_elemental_symbol(effect.element)}'
+            out += f'\n- {effect.type.name.capitalize()} : {dice.count(level)}d{effect.dice_value} {get_elemental_symbol(effect.element)}'
 
     return out
 
+
+def get_requirements_display_string(item):
+    if item["_itype"] not in [1, 2, 3, 5, 6]:
+        raise Exception(f'get_requirements_display_string for unsupported _itype {item["_itype"]} on {item["name"]}')
+
+    display_string = ''
+    display_string += f'\nStrength {item["required_strength"]}' if item['required_strength'] != 0 else ''
+    display_string += f'\nIntelligence {item["required_intelligence"]}' if item['required_intelligence'] != 0 else ''
+    display_string += f'\nDexterity {item["required_dexterity"]}' if item['required_dexterity'] != 0 else ''
+    display_string += f'\nWillpower {item["required_willpower"]}' if item['required_willpower'] != 0 else ''
+    return display_string.lstrip('\n')
 
 #  MATHS  #
 

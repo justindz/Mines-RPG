@@ -41,8 +41,8 @@ async def check_ability_requirements_and_use(ability, actor, delve, target, figh
         await delve.channel.send('You cannot use this skill without an equipped weapon.')
         await DelveController.recover(actor, delve)
         return False
-    elif isinstance(ability, skill.Skill) and actor.equipped['weapon']['_weapon_type'] != ability.weapon_type.value:
-        await delve.channel.send(f'This skill requires a {ability.weapon_type}.')
+    elif isinstance(ability, skill.Skill) and actor.equipped['weapon']['_weapon_type'] in ability.weapon_types:
+        await delve.channel.send(f'You cannot use this skill with this weapon type.')
         await DelveController.recover(actor, delve)
         return False
     elif not set(ability.consumes).issubset(set(fight.states)):
