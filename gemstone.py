@@ -1,6 +1,8 @@
 import random
 from mongokit_ng import Document
 
+import utilities
+
 
 class Gemstone(Document):
     __database__ = 'delverpg'
@@ -36,12 +38,12 @@ class Gemstone(Document):
 
 
 def get_gemstone(connection, key: str, level: int) -> Gemstone:
-    level = max(min(level, 9), 1) - 1
+    level = utilities.clamp(level, 1, 9) - 1
     base = gemstones[key]
     gemstone = connection.Gemstone()
     gemstone.name = base['name'] + f' {base["tiers"][level]["name"]}'
     gemstone.description = base['description']
-    gemstone.level = level
+    gemstone.level = level + 1
     gemstone.effect = base['effect']
     gemstone.amount = base['tiers'][level]['amount']
     return gemstone
@@ -51,11 +53,12 @@ def get_random_gemstone(connection, level: int) -> Gemstone:
     chance = random.random()
 
     if chance <= 0.1:
-        g = get_gemstone(connection, random.choice(['emerald', 'ruby', 'topaz', 'sapphire']), level)
+        g = get_gemstone(connection, random.choice(['emerald', 'ruby', 'topaz', 'sapphire', 'diamond']), level)
         g.rarity = 3
         g.value = g.level * 3 + (g.level * 10)
     elif chance <= 0.3:
-        g = get_gemstone(connection, random.choice(['quartz', 'beryl', 'opal']), level)
+        g = get_gemstone(connection, random.choice(['quartz', 'beryl', 'opal', 'sunstone', 'serpentine', 'fire_agate',
+                                                    'zircon', 'fluorite']), level)
         g.rarity = 2
         g.value = g.level * 3 + (g.level * 5)
     else:
@@ -302,7 +305,7 @@ gemstones = {
                  {'name': 'Marquise', 'amount': 0.09},
              ]},
     'topaz': {'name': 'Topaz',
-              'description': 'An orthorhombic piece of transparent yellow-orange silicate mineral.',
+              'description': 'An orthorhombic piece of transparent yellow-orange silicate.',
               'effect': 'bonus_electricity_res',
               'tiers': [
                   {'name': 'Mote', 'amount': 0.01},
@@ -318,6 +321,90 @@ gemstones = {
     'sapphire': {'name': 'Sapphire',
                  'description': 'A hexagonal piece of striking blue corundum.',
                  'effect': 'bonus_water_res',
+                 'tiers': [
+                     {'name': 'Mote', 'amount': 0.01},
+                     {'name': 'Speck', 'amount': 0.02},
+                     {'name': 'Sliver', 'amount': 0.03},
+                     {'name': 'Shard', 'amount': 0.04},
+                     {'name': 'Fragment', 'amount': 0.05},
+                     {'name': 'Round', 'amount': 0.06},
+                     {'name': 'Square', 'amount': 0.07},
+                     {'name': 'Oval', 'amount': 0.08},
+                     {'name': 'Marquise', 'amount': 0.09},
+                 ]},
+    'diamond': {'name': 'Diamond',
+                'description': 'A crystal of clear, lustrous, transparent carbon.',
+                'effect': 'base_crit_chance',
+                'tiers': [
+                    {'name': 'Mote', 'amount': 0.01},
+                    {'name': 'Speck', 'amount': 0.01},
+                    {'name': 'Sliver', 'amount': 0.01},
+                    {'name': 'Shard', 'amount': 0.02},
+                    {'name': 'Fragment', 'amount': 0.02},
+                    {'name': 'Round', 'amount': 0.02},
+                    {'name': 'Square', 'amount': 0.03},
+                    {'name': 'Oval', 'amount': 0.03},
+                    {'name': 'Marquise', 'amount': 0.03},
+                ]},
+    'sunstone': {'name': 'Sunstone',
+                 'description': 'A piece of translucent, creamy pink, aventurescent feldspar.',
+                 'effect': 'crit_damage',
+                 'tiers': [
+                     {'name': 'Mote', 'amount': 1},
+                     {'name': 'Speck', 'amount': 2},
+                     {'name': 'Sliver', 'amount': 3},
+                     {'name': 'Shard', 'amount': 5},
+                     {'name': 'Fragment', 'amount': 8},
+                     {'name': 'Round', 'amount': 13},
+                     {'name': 'Square', 'amount': 21},
+                     {'name': 'Oval', 'amount': 34},
+                     {'name': 'Marquise', 'amount': 55},
+                 ]},
+    'serpentine': {'name': 'Serpentine',
+                   'description': 'A piece of waxy, opaque green silicate.',
+                   'effect': 'earth_penetration',
+                   'tiers': [
+                       {'name': 'Mote', 'amount': 0.01},
+                       {'name': 'Speck', 'amount': 0.02},
+                       {'name': 'Sliver', 'amount': 0.03},
+                       {'name': 'Shard', 'amount': 0.04},
+                       {'name': 'Fragment', 'amount': 0.05},
+                       {'name': 'Round', 'amount': 0.06},
+                       {'name': 'Square', 'amount': 0.07},
+                       {'name': 'Oval', 'amount': 0.08},
+                       {'name': 'Marquise', 'amount': 0.09},
+                   ]},
+    'fire_agate': {'name': 'Fire Agate',
+                   'description': 'A piece of brown agate containing hemispheres of red, orange, and yellow flash.',
+                   'effect': 'fire_penetration',
+                   'tiers': [
+                       {'name': 'Mote', 'amount': 0.01},
+                       {'name': 'Speck', 'amount': 0.02},
+                       {'name': 'Sliver', 'amount': 0.03},
+                       {'name': 'Shard', 'amount': 0.04},
+                       {'name': 'Fragment', 'amount': 0.05},
+                       {'name': 'Round', 'amount': 0.06},
+                       {'name': 'Square', 'amount': 0.07},
+                       {'name': 'Oval', 'amount': 0.08},
+                       {'name': 'Marquise', 'amount': 0.09},
+                   ]},
+    'zircon': {'name': 'Zircon',
+               'description': 'A tetragonal piece of golden yellow, translucent silicate.',
+               'effect': 'electricity_penetration',
+               'tiers': [
+                   {'name': 'Mote', 'amount': 0.01},
+                   {'name': 'Speck', 'amount': 0.02},
+                   {'name': 'Sliver', 'amount': 0.03},
+                   {'name': 'Shard', 'amount': 0.04},
+                   {'name': 'Fragment', 'amount': 0.05},
+                   {'name': 'Round', 'amount': 0.06},
+                   {'name': 'Square', 'amount': 0.07},
+                   {'name': 'Oval', 'amount': 0.08},
+                   {'name': 'Marquise', 'amount': 0.09},
+               ]},
+    'fluorite': {'name': 'Fluorite',
+                 'description': 'A perfectly octohedronal piece of translucent, sky blue halide.',
+                 'effect': 'water_penetration',
                  'tiers': [
                      {'name': 'Mote', 'amount': 0.01},
                      {'name': 'Speck', 'amount': 0.02},

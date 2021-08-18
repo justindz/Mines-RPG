@@ -68,6 +68,7 @@ class Character(Document):
         'bank_limit': int,
         'shop': None,
         'depths': dict,
+        'profession': str,
         'deaths': int,
         'status_effects': None,
     }
@@ -128,6 +129,7 @@ class Character(Document):
         'bank_limit': 10,
         'shop': [],
         'depths': {},
+        'profession': '',
         'deaths': 0,
         'status_effects': [],  # list of dicts w/ keys = name, stat, value, turns_remaining
     }
@@ -328,8 +330,7 @@ class Character(Document):
 
     def use_consumable(self, connection, consumable):
         if consumable['_itype'] not in [ItemType.potion.value, ItemType.food.value]:
-            raise Exception(
-                f'Invalid consumable {consumable["name"]} of type {ItemType(consumable["_itype"]).name} used by {self.name}.')
+            return f'{consumable["name"]} is not consumable.'
         elif consumable['uses'] <= 0:
             raise Exception(f'Consumable {consumable["name"]} used by {self.name} had {consumable["uses"]} uses.')
         else:

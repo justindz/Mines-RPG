@@ -183,6 +183,20 @@ class DelveController(commands.Cog):
 
     @commands.command()
     @commands.check(check_correct_delve_channel)
+    @commands.check(check_idle)
+    async def use(self, ctx, index: int):
+        character = self.get(ctx.author)
+
+        try:
+            consumable = character.inventory[index]
+        except IndexError:
+            await ctx.author.send(utilities.red('Invalid inventory position.'))
+            return
+
+        await ctx.channel.send(character.use_consumable(self.connection, consumable))
+
+    @commands.command()
+    @commands.check(check_correct_delve_channel)
     @commands.check(check_is_leader)
     @commands.check(check_room_complete)
     async def proceed(self, ctx):

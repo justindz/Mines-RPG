@@ -17,22 +17,19 @@ class MarketController(commands.Cog):
         self.sell_rate = 1.25
 
     #  CHECKS  #
-    async def check_idle(ctx):
-        delves = ctx.bot.get_cog('DelveController').delves
-
-        for channel_name in delves.keys():
-            delve = delves[channel_name]
-
-            if ctx.author in delve.players and delve.status != 'idle':
-                return False
-
-        return True
-
     async def check_market_channel(ctx):
         if ctx.channel.id == market_channel_id:
             return True
 
         return False
+
+    async def check_not_delving(ctx):
+        delves = ctx.bot.get_cog('DelveController').delves
+        for delve in delves:
+            if ctx.author in delve.players:
+                return False
+
+        return True
 
     #  COMMANDS  #
     def cog_unload(self):
@@ -57,8 +54,8 @@ class MarketController(commands.Cog):
         await self.bot.wait_until_ready()
 
     @commands.command()
-    @commands.check(check_idle)
     @commands.check(check_market_channel)
+    @commands.check(check_not_delving)
     async def list(self, ctx):
         """Display the NPC vendor's current inventory."""
         character = self.get(ctx.author)
@@ -72,8 +69,8 @@ class MarketController(commands.Cog):
         await ctx.author.send(out)
 
     @commands.command()
-    @commands.check(check_idle)
     @commands.check(check_market_channel)
+    @commands.check(check_not_delving)
     async def buy(self, ctx, index: int):
         """Buy a listed item from the NPC vendor."""
         character = self.get(ctx.author)
@@ -96,8 +93,8 @@ class MarketController(commands.Cog):
             await ctx.author.send(utilities.red('Invalid shop inventory position.'))
 
     @commands.command()
-    @commands.check(check_idle)
     @commands.check(check_market_channel)
+    @commands.check(check_not_delving)
     async def offer(self, ctx, index: int):
         """Ask how much the NPC vendor will pay for an item in your inventory."""
         character = self.get(ctx.author)
@@ -111,8 +108,8 @@ class MarketController(commands.Cog):
             await ctx.author.send(utilities.red('Invalid inventory position.'))
 
     @commands.command()
-    @commands.check(check_idle)
     @commands.check(check_market_channel)
+    @commands.check(check_not_delving)
     async def sell(self, ctx, index: int):
         """Sell an item to the NPC vendor. Sold items cannot be bought back."""
         character = self.get(ctx.author)
@@ -129,8 +126,8 @@ class MarketController(commands.Cog):
             await ctx.author.send(utilities.red('Invalid inventory position.'))
 
     @commands.command()
-    @commands.check(check_idle)
     @commands.check(check_market_channel)
+    @commands.check(check_not_delving)
     async def bank(self, ctx):
         """View a list of the items stored in your bank."""
         character = self.get(ctx.author)
@@ -144,8 +141,8 @@ class MarketController(commands.Cog):
         await ctx.author.send(out)
 
     @commands.command()
-    @commands.check(check_idle)
     @commands.check(check_market_channel)
+    @commands.check(check_not_delving)
     async def deposit(self, ctx, index: int):
         """Deposit an item into your bank from your inventory."""
         character = self.get(ctx.author)
@@ -162,8 +159,8 @@ class MarketController(commands.Cog):
             await ctx.channel.send(f'{character.name} deposited {name} to the bank.')
 
     @commands.command()
-    @commands.check(check_idle)
     @commands.check(check_market_channel)
+    @commands.check(check_not_delving)
     async def withdraw(self, ctx, index: int):
         """Add an item from your bank to your inventory. This action costs 1 coin per item in your bank account."""
         character = self.get(ctx.author)

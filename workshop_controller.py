@@ -16,22 +16,19 @@ class WorkshopController(commands.Cog):
         self.name = 'Emma'
 
     #  CHECKS  #
-    async def check_idle(ctx):
-        delves = ctx.bot.get_cog('DelveController').delves
-
-        for channel_name in delves.keys():
-            delve = delves[channel_name]
-
-            if ctx.author in delve.players and delve.status != 'idle':
-                return False
-
-        return True
-
     async def check_workshop_channel(ctx):
         if ctx.channel.id == workshop_channel_id:
             return True
 
         return False
+
+    async def check_not_delving(ctx):
+        delves = ctx.bot.get_cog('DelveController').delves
+        for delve in delves:
+            if ctx.author in delve.players:
+                return False
+
+        return True
 
     #  COMMANDS  #
     def cog_unload(self):
@@ -55,12 +52,68 @@ class WorkshopController(commands.Cog):
     async def before_banter(self):
         await self.bot.wait_until_ready()
 
-    @commands.command()
-    @commands.check(check_idle)
+    @commands.command(aliases=['profs', 'trades', 'trade'])
     @commands.check(check_workshop_channel)
-    async def socket(self, ctx, gemstone_index: int, item_index: int):
+    @commands.check(check_not_delving)
+    async def professions(self, ctx):
+        """Learn about the available professions."""
+        await ctx.author.send(utilities.blue(f'{self.name} says, "{professions_desc}"'))
+
+    @commands.command(aliases=['jeweler'])
+    @commands.check(check_workshop_channel)
+    @commands.check(check_not_delving)
+    async def jewelers(self, ctx):
+        """Learn about the jeweler profession."""
+        await ctx.author.send(utilities.blue(f'{self.name} says, "{jeweler_desc}"'))
+
+    @commands.command(aliases=['alchemist'])
+    @commands.check(check_workshop_channel)
+    @commands.check(check_not_delving)
+    async def alchemists(self, ctx):
+        """Learn about the alchemist profession."""
+        await ctx.author.send(utilities.blue(f'{self.name} says, "{alchemist_desc}"'))
+
+    @commands.command(aliases=['cartographer', 'mapmakers', 'mapmaker'])
+    @commands.check(check_workshop_channel)
+    @commands.check(check_not_delving)
+    async def cartographers(self, ctx):
+        """Learn about the cartographer profession."""
+        await ctx.author.send(utilities.blue(f'{self.name} says, "{cartographer_desc}"'))
+
+    @commands.command()
+    @commands.check(check_workshop_channel)
+    @commands.check(check_not_delving)
+    async def choose(self, ctx, profession: str):
+        """Choose a profession: jeweler, alchemist, or cartographer. Note: this choice is difficult to undo!"""
+        character = self.get(ctx.author)
+
+        if character.profession != '':
+            await ctx.author.send(utilities.yellow(f'You have already chosen the {character.profession} trade.'))
+            return
+
+        if profession == 'jeweler':
+            character.profession = 'jeweler'
+            character.save()
+            await self.bot.get_channel(workshop_channel_id).send(f'{self.name} announces, "Congratulations to {character.name}, our newest {character.profession}!"')
+        elif profession == 'alchemist':
+            # character.profession = 'alchemist'
+            await ctx.author.send(utilities.blue(f'{self.name} says, "I\'m not taking on any new students in this profession at the moment."'))
+        elif profession == 'cartographer':
+            # character.profession = 'cartographer'
+            await ctx.author.send(utilities.blue(f'{self.name} says, "I\'m not taking on any new students in this profession at the moment."'))
+        else:
+            await ctx.author.send(utilities.blue(f'{self.name} says, "I\'m afraid I don\'t know the {profession} trade."'))
+
+    @commands.command()
+    @commands.check(check_workshop_channel)
+    @commands.check(check_not_delving)
+    async def socket(self, ctx, item_index: int, gemstone_index: int):
         """Socket a gemstone into an unequipped weapon or armor in your inventory with an open socket. The change is irreversible. You must be a Jeweler to use this crafting option."""
         character = self.get(ctx.author)
+
+        if character.profession != 'jeweler':
+            return
+
         workshop_channel = self.bot.get_channel(workshop_channel_id)
         gem = None
         item = None
@@ -78,6 +131,10 @@ class WorkshopController(commands.Cog):
         except IndexError:
             await ctx.author.send(utilities.red('Invalid inventory position.'))
 
+        if character.level < gem['level']:
+            await ctx.author.send(utilities.yellow('You are not experienced enough to work with this quality of gem.'))
+            return
+
         if not gemstone.usable_in(gem, item):
             await ctx.author.send(utilities.yellow(f'{gem["name"]} cannot be applied to this item type.'))
             return
@@ -89,10 +146,16 @@ class WorkshopController(commands.Cog):
             await ctx.author.send(utilities.yellow(f'{item["name"]} has no open sockets.'))
 
 
+professions_desc = "So, you're interested in learning a trade to practice here in my workshop? Wonderful! At the moment, I'm equipped to support the activities of \\jewelers, \\alchemists, and \\cartographers. When you have made up your mind, you can \\choose a profession. While professions are entirely optional, they can help you in your journey. You can choose your profession at any time, but only once! As you become more experienced in the mines, your capabilities in your chosen profession will improve accordingly."
+jeweler_desc = "Jewelers can socket gemstones into weapons and armor, enhancing the item's properties. Items have a limited number of sockets, and gemstones cannot be safely removed, so this profession is not or the anxiety-prone!"
+alchemist_desc = "Alchemists can use various organic reagants to enhance the properties of potions and food. I'm not taking on any new students in this profession at the moment."
+cartographer_desc = "Cartographers can use a variety of resources to make modifications to maps discovered in the mine. These modifications generally adjust the risk and reward levels of the delve into that mine, using the enhanced map. I'm not taking on any new students in this profession at the moment."
+
 monolog = [
-    "Hmmm.",
+    "Let me know if you have any questions about the \\professions you can pursue in my workshop.",
+    "I suppose if I charged you all to use my workshop, I could afford to eat more often. But... that seems pushy.",
 ]
 
 monolog_rare = [
-    "Fuck!",
+    "I highly recommend you don't combine those two ingre... oh. Oh dear.",
 ]
