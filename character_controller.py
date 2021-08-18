@@ -76,8 +76,11 @@ class CharacterController(commands.Cog):
 | Willpower: {character.willpower} ({character.bonus_willpower:+})
 |----
 | Health: {character.current_health}/{character.health} ({character.bonus_health:+})
+| Health Regen: {character.health_regen} ({character.bonus_health_regen:+})
 | Stamina: {character.current_stamina}/{character.stamina} ({character.bonus_stamina:+})
+| Stamina Regen: {character.stamina_regen} ({character.bonus_stamina_regen:+})
 | Mana: {character.current_mana}/{character.mana} ({character.bonus_mana:+})
+| Mana Regen: {character.mana_regen} ({character.bonus_mana_regen:+})
 |----
 | Initiative: {character.init} ({character.bonus_init:+})
 | Carry Weight: {character.current_carry}/{character.carry} ({character.bonus_carry:+})
@@ -115,7 +118,7 @@ class CharacterController(commands.Cog):
 
         i = 0
         for it in character.inventory:
-            inv_string += f'{i} - {it["name"]}{utilities.get_rarity_symbol(it["rarity"])} ({it["level"]}) {it["weight"]}wgt\n'
+            inv_string += f'{i} - {it["name"]}{utilities.get_rarity_symbol(it["rarity"])} - {it["weight"]}wgt\n'
             i += 1
 
         inv_string += 'Carry: {}/{}\n'.format(character.current_carry, character.carry + character.bonus_carry)
@@ -154,7 +157,12 @@ Requirements
 
 Bonuses
 -------
-{weapon.get_bonuses_display_string(it)}'''
+{weapon.get_bonuses_display_string(it)}
+
+Sockets
+-------
+{utilities.get_socket_display(it)}
+'''
             elif it['_itype'] in [ItemType.head.value, ItemType.chest.value, ItemType.belt.value,
                                   ItemType.boots.value, ItemType.gloves.value, ItemType.amulet.value,
                                   ItemType.ring.value]:
@@ -167,7 +175,12 @@ Requirements
 
 Bonuses
 -------
-{armor.get_bonuses_display_string(it)}'''
+{armor.get_bonuses_display_string(it)}
+
+Sockets
+-------
+{utilities.get_socket_display(it)}
+'''
             item_string += f'''
 Weight: {it["weight"]}
 Value: {it["value"]}'''

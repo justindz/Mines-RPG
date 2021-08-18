@@ -4,11 +4,13 @@ from mongokit_ng import RequireFieldError
 
 import armor
 import consumable
+import gemstone
 import weapon
 from armors import armors
 from consumable import consumables
 from weapons import weapons
 from book import books
+from gemstone import gemstones
 
 
 class ItemType(Enum):
@@ -23,6 +25,7 @@ class ItemType(Enum):
     food = 9
     potion = 10
     book = 11
+    gemstone = 12
 
 
 class Rarity(Enum):
@@ -40,12 +43,14 @@ def generate_item(connection, key: str, selection: dict, level: int, rarity=None
 
         if selection == weapons:
             item = connection.Weapon()
+            item['sockets'] = [None, None, None]
             value += 5 * base['level']
         elif selection == consumables:
             item = connection.Consumable()
             value += 1 * base['level']
         else:
             item = connection.Armor()
+            item['sockets'] = [None, None, None]
             value += 5 * base['level']
     except KeyError:
         print(f'generate_item failed on KeyError for key: {key}')
@@ -107,7 +112,10 @@ def generate_random_item(connection, level: int, item_type=None, rarity=None, lu
     lvl_check = [level - 1, level, level + 1]
 
     if item_type is None:
-        selection = random.choice([armors, consumables, weapons])
+        selection = random.choice([armors, consumables, weapons, gemstones])
+
+        if selection == gemstones:
+            return gemstone.get_random_gemstone(connection, random.choice(lvl_check))
     else:
         if item_type == ItemType.weapon:
             selection = weapons
@@ -116,6 +124,8 @@ def generate_random_item(connection, level: int, item_type=None, rarity=None, lu
         elif item_type in [ItemType.head, ItemType.chest, ItemType.gloves, ItemType.belt, ItemType.boots,
                            ItemType.amulet, ItemType.ring]:
             selection = armors
+        elif item_type == ItemType.gemstone:
+            return gemstone.get_random_gemstone(connection, random.choice(lvl_check))
 
     candidates = {k: v for k, v in selection.items() if v['level'] in lvl_check}
 
@@ -201,6 +211,8 @@ def delete_item(connection, item):
         connection.delverpg.consumables.remove(_id)
     elif item['_itype'] == ItemType.book.value:
         connection.delverpg.books.remove(_id)
+    elif item['_itype'] == ItemType.gemstone.value:
+        connection.delverpg.gemstones.remove(_id)
     else:
         raise Exception(f'delete_item called on unknown item type {item["_itype"]} w/ id {_id}')
 
@@ -231,7 +243,24 @@ def add_affix(item, name, affix, level):
     elif affix['effect'] == 'damage_spread':
         item['damages'][0][0] = round(item['damages'][0][0] / 2)
         item['damages'][0][1] *= 2
+    elif affix['effect'] == 'socket':
+        item['sockets'].append(None)
     else:
         print(f'Unknown affix {name} with effect {affix["effect"]} attempted to add to item {item["name"]}')
 
     return item
+
+
+def socket_gemstone(connection, item, gemstone):
+    i = 0
+
+    for socket in item['sockets']:
+        if socket is not None:
+            i += 1
+        else:
+            item['sockets'][i] = gemstone['name']
+            item[gemstone['effect']] += gemstone['amount']
+            delete_item(connection, gemstone)
+            return True
+
+    return False

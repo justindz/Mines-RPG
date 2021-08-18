@@ -11,13 +11,17 @@ class Armor(Document):
         'rarity': int,
         'weight': int,
         '_itype': int,
+        'sockets': list,
         'bonus_strength': int,
         'bonus_intelligence': int,
         'bonus_dexterity': int,
         'bonus_willpower': int,
         'bonus_health': int,
+        'bonus_health_regen': int,
         'bonus_stamina': int,
+        'bonus_stamina_regen': int,
         'bonus_mana': int,
+        'bonus_mana_regen': int,
         'bonus_init': int,
         'bonus_carry': int,
         'bonus_earth_res': float,
@@ -30,11 +34,36 @@ class Armor(Document):
         'required_dexterity': int,
         'required_willpower': int,
     }
-    required_fields = ['name', 'description', 'level', 'rarity', 'weight', '_itype', 'bonus_strength',
-                       'bonus_intelligence', 'bonus_dexterity', 'bonus_willpower', 'bonus_health', 'bonus_stamina',
-                       'bonus_mana', 'bonus_init', 'bonus_carry', 'bonus_earth_res', 'bonus_fire_res', 'bonus_electricity_res',
-                       'bonus_water_res', 'value', 'required_strength', 'required_intelligence', 'required_dexterity',
-                       'required_willpower']
+    required_fields = [
+        'name',
+        'description',
+        'level',
+        'rarity',
+        'weight',
+        '_itype',
+        'sockets',
+        'bonus_strength',
+        'bonus_intelligence',
+        'bonus_dexterity',
+        'bonus_willpower',
+        'bonus_health',
+        'bonus_health_regen',
+        'bonus_stamina',
+        'bonus_stamina_regen',
+        'bonus_mana',
+        'bonus_mana_regen',
+        'bonus_init',
+        'bonus_carry',
+        'bonus_earth_res',
+        'bonus_fire_res',
+        'bonus_electricity_res',
+        'bonus_water_res',
+        'value',
+        'required_strength',
+        'required_intelligence',
+        'required_dexterity',
+        'required_willpower'
+    ]
     use_dot_notation = True
     use_autorefs = True
 
@@ -46,8 +75,11 @@ def get_bonuses_display_string(item):
     display_string += f'\nDexterity {item["bonus_dexterity"]:+}' if item['bonus_dexterity'] != 0 else ''
     display_string += f'\nWillpower {item["bonus_willpower"]:+}' if item['bonus_willpower'] != 0 else ''
     display_string += f'\nHealth {item["bonus_health"]:+}' if item['bonus_health'] != 0 else ''
+    display_string += f'\nHealth Regen {item["bonus_health_regen"]:+}' if item['bonus_health_regen'] != 0 else ''
     display_string += f'\nStamina {item["bonus_stamina"]:+}' if item['bonus_stamina'] != 0 else ''
+    display_string += f'\nStamina Regen {item["bonus_stamina_regen"]:+}' if item['bonus_stamina_regen'] != 0 else ''
     display_string += f'\nMana {item["bonus_mana"]:+}' if item['bonus_mana'] != 0 else ''
+    display_string += f'\nMana Regen {item["bonus_mana_regen"]:+}' if item['bonus_mana_regen'] != 0 else ''
     display_string += f'\nInitiative {item["bonus_init"]:+}' if item['bonus_init'] != 0 else ''
     display_string += f'\nCarry {item["bonus_carry"]:+}' if item['bonus_carry'] != 0 else ''
     display_string += f'\nEarth Res {item["bonus_earth_res"]:+.0%}' if item['bonus_earth_res'] != 0.0 else ''
@@ -82,7 +114,7 @@ prefixes = {
     'Enlightening': {
         1: {'effect': 'bonus_intelligence', 'value': 1}
     },
-    'Encouraging': {
+    'Unleashing': {
         1: {'effect': 'bonus_dexterity', 'value': 1}
     },
     'Inspiring': {
@@ -123,5 +155,17 @@ suffixes = {
     },
     'Absorbing': {
         1: {'effect': 'bonus_water_res', 'value': 0.05}
+    },
+    'Medicinal': {
+        1: {'effect': 'bonus_health_regen', 'value': 1}
+    },
+    'Stimulant': {
+        1: {'effect': 'bonus_stamina_regen', 'value': 1}
+    },
+    'Arcane': {
+        1: {'effect': 'bonus_mana_regen', 'value': 1}
+    },
+    'Peerless': {
+        1: {'effect': 'socket'}
     },
 }

@@ -1,4 +1,3 @@
-import random
 import datetime
 from mongokit_ng import Document
 
@@ -7,8 +6,6 @@ import item
 from item import ItemType
 from elements import Elements
 import book
-import skill
-import spell
 import dice
 
 
@@ -34,12 +31,18 @@ class Character(Document):
         'health': int,
         'bonus_health': int,
         'current_health': int,
+        'health_regen': int,
+        'bonus_health_regen': int,
         'stamina': int,
         'bonus_stamina': int,
         'current_stamina': int,
+        'stamina_regen': int,
+        'bonus_stamina_regen': int,
         'mana': int,
         'bonus_mana': int,
         'current_mana': int,
+        'mana_regen': int,
+        'bonus_mana_regen': int,
 
         'init': int,
         'bonus_init': int,
@@ -87,12 +90,18 @@ class Character(Document):
         'health': 100,
         'bonus_health': 0,
         'current_health': 100,
+        'health_regen': 0,
+        'bonus_health_regen': 0,
         'stamina': 100,
         'bonus_stamina': 0,
         'current_stamina': 100,
+        'stamina_regen': 0,
+        'bonus_stamina_regen': 0,
         'mana': 100,
         'bonus_mana': 0,
         'current_mana': 100,
+        'mana_regen': 0,
+        'bonus_mana_regen': 0,
 
         'init': 0,
         'bonus_init': 0,
@@ -110,8 +119,8 @@ class Character(Document):
         'bonus_water_res': 0.0,
 
         'points': 0,
-        'abilities': ['spell-stalagmite', 'skill-slash', 'spell-slow', 'spell-haste', 'spell-summon_coal_golem'],
-        'ability_slots': {'1': 'skill-slash', '2': 'spell-stalagmite', '3': 'spell-slow', '4': 'spell-summon_coal_golem'},
+        'abilities': ['skill-strike'],
+        'ability_slots': {'1': 'skill-strike', '2': None, '3': None},
         'equipped': {'weapon': None, 'head': None, 'chest': None, 'belt': None, 'boots': None, 'gloves': None,
                      'amulet': None, 'ring': None},
         'inventory': [],
@@ -287,8 +296,11 @@ class Character(Document):
         self.bonus_dexterity += armor['bonus_dexterity']
         self.bonus_willpower += armor['bonus_willpower']
         self.bonus_health += armor['bonus_health']
+        self.bonus_health_regen += armor['bonus_health_regen']
         self.bonus_stamina += armor['bonus_stamina']
+        self.bonus_stamina_regen += armor['bonus_stamina_regen']
         self.bonus_mana += armor['bonus_mana']
+        self.bonus_mana_regen += armor['bonus_mana_regen']
         self.bonus_init += armor['bonus_init']
         self.bonus_carry += armor['bonus_carry']
         self.earth_res += armor['bonus_earth_res']
@@ -302,8 +314,11 @@ class Character(Document):
         self.bonus_dexterity -= armor['bonus_dexterity']
         self.bonus_willpower -= armor['bonus_willpower']
         self.bonus_health -= armor['bonus_health']
+        self.bonus_health_regen -= armor['bonus_health_regen']
         self.bonus_stamina -= armor['bonus_stamina']
+        self.bonus_stamina_regen -= armor['bonus_stamina_regen']
         self.bonus_mana -= armor['bonus_mana']
+        self.bonus_mana_regen -= armor['bonus_mana_regen']
         self.bonus_init -= armor['bonus_init']
         self.bonus_carry -= armor['bonus_carry']
         self.earth_res -= armor['bonus_earth_res']
@@ -405,15 +420,12 @@ class Character(Document):
 
     def recover(self):
         percentage = 0.1
-        return self.restore_all(int((self.health + self.bonus_health) * percentage),
-                                int((self.stamina + self.bonus_stamina) * percentage),
+        return self.restore_all(0, int((self.stamina + self.bonus_stamina) * percentage),
                                 int((self.mana + self.bonus_mana) * percentage))
 
     def regen(self):
-        h = 0
-        s = 0
-        m = 0
-        return self.restore_all(h, s, m)
+        return self.restore_all(self.health_regen + self.bonus_health_regen,
+                                self.stamina_regen + self.bonus_stamina_regen, self.mana_regen + self.bonus_mana_regen)
 
     def get_ele_pens(self) -> tuple:
         if self.equipped['weapon'] is None:

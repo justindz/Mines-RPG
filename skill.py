@@ -1,7 +1,7 @@
 from elements import Elements
 import ability
 from ability import EffectType, Effect
-from weapon import WeaponType
+from weapon import all_types, bladed_types, ranged_types
 
 
 class Skill(ability.Ability):
@@ -17,11 +17,15 @@ class Skill(ability.Ability):
 
 
 skills = {  # Note: Element should always be None for Skill effects--they inherit the weapon element
+    'strike': Skill('Strike', 'Strike skill description.', 1,
+                    {'h': 0, 's': 5, 'm': 0},
+                    [Effect(EffectType.damage_health, None)],
+                    [], [], all_types, 1.2),
     'slash': Skill('Slash', 'Slash skill description.', 1,
-                   {'h': 0, 's': 5, 'm': 0},
+                   {'h': 0, 's': 8, 'm': 0},
                    [Effect(EffectType.damage_health, None),
-                    Effect(EffectType.debuff, None, _status_effect_value=-5, _stat='health_regen',
+                    Effect(EffectType.debuff, None, _status_effect_value=-2, _stat='health_regen',
                            _status_effect_name='Wounded', _status_effect_turns=2)],
-                   [Elements.earth], [], [WeaponType.sword, WeaponType.dagger, WeaponType.axe, WeaponType.fist], 1.2,
+                   [Elements.earth], [], bladed_types, 1.0,
                    _area=1, _area_modifiable=True),
 }

@@ -31,6 +31,7 @@ class Weapon(Document):
         'weight': int,
         '_itype': int,
         '_weapon_type': int,
+        'sockets': list,
         'bonus_strength': int,
         'bonus_intelligence': int,
         'bonus_dexterity': int,
@@ -52,11 +53,37 @@ class Weapon(Document):
         'electricity_penetration': float,
         'water_penetration': float,
     }
-    required_fields = ['name', 'description', 'level', 'rarity', 'weight', '_itype', '_weapon_type', 'bonus_strength',
-                       'bonus_intelligence', 'bonus_dexterity', 'bonus_willpower', 'bonus_health', 'bonus_stamina',
-                       'bonus_mana', 'bonus_init', 'base_crit_chance', 'damages', 'crit_damage', 'value',
-                       'required_strength', 'required_intelligence', 'required_dexterity', 'required_willpower',
-                       'earth_penetration', 'fire_penetration', 'electricity_penetration', 'water_penetration']
+    required_fields = [
+        'name',
+        'description',
+        'level',
+        'rarity',
+        'weight',
+        '_itype',
+        '_weapon_type',
+        'sockets',
+        'bonus_strength',
+        'bonus_intelligence',
+        'bonus_dexterity',
+        'bonus_willpower',
+        'bonus_health',
+        'bonus_stamina',
+        'bonus_mana',
+        'bonus_init',
+        'base_crit_chance',
+        'damages',
+        'crit_damage',
+        'value',
+        'required_strength',
+        'required_intelligence',
+        'required_dexterity',
+        'required_willpower',
+        'earth_penetration',
+        'fire_penetration',
+        'electricity_penetration',
+        'water_penetration'
+    ]
+    default_values = {'_itype': 1}
     use_dot_notation = True
     use_autorefs = True
 
@@ -87,6 +114,13 @@ def get_bonuses_display_string(item):
     return display_string.lstrip('\n')
 
 
+all_types = [WeaponType.hammer, WeaponType.sword, WeaponType.dagger, WeaponType.staff, WeaponType.axe, WeaponType.spear,
+             WeaponType.flail, WeaponType.fist, WeaponType.magic, WeaponType.thrown]
+bladed_types = [WeaponType.sword, WeaponType.dagger, WeaponType.axe, WeaponType.fist]
+blunt_types = [WeaponType.hammer, WeaponType.staff, WeaponType.flail]
+ranged_types = [WeaponType.magic, WeaponType.thrown]
+
+
 prefixes = {
     'Honed': {
         1: {'effect': 'required_strength', 'value': -1}
@@ -112,7 +146,7 @@ prefixes = {
     'Enlightening': {
         1: {'effect': 'bonus_intelligence', 'value': 1}
     },
-    'Encouraging': {
+    'Unleashing': {
         1: {'effect': 'bonus_dexterity', 'value': 1}
     },
     'Inspiring': {
@@ -173,5 +207,8 @@ suffixes = {
     },
     'Wild': {
         1: {'effect': 'damage_spread'}
+    },
+    'Peerless': {
+        1: {'effect': 'socket'}
     },
 }

@@ -1,5 +1,3 @@
-import asyncio
-import discord
 from discord.ext import commands, tasks
 import random
 
@@ -50,9 +48,9 @@ class MarketController(commands.Cog):
             rare = True
 
         if rare:
-            await market_channel.send('{} says, "{}"'.format(self.name, random.choice(monolog_rare)))
+            await market_channel.send(f'{self.name} says, "{random.choice(monolog_rare)}"')
         else:
-            await market_channel.send('{} says, "{}"'.format(self.name, random.choice(monolog)))
+            await market_channel.send(f'{self.name} says, "{random.choice(monolog)}"')
 
     @banter.before_loop
     async def before_banter(self):

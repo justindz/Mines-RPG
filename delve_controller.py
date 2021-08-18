@@ -289,17 +289,15 @@ class DelveController(commands.Cog):
                             await delve.channel.send(actor.use_consumable(self.connection, actor.inventory[indices[int(choice) - 1]]))
                         elif action == '3':  # Recover
                             await self.recover(actor, delve)
+
+                        await self.check_for_defeated_enemies(actor, delve, fight)
                     except asyncio.TimeoutError:
                         await delve.channel.send('{} did not take an action in time.'.format(actor.name))
                         await self.recover(actor, delve)
                 elif isinstance(actor, Summon):
                     out = actor.take_a_turn(fight)
                     await delve.channel.send(out)
-
-                    for enemy in fight.enemies:
-                        if enemy.current_health <= 0:
-                            fight.remove_enemy(enemy)
-                            await delve.channel.send(f'{actor.name} defeated {enemy.name}.')
+                    await self.check_for_defeated_enemies(actor, delve, fight)
                 elif isinstance(actor, Enemy):
                     out = actor.take_a_turn(fight)
                     await delve.channel.send(out)
@@ -316,8 +314,17 @@ class DelveController(commands.Cog):
                 if await self.check_end_of_fight(delve, fight):
                     break
                 await asyncio.sleep(3)
+
+            turn_count += 1
             await self.end_of_turn(delve, fight, turn_count)
         delve.current_room.encounter = None
+
+    @staticmethod
+    async def check_for_defeated_enemies(actor, delve, fight):
+        for enemy in fight.enemies:
+            if enemy.current_health <= 0:
+                fight.remove_enemy(enemy)
+                await delve.channel.send(f'{actor.name} defeated {enemy.name}.')
 
     async def start_of_turn(self, delve, fight):
         for actor in [x for x in fight.characters if isinstance(x, Character)]:
@@ -378,7 +385,6 @@ class DelveController(commands.Cog):
         if fight.end_of_turn():
             await delve.channel.send('Elements have dissipated.')
 
-        turn_count += 1
         await delve.channel.send('End of turn {}.'.format(turn_count))
 
     @staticmethod

@@ -121,7 +121,7 @@ Cost: {ab.ability_cost_to_str()}'''
     return out
 
 
-def get_requirements_display_string(item):
+def get_requirements_display_string(item) -> str:
     if item["_itype"] not in [1, 2, 3, 5, 6]:
         raise Exception(f'get_requirements_display_string for unsupported _itype {item["_itype"]} on {item["name"]}')
 
@@ -132,17 +132,29 @@ def get_requirements_display_string(item):
     display_string += f'\nWillpower {item["required_willpower"]}' if item['required_willpower'] != 0 else ''
     return display_string.lstrip('\n')
 
+
+def get_socket_display(item) -> str:
+    out = ''
+
+    for socket in item['sockets']:
+        if socket is None:
+            out += ' {  }'
+        else:
+            out += f' {{ {socket} }}'
+
+    return out.lstrip(' ')
+
 #  MATHS  #
 
 
-def stat_check(total: int, difficulty: int, scaling: float, depth: int):
-    chance = 0.0001 * (total - difficulty + (depth * scaling)) ** 3 + .75
-    chance = clamp(chance, 0.05, 0.95)
-
-    if random.uniform(0, 1) <= chance:
-        return True
-
-    return False
+# def stat_check(total: int, difficulty: int, scaling: float, depth: int):
+#     chance = 0.0001 * (total - difficulty + (depth * scaling)) ** 3 + .75
+#     chance = clamp(chance, 0.05, 0.95)
+#
+#     if random.uniform(0, 1) <= chance:
+#         return True
+#
+#     return False
 
 
 # def scale_xp(xp: int, l1: int, l2: int):

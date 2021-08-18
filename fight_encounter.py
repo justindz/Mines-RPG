@@ -183,9 +183,6 @@ class Fight:
                 else:
                     raise Exception(f'{char.name} used ability {ab.name} with unsupported effect type {effect.type}')
 
-            if _target.current_health <= 0:
-                self.remove_enemy(_target)
-
         if isinstance(ab, spell.Spell):
             for summ_str in ab.summon:
                 s = copy.deepcopy(summons[summ_str])
