@@ -10,20 +10,20 @@ from ai.explode import Explode
 enemies = {
     'slime': Enemy('Slime',
                    # Stats
-                   1, 0.3,
-                   1, 0.3,
-                   1, 0.3,
-                   1, 0.3,
+                   1, 3,
+                   1, 3,
+                   1, 3,
+                   1, 3,
                    # Health
-                   10, 0.1,
+                   10, 3,
                    0, 0,
                    # Init
-                   4, 0.2,
+                   4, 2,
                    # Res
-                   0.0, 0.0,
-                   0.0, 0.0,
-                   0.0, 0.0,
-                   0.0, 0.0,
+                   0.0, 0.02,
+                   0.0, 0.02,
+                   0.0, 0.02,
+                   0.0, 0.02,
                    [
                        SingleTargetAttack('Headbutt', 0, 0.05,
                                           [Effect(EffectType.damage_health, Elements.earth, _dice_value=4)]),
@@ -39,20 +39,20 @@ enemies = {
 
     'spider': Enemy('Spider',
                     # Stats
-                    1, 0.3,
-                    1, 0.3,
-                    1, 0.3,
-                    1, 0.3,
+                    1, 3,
+                    1, 3,
+                    1, 3,
+                    1, 3,
                     # Health
-                    8, 0.1,
+                    8, 2,
                     0, 0,
                     # Init
-                    3, 0.2,
+                    3, 2,
                     # Res
-                    0.0, 0.0,
-                    0.0, 0.0,
-                    0.0, 0.0,
-                    0.0, 0.0,
+                    0.0, 0.02,
+                    0.0, 0.02,
+                    0.0, 0.02,
+                    0.0, 0.02,
                     [
                         SingleTargetAttack('Bite', 0, 0.06,
                                            [Effect(EffectType.damage_health, Elements.earth, _dice_value=4)]),
@@ -66,20 +66,20 @@ enemies = {
 
     'scarab': Enemy('Scarab',
                     # Stats
-                    2, 0.3,
-                    1, 0.3,
-                    1, 0.3,
-                    1, 0.3,
+                    2, 3,
+                    1, 3,
+                    1, 3,
+                    1, 3,
                     # Health
-                    7, 0.1,
+                    7, 2,
                     0, 0,
                     # Init
-                    4, 0.2,
+                    4, 3,
                     # Res
-                    0.1, 0.0,
-                    0.1, 0.0,
-                    0.1, 0.0,
-                    0.1, 0.0,
+                    0.1, 0.02,
+                    0.1, 0.02,
+                    0.1, 0.02,
+                    0.1, 0.02,
                     [
                         SingleTargetAttack('Bite', 0, 0.05,
                                            [Effect(EffectType.damage_health, Elements.earth, _dice_value=6)]),
@@ -90,39 +90,39 @@ enemies = {
 
     'summoned_scarab': Enemy('Scarab',
                              # Stats
-                             2, 0.3,
-                             1, 0.3,
-                             1, 0.3,
-                             1, 0.3,
+                             2, 3,
+                             1, 3,
+                             1, 3,
+                             1, 3,
                              # Health
-                             7, 0.1,
+                             7, 2,
                              0, 0,
                              # Init
-                             4, 0.2,
+                             4, 3,
                              # Res
-                             0.1, 0.0,
-                             0.1, 0.0,
-                             0.1, 0.0,
-                             0.1, 0.0,
+                             0.1, 0.02,
+                             0.1, 0.02,
+                             0.1, 0.02,
+                             0.1, 0.02,
                              [SingleTargetAttack('Bite', 0, 0.05,
                                                  [Effect(EffectType.damage_health, Elements.earth, _dice_value=6)])],
                              [Goal(GoalType.damage_opponent, 400)]),
 
     'imp': Enemy('Imp',
                  # Stats
-                 1, 0.3,
-                 2, 0.4,
-                 1, 0.3,
-                 1, 0.3,
+                 1, 3,
+                 2, 4,
+                 1, 3,
+                 1, 2,
                  # Health
-                 10, 0.1,
-                 1, 1,
+                 10, 3,
+                 1, 0.5,
                  # Init
-                 5, 0.2,
+                 5, 2,
                  # Res
-                 0.03, 0.01,
+                 0.03, 0.02,
                  0.08, 0.03,
-                 0.03, 0.01,
+                 0.03, 0.02,
                  0.0, 0.01,
                  [
                      SingleTargetAttack('Claw', 0, 0.05, [Effect(EffectType.damage_health, Elements.earth,
@@ -132,15 +132,15 @@ enemies = {
 
     'bomb': Enemy('Bomb',
                   # Stats
-                  1, 0.3,
-                  3, 0.3,
-                  1, 0.3,
-                  1, 0.3,
+                  1, 3,
+                  3, 3,
+                  1, 3,
+                  1, 3,
                   # Health
-                  20, 0.1,
-                  0, 0.0,
+                  20, 2,
+                  0, 0,
                   # Init
-                  10, 0.3,
+                  10, 3,
                   # Res
                   0.03, 0.01,
                   0.05, 0.03,

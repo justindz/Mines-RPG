@@ -109,17 +109,18 @@ def get_bonuses_display_string(item):
     display_string += f'\nInitiative {item["bonus_init"]:+}' if item['bonus_init'] != 0 else ''
     display_string += f'\nEarth Penetration {item["earth_penetration"]:.0%}' if item['earth_penetration'] > 0 else ''
     display_string += f'\nFire Penetration {item["fire_penetration"]:.0%}' if item['fire_penetration'] > 0 else ''
-    display_string += f'\nElectricity Penetration {item["electricity_penetration"]:.0%}' if item['electricity_penetration'] > 0 else ''
+    display_string += f'\nElectricity Penetration {item["electricity_penetration"]:.0%}' if item[
+                                                                                                'electricity_penetration'] > 0 else ''
     display_string += f'\nWater Penetration {item["water_penetration"]:.0%}' if item['water_penetration'] > 0 else ''
     return display_string.lstrip('\n')
 
 
 all_types = [WeaponType.hammer, WeaponType.sword, WeaponType.dagger, WeaponType.staff, WeaponType.axe, WeaponType.spear,
              WeaponType.flail, WeaponType.fist, WeaponType.magic, WeaponType.thrown]
+melee_types = [WeaponType.hammer, WeaponType.sword, WeaponType.dagger, WeaponType.staff, WeaponType.axe,
+               WeaponType.spear, WeaponType.flail, WeaponType.fist]
 bladed_types = [WeaponType.sword, WeaponType.dagger, WeaponType.axe, WeaponType.fist]
 blunt_types = [WeaponType.hammer, WeaponType.staff, WeaponType.flail]
-ranged_types = [WeaponType.magic, WeaponType.thrown]
-
 
 prefixes = {
     'Honed': {

@@ -1,11 +1,10 @@
+from enum import Enum
+
 from elements import Elements
 from ability import EffectType
 from character import Character
 import utilities
 import dice
-
-import random
-from enum import Enum
 
 
 class GoalType(Enum):

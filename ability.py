@@ -12,10 +12,9 @@ class EffectType(Enum):
 
 
 class Ability:
-    def __init__(self, _name, _description, _level, _cost, _effects, _activates, _consumes, _area, _area_modifiable):
+    def __init__(self, _name, _description, _cost, _effects, _activates, _consumes, _area, _area_modifiable):
         self.name = _name
         self.description = _description
-        self.level = _level
         self.cost = _cost
         self.effects = _effects
         self.activates = _activates

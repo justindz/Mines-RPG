@@ -121,7 +121,7 @@ class Character(Document):
 
         'points': 0,
         'abilities': ['skill-strike'],
-        'ability_slots': {'1': 'skill-strike', '2': None, '3': None},
+        'ability_slots': {'1': 'skill-strike', '2': None, '3': None, '4': None},
         'equipped': {'weapon': None, 'head': None, 'chest': None, 'belt': None, 'boots': None, 'gloves': None,
                      'amulet': None, 'ring': None},
         'inventory': [],
