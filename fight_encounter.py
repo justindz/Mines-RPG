@@ -165,7 +165,8 @@ class Fight:
                     for dmg in dmgs:
                         out += f'\n{_target.name} suffered {dmg[0]} {Elements(dmg[1]).name} damage.'
                 elif effect.type == ability.EffectType.burn:
-                    if target.apply_burn(effect.status_effect_turns, effect.status_effect_value):
+                    if target.apply_burn(effect.status_effect_turns, effect.status_effect_value,
+                                         char.dot_str + char.bonus_dot_str, char.dot_duration + char.bonus_dot_duration):
                         out += f'\n{target.name} is burning.'
                     else:
                         out += f'\n{target.name} is already seriously burning.'

@@ -64,7 +64,7 @@ class Summon(Enemy):
 
         for action in self.actions:
             if action.targets_opponents and action.is_usable(fight.states):
-                effects = list(filter(lambda effect: effect.type == EffectType.damage_health, action.effects))
+                effects = list(filter(lambda effect: effect.type in [EffectType.damage_health, EffectType.burn], action.effects))
 
                 if len(effects) > 0:
                     for enemy in fight.enemies:
@@ -149,9 +149,10 @@ class Summon(Enemy):
 
         for action in self.actions:
             if action.is_usable(fight.states) and not action.targets_opponents and not action.targets_allies:
-                effects = list(filter(lambda effect: effect.type in [EffectType.damage_health, EffectType.debuff,
-                                                                     EffectType.buff, EffectType.restore_health,
-                                                                     EffectType.summon], action.effects))
+                effects = list(filter(lambda effect: effect.type in [EffectType.damage_health, EffectType.burn,
+                                                                     EffectType.debuff, EffectType.buff,
+                                                                     EffectType.restore_health, EffectType.summon],
+                                      action.effects))
 
                 if len(effects) > 0:
                     plan = Plan()

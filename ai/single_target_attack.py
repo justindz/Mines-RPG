@@ -39,7 +39,8 @@ class SingleTargetAttack(Action):
                     for dmg in dmgs:
                         out += f'\n{target.name} suffered {dmg[0]} {Elements(dmg[1]).name} damage.'
                 elif effect.type == EffectType.burn:
-                    if target.apply_burn(effect.status_effect_turns, effect.status_effect_value):
+                    if target.apply_burn(effect.status_effect_turns, effect.status_effect_value,
+                                         user.dot_str, user.dot_duration):
                         out += f'\n{target.name} is burning.'
                     else:
                         out += f'\n{target.name} is already seriously burning.'

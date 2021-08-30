@@ -25,6 +25,8 @@ class Accessory(Document):
         'bonus_carry': int,
         'bonus_dot_res': float,
         'bonus_dot_reduction': int,
+        'bonus_dot_str': float,
+        'bonus_dot_duration': int,
         'value': int,
         'required_strength': int,
         'required_intelligence': int,
@@ -52,6 +54,8 @@ class Accessory(Document):
         'bonus_carry',
         'bonus_dot_res',
         'bonus_dot_reduction',
+        'bonus_dot_str',
+        'bonus_dot_duration',
         'value',
         'required_strength',
         'required_intelligence',
@@ -78,6 +82,8 @@ def get_bonuses_display_string(item):
     display_string += f'\nCarry {item["bonus_carry"]:+}' if item['bonus_carry'] != 0 else ''
     display_string += f'\nDamage Over Time Resistance {item["bonus_dot_res"]:+.0%}' if item['bonus_dot_res'] != 0.0 else ''
     display_string += f'\nDamage Over Time Reduction {item["bonus_dot_reduction"]:+.0%}' if item['bonus_dot_reduction'] != 0 else ''
+    display_string += f'\nDamage Over Time Strength {item["bonus_dot_str"]:+.0%}' if item['bonus_dot_str'] != 0.0 else ''
+    display_string += f'\nDamage Over Time Duration {item["bonus_dot_duration"]:+.0%}' if item['bonus_dot_duration'] != 0 else ''
     return display_string.lstrip('\n')
 
 
@@ -121,6 +127,9 @@ prefixes = {
     'Hardy': {
         1: {'effect': 'bonus_dot_res', 'value': 0.1}
     },
+    'Severe': {
+        1: {'effect': 'bonus_dot_str', 'value': 0.1}
+    },
 }
 
 suffixes = {
@@ -138,5 +147,8 @@ suffixes = {
     },
     'Resilient': {
         1: {'effect': 'bonus_dot_reduction', 'value': 1}
+    },
+    'Persistent': {
+        1: {'effect': 'bonus_dot_duration', 'value': 1}
     },
 }

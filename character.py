@@ -62,6 +62,10 @@ class Character(Document):
         'bonus_dot_res': float,
         'dot_reduction': int,
         'bonus_dot_reduction': int,
+        'dot_str': float,
+        'bonus_dot_str': float,
+        'dot_duration': int,
+        'bonus_dot_duration': int,
 
         'points': int,
         'abilities': [str],
@@ -127,6 +131,10 @@ class Character(Document):
         'bonus_dot_res': 0.0,
         'dot_reduction': 0,
         'bonus_dot_reduction': 0,
+        'dot_str': 0.0,
+        'bonus_dot_str': 0.0,
+        'dot_duration': 0,
+        'bonus_dot_duration': 0,
 
         'points': 0,
         'abilities': ['skill-strike'],
@@ -544,11 +552,15 @@ class Character(Document):
         amt = 0
 
         for effect in action.effects:
-            element_scaling = enemy.get_element_scaling(effect.element)
-            avg = (dice.count(enemy.level) * effect.dice_value) / 2 + element_scaling
-            avg += int((dice.count(enemy.level) * effect.dice_value - avg) * action.base_crit_chance)
-            amt += avg
-            amt = self.apply_element_damage_resistances(amt, effect.element)
+            if effect.type == ability.EffectType.damage_health:
+                element_scaling = enemy.get_element_scaling(effect.element)
+                avg = (dice.count(enemy.level) * effect.dice_value) / 2 + element_scaling
+                avg += int((dice.count(enemy.level) * effect.dice_value - avg) * action.base_crit_chance)
+                amt += self.apply_element_damage_resistances(avg, effect.element)
+            elif effect.type == ability.EffectType.burn:
+                turns = effect.status_effect_turns + enemy.dot_duration - self.dot_reduction - self.bonus_dot_reduction
+                turns = min(turns, 0)
+                amt += round(effect.status_effect_value * (1.0 + enemy.dot_strength - self.dot_res - self.dot_bonus_res)) * turns
 
         return amt
 
@@ -610,9 +622,13 @@ class Character(Document):
         self.save()
         return out
 
-    def apply_burn(self, turns: int, dmg: int):
-        if (turns * dmg) - (self.dot_reduction + self.bonus_dot_reduction) > self.burn['turns'] * self.burn['dmg']:
-            self.burn['turns'] = turns - (self.dot_reduction + self.bonus_dot_reduction)
+    def apply_burn(self, turns: int, dmg: int, strength: float, duration: int):
+        turns += duration - self.dot_reduction - self.bonus_dot_reduction
+        turns = min(turns, 0)
+        dmg = round(dmg * (1.0 + strength - self.dot_res - self.dot_bonus_res))
+
+        if turns * dmg > self.burn['turns'] * self.burn['dmg']:
+            self.burn['turns'] = turns
             self.burn['dmg'] = dmg
             self.save()
             return True
@@ -620,13 +636,11 @@ class Character(Document):
         return False
 
     def apply_damage_over_time(self):
-        burn = round(self.burn['dmg'] * (1.0 - self.dot_res))
-
-        if burn > 0:
-            self.current_health -= burn
+        if self.burn['turns'] > 0:
+            self.current_health -= self.burn['dmg']
             self.current_health = max(0, self.current_health)
             self.burn['turns'] -= 1
-            out = f'{self.name} burned for {burn} damage.'
+            out = f'{self.name} burned for {self.burn["dmg"]} damage.'
 
             if self.burn['turns'] == 0:
                 self.burn['dmg'] = 0
