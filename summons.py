@@ -24,6 +24,8 @@ summons = {
                          0.0, 0.0,
                          0.1, 0.01,
                          0.0, 0.0,
+                         0.0, 0.0,
+                         0,
                          [SingleTargetAttack('Punch', 0, 0.05,
                                              [Effect(EffectType.damage_health, Elements.earth, _dice_value=4)]),
                           SingleTargetAttack('Slam', 3, 0.05,

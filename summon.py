@@ -3,16 +3,16 @@ from ability import EffectType
 
 
 class Summon(Enemy):
-    def __init__(self, name, strength, strength_growth, intelligence, intelligence_growth, dexterity,
-                 dexterity_growth,
-                 willpower, willpower_growth, health, health_growth, health_regen, health_regen_growth,
-                 init, init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth,
-                 electricity_res, electricity_res_growth, water_res, water_res_growth, actions, goals, cost, ele_pens):
+    def __init__(self, name, strength, strength_growth, intelligence, intelligence_growth, dexterity, dexterity_growth,
+                 willpower, willpower_growth, health, health_growth, health_regen, health_regen_growth, init,
+                 init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth, electricity_res,
+                 electricity_res_growth, water_res, water_res_growth, dot_res, dot_res_growth, dot_reduction, actions,
+                 goals, cost, ele_pens):
         super().__init__(name, strength, strength_growth, intelligence, intelligence_growth, dexterity,
-                         dexterity_growth,
-                         willpower, willpower_growth, health, health_growth, health_regen, health_regen_growth,
-                         init, init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth,
-                         electricity_res, electricity_res_growth, water_res, water_res_growth, actions, goals)
+                         dexterity_growth, willpower, willpower_growth, health, health_growth, health_regen,
+                         health_regen_growth, init, init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth,
+                         electricity_res, electricity_res_growth, water_res, water_res_growth, dot_res, dot_res_growth,
+                         dot_reduction, actions, goals)
         self.cost = cost
         self.owner = ''
         self.bonus_health = 0  # used in planners by enemies who may target the summon like a player

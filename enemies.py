@@ -24,6 +24,8 @@ enemies = {
                    0.0, 0.02,
                    0.0, 0.02,
                    0.0, 0.02,
+                   0.0, 0.02,
+                   0,
                    [
                        SingleTargetAttack('Headbutt', 0, 0.05,
                                           [Effect(EffectType.damage_health, Elements.earth, _dice_value=4)]),
@@ -53,6 +55,8 @@ enemies = {
                     0.0, 0.02,
                     0.0, 0.02,
                     0.0, 0.02,
+                    0.0, 0.02,
+                    0,
                     [
                         SingleTargetAttack('Bite', 0, 0.06,
                                            [Effect(EffectType.damage_health, Elements.earth, _dice_value=4)]),
@@ -80,6 +84,8 @@ enemies = {
                     0.1, 0.02,
                     0.1, 0.02,
                     0.1, 0.02,
+                    0.1, 0.02,
+                    0,
                     [
                         SingleTargetAttack('Bite', 0, 0.05,
                                            [Effect(EffectType.damage_health, Elements.earth, _dice_value=6)]),
@@ -104,6 +110,8 @@ enemies = {
                              0.1, 0.02,
                              0.1, 0.02,
                              0.1, 0.02,
+                             0.1, 0.02,
+                             0,
                              [SingleTargetAttack('Bite', 0, 0.05,
                                                  [Effect(EffectType.damage_health, Elements.earth, _dice_value=6)])],
                              [Goal(GoalType.damage_opponent, 400)]),
@@ -124,9 +132,14 @@ enemies = {
                  0.08, 0.03,
                  0.03, 0.02,
                  0.0, 0.01,
+                 0.3, 0.02,
+                 0,
                  [
-                     SingleTargetAttack('Claw', 0, 0.05, [Effect(EffectType.damage_health, Elements.earth,
-                                                                 _dice_value=6)]),
+                     SingleTargetAttack('Mischevious Flame', 0, 0.05, [Effect(EffectType.damage_health, Elements.fire,
+                                                                              _dice_value=3),
+                                                                       Effect(EffectType.burn, Elements.fire,
+                                                                              _status_effect_turns=2,
+                                                                              _status_effect_value=2)]),
                  ],
                  [Goal(GoalType.damage_opponent, 500)]),
 
@@ -146,6 +159,8 @@ enemies = {
                   0.05, 0.03,
                   0.03, 0.01,
                   0.0, 0.01,
+                  0.3, 0.02,
+                  0,
                   [
                       SingleTargetAttack('Bite', 0, 0.06, [Effect(EffectType.damage_health, Elements.fire,
                                                                   _dice_value=8)]),

@@ -9,7 +9,7 @@ import random
 class SingleTargetAttack(Action):
     def __init__(self, name: str, cooldown: int, base_crit_chance: float, effects: [Effect]):
         for effect in effects:
-            if effect.type != EffectType.damage_health:
+            if effect.type not in [EffectType.damage_health, EffectType.burn]:
                 raise Exception(f'SingleTargetAttack {name} has an unsupported effect type {effect.type}')
 
         super().__init__()
@@ -33,10 +33,16 @@ class SingleTargetAttack(Action):
 
         for target in targets:
             for effect in self.effects:
-                dmgs = target.take_damage(user.deal_damage(effect, critical=crit), user.ele_pens)
+                if effect.type == EffectType.damage_health:
+                    dmgs = target.take_damage(user.deal_damage(effect, critical=crit), user.ele_pens)
 
-                for dmg in dmgs:
-                    out += f'\n{target.name} suffered {dmg[0]} {Elements(dmg[1]).name} damage.'
+                    for dmg in dmgs:
+                        out += f'\n{target.name} suffered {dmg[0]} {Elements(dmg[1]).name} damage.'
+                elif effect.type == EffectType.burn:
+                    if target.apply_burn(effect.status_effect_turns, effect.status_effect_value):
+                        out += f'\n{target.name} is burning.'
+                    else:
+                        out += f'\n{target.name} is already seriously burning.'
 
         out += self.handle_elements(fight)
         self.check_cooldown()

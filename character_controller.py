@@ -89,6 +89,8 @@ class CharacterController(commands.Cog):
 | Fire Res: {character.fire_res:.0%} ({character.bonus_fire_res:+.0%})
 | Electricity Res: {character.electricity_res:.0%} ({character.bonus_electricity_res:+.0%})
 | Water Res: {character.water_res:.0%} ({character.bonus_water_res:+.0%})
+| Damage Over Time Res: {character.dot_res:.0%} ({character.bonus_dot_res:+.0%})
+| Damage Over Time Reduction: {character.dot_reduction} ({character.bonus_dot_reduction:+})
 |----
 | Deaths: {character.deaths}
 --<-(@  --<-(@  --<-(@  --<-(@''')

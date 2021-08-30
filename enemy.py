@@ -51,9 +51,10 @@ class Plan:
 
 class Enemy:
     def __init__(self, name, strength, strength_growth, intelligence, intelligence_growth, dexterity, dexterity_growth,
-                 willpower, willpower_growth, health, health_growth, health_regen, health_regen_growth,
-                 init, init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth,
-                 electricity_res, electricity_res_growth, water_res, water_res_growth, actions, goals):
+                 willpower, willpower_growth, health, health_growth, health_regen, health_regen_growth, init,
+                 init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth, electricity_res,
+                 electricity_res_growth, water_res, water_res_growth, dot_res, dot_res_growth, dot_reduction, actions,
+                 goals):
         self.name = name
         self.level = 1
 
@@ -75,6 +76,7 @@ class Enemy:
         self.init_growth = init_growth
         self.bonus_init = 0  # exists for the purpose of init sorting in fight encounters with characters
         self.status_effects = []  # list of dicts w/ keys = name, stat, value, turns_remaining
+        self.burn = {'turns': 0, 'dmg': 0}
         self.ele_pens = (0.0, 0.0, 0.0, 0.0)  # used for enemy on summon damage calcs
 
         # Resistances
@@ -86,6 +88,9 @@ class Enemy:
         self.electricity_res_growth = electricity_res_growth
         self.water_res = water_res
         self.water_res_growth = water_res_growth
+        self.dot_res = dot_res
+        self.dot_res_growth = dot_res_growth
+        self.dot_reduction = dot_reduction
 
         # AI
         self.actions = actions
@@ -102,6 +107,7 @@ class Enemy:
         self.current_health = self.health
         self.health_regen += round(self.health_regen_growth * gap)
         self.init += round(self.init_growth * gap)
+        self.dot_res += round(self.dot_res_growth * gap, 2)
         self.name = prefixes[utilities.clamp(int(depth / 10), 1, len(prefixes))] + " " + self.name
 
     def apply_status_effect(self, name: str, stat: str, value: int, turns_remaining: int):
@@ -147,6 +153,33 @@ class Enemy:
                 self.remove_status_effect(se)
 
         return out
+
+    def apply_burn(self, turns: int, dmg: int):
+        if (turns * dmg) - self.dot_reduction > self.burn['turns'] * self.burn['dmg']:
+            self.burn['turns'] = turns - self.dot_reduction
+            self.burn['dmg'] = dmg
+            return True
+
+        return False
+
+    def apply_damage_over_time(self):
+        burn = round(self.burn['dmg'] * (1.0 - self.dot_res))
+
+        if burn > 0:
+            self.current_health -= burn
+            self.current_health = max(0, self.current_health)
+            self.burn['turns'] -= 1
+            out = f'{self.name} burned for {burn} damage.'
+
+            if self.burn['turns'] == 0:
+                self.burn['dmg'] = 0
+
+            if self.current_health <= 0:
+                return True, out
+            else:
+                return False, out
+
+        return None  # no DOT occurred
 
     def list_active_effects(self):
         out = ''

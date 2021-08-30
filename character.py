@@ -58,6 +58,10 @@ class Character(Document):
         'bonus_electricity_res': float,
         'water_res': float,
         'bonus_water_res': float,
+        'dot_res': float,
+        'bonus_dot_res': float,
+        'dot_reduction': int,
+        'bonus_dot_reduction': int,
 
         'points': int,
         'abilities': [str],
@@ -71,6 +75,7 @@ class Character(Document):
         'profession': str,
         'deaths': int,
         'status_effects': None,
+        'burn': dict,
     }
     required_fields = ['name']
     default_values = {
@@ -118,6 +123,10 @@ class Character(Document):
         'bonus_electricity_res': 0.0,
         'water_res': 0.0,
         'bonus_water_res': 0.0,
+        'dot_res': 0.0,
+        'bonus_dot_res': 0.0,
+        'dot_reduction': 0,
+        'bonus_dot_reduction': 0,
 
         'points': 0,
         'abilities': ['skill-strike'],
@@ -132,6 +141,7 @@ class Character(Document):
         'profession': '',
         'deaths': 0,
         'status_effects': [],  # list of dicts w/ keys = name, stat, value, turns_remaining
+        'burn': {'turns': 0, 'dmg': 0},
     }
     use_dot_notation = True
     use_autorefs = True
@@ -238,13 +248,16 @@ class Character(Document):
                 self.apply_weapon_bonuses(item)
             else:
                 self.remove_weapon_bonuses(item)
-        elif item['_itype'] in [ItemType.head.value, ItemType.chest.value, ItemType.belt.value,
-                                ItemType.boots.value, ItemType.gloves.value, ItemType.amulet.value,
-                                ItemType.ring.value]:
+        elif item['_itype'] in [ItemType.head.value, ItemType.chest.value, ItemType.boots.value, ItemType.gloves.value]:
             if equip:
                 self.apply_armor_bonuses(item)
             else:
                 self.remove_armor_bonuses(item)
+        elif item['_itype'] in [ItemType.belt.value, ItemType.amulet.value, ItemType.ring.value]:
+            if equip:
+                self.apply_accessory_bonuses(item)
+            else:
+                self.remove_accessory_bonuses(item)
 
         self.save()
 
@@ -327,6 +340,38 @@ class Character(Document):
         self.fire_res -= armor['bonus_fire_res']
         self.electricity_res -= armor['bonus_electricity_res']
         self.water_res -= armor['bonus_water_res']
+
+    def apply_accessory_bonuses(self, accessory):
+        self.bonus_strength += accessory['bonus_strength']
+        self.bonus_intelligence += accessory['bonus_intelligence']
+        self.bonus_dexterity += accessory['bonus_dexterity']
+        self.bonus_willpower += accessory['bonus_willpower']
+        self.bonus_health += accessory['bonus_health']
+        self.bonus_health_regen += accessory['bonus_health_regen']
+        self.bonus_stamina += accessory['bonus_stamina']
+        self.bonus_stamina_regen += accessory['bonus_stamina_regen']
+        self.bonus_mana += accessory['bonus_mana']
+        self.bonus_mana_regen += accessory['bonus_mana_regen']
+        self.bonus_init += accessory['bonus_init']
+        self.bonus_dot_strength_res += accessory['bonus_dot_res']
+        self.bonus_dot_duration_reduction += accessory['bonus_dot_reduction']
+        self.bonus_carry += accessory['bonus_carry']
+
+    def remove_accessory_bonuses(self, accessory):
+        self.bonus_strength -= accessory['bonus_strength']
+        self.bonus_intelligence -= accessory['bonus_intelligence']
+        self.bonus_dexterity -= accessory['bonus_dexterity']
+        self.bonus_willpower -= accessory['bonus_willpower']
+        self.bonus_health -= accessory['bonus_health']
+        self.bonus_health_regen -= accessory['bonus_health_regen']
+        self.bonus_stamina -= accessory['bonus_stamina']
+        self.bonus_stamina_regen -= accessory['bonus_stamina_regen']
+        self.bonus_mana -= accessory['bonus_mana']
+        self.bonus_mana_regen -= accessory['bonus_mana_regen']
+        self.bonus_init -= accessory['bonus_init']
+        self.bonus_dot_strength_res -= accessory['bonus_dot_res']
+        self.bonus_dot_duration_reduction -= accessory['bonus_dot_reduction']
+        self.bonus_carry -= accessory['bonus_carry']
 
     def use_consumable(self, connection, consumable):
         if consumable['_itype'] not in [ItemType.potion.value, ItemType.food.value]:
@@ -565,12 +610,47 @@ class Character(Document):
         self.save()
         return out
 
+    def apply_burn(self, turns: int, dmg: int):
+        if (turns * dmg) - (self.dot_reduction + self.bonus_dot_reduction) > self.burn['turns'] * self.burn['dmg']:
+            self.burn['turns'] = turns - (self.dot_reduction + self.bonus_dot_reduction)
+            self.burn['dmg'] = dmg
+            self.save()
+            return True
+
+        return False
+
+    def apply_damage_over_time(self):
+        burn = round(self.burn['dmg'] * (1.0 - self.dot_res))
+
+        if burn > 0:
+            self.current_health -= burn
+            self.current_health = max(0, self.current_health)
+            self.burn['turns'] -= 1
+            out = f'{self.name} burned for {burn} damage.'
+
+            if self.burn['turns'] == 0:
+                self.burn['dmg'] = 0
+
+            if self.current_health <= 0:
+                return True, out
+            else:
+                return False, out
+
+        return None  # no DOT occurred
+
     def end_of_turn(self):
         out = ''
         h, s, m = self.regen()
 
         if h > 0 or s > 0 or m > 0:
             out += f'{self.name} regenerates {h}h {s}s {m}m.\n'
+
+        if self.burn['turns'] > 0:
+            self.burn['turns'] -= 1
+
+            if self.burn['turns'] == 0:
+                self.burn['dmg'] = 0
+                out += f'{self.name} has stopped burning.\n'
 
         return out + self.countdown_status_effects()
 

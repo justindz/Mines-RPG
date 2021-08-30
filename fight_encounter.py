@@ -164,6 +164,11 @@ class Fight:
 
                     for dmg in dmgs:
                         out += f'\n{_target.name} suffered {dmg[0]} {Elements(dmg[1]).name} damage.'
+                elif effect.type == ability.EffectType.burn:
+                    if target.apply_burn(effect.status_effect_turns, effect.status_effect_value):
+                        out += f'\n{target.name} is burning.'
+                    else:
+                        out += f'\n{target.name} is already seriously burning.'
                 elif effect.type == ability.EffectType.restore_health:
                     heal = _target.restore_health(dice.roll(dice.count(char.level), effect.dice_value, crit), char)
                     out += f'\n{_target.name} regained {heal} health.'

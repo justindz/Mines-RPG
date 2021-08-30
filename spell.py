@@ -21,6 +21,10 @@ spells = {
     'stalagmite': Spell('Stalagmite', 'Stalagmite description.', {'h': 0, 's': 0, 'm': 5},
                         [Effect(EffectType.damage_health, Elements.earth, _dice_value=4)], [], [Elements.earth],
                         _targets_enemies=True),
+    'ignite': Spell('Ignite', 'Ignite description.', {'h': 0, 's': 0, 'm': 8},
+                    [Effect(EffectType.damage_health, Elements.fire, _dice_value=2),
+                     Effect(EffectType.burn, Elements.fire, _status_effect_value=1, _status_effect_turns=2)], [],
+                    [Elements.fire], _targets_enemies=True),
     # Healing
     'regenerate': Spell('Regenerate', 'Regenerate description.', {'h': 0, 's': 0, 'm': 10},
                         [Effect(EffectType.buff, Elements.water, _status_effect_value=2, _stat='health_regen',

@@ -116,13 +116,16 @@ Cost: {ab.ability_cost_to_str()}'''
             out += f'\n- {effect.type.name.capitalize()} : {effect.multiplier}x Weapon Damage'
     elif isinstance(ab, spell.Spell):
         for effect in ab.effects:
-            out += f'\n- {effect.type.name.capitalize()} : {dice.count(level)}d{effect.dice_value} {get_elemental_symbol(effect.element)}'
+            if effect.type == ability.EffectType.damage_health:
+                out += f'\n- Damage Health : {dice.count(level)}d{effect.dice_value} {get_elemental_symbol(effect.element)}'
+            elif effect.type == ability.EffectType.burn:
+                out += f'\n- Burn : {effect.status_effect_value} {get_elemental_symbol(effect.element)} for {effect.status_effect_turns} turns'
 
     return out
 
 
 def get_requirements_display_string(item) -> str:
-    if item["_itype"] not in [1, 2, 3, 5, 6]:
+    if item["_itype"] not in [1, 2, 3, 4, 5, 6, 7, 8]:
         raise Exception(f'get_requirements_display_string for unsupported _itype {item["_itype"]} on {item["name"]}')
 
     display_string = ''
@@ -135,6 +138,9 @@ def get_requirements_display_string(item) -> str:
 
 def get_socket_display(item) -> str:
     out = ''
+
+    if item['_itype'] in [4, 7, 8]:
+        return out
 
     for socket in item['sockets']:
         if socket is None:

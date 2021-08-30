@@ -2,11 +2,11 @@ import discord
 from discord.errors import NotFound
 from discord.ext import commands
 import asyncio
-import random
 
 import skill
 import spell
 import utilities
+from elements import Elements
 from zone import Zone
 from delve import Delve
 from character import Character
@@ -305,6 +305,13 @@ class DelveController(commands.Cog):
                             await self.recover(actor, delve)
 
                         await self.check_for_defeated_enemies(actor, delve, fight)
+                        dot = actor.apply_damage_over_time()
+
+                        if dot is not None:
+                            await delve.channel.send(dot[1])
+
+                            if dot[0] is True:
+                                await self.player_dead(delve, actor)
                     except asyncio.TimeoutError:
                         await delve.channel.send('{} did not take an action in time.'.format(actor.name))
                         await self.recover(actor, delve)
@@ -312,6 +319,13 @@ class DelveController(commands.Cog):
                     out = actor.take_a_turn(fight)
                     await delve.channel.send(out)
                     await self.check_for_defeated_enemies(actor, delve, fight)
+                    dot = actor.apply_damage_over_time()
+
+                    if dot is not None:
+                        await delve.channel.send(dot[1])
+
+                        if dot[0] is True:
+                            fight.unsummon(actor)
                 elif isinstance(actor, Enemy):
                     out = actor.take_a_turn(fight)
                     await delve.channel.send(out)
@@ -325,6 +339,15 @@ class DelveController(commands.Cog):
                                 await self.player_dead(delve, target)
                             elif isinstance(target, Summon):
                                 await delve.channel.send(fight.unsummon(target))
+
+                    dot = actor.apply_damage_over_time()
+
+                    if dot is not None:
+                        await delve.channel.send(dot[1])
+
+                        if dot[0] is True:
+                            fight.remove_enemy(actor)
+                            await delve.channel.send(f'{actor.name} was defeated.')
                 if await self.check_end_of_fight(delve, fight):
                     break
                 await asyncio.sleep(3)
@@ -352,7 +375,9 @@ class DelveController(commands.Cog):
         for fighter in fight.inits:
             await delve.channel.send(utilities.underline(
                 f'- {fighter.name} {fighter.current_health}/{fighter.health}'
-                + (f' [{fighter.list_active_effects()}]' if len(fighter.status_effects) > 0 else '')))
+                + (f' [{fighter.list_active_effects()}]' if len(fighter.status_effects) > 0 else '')
+                + (f' {utilities.get_elemental_symbol(Elements.fire)}' if fighter.burn['turns'] > 0 else '')
+            ))
 
         await delve.channel.send(fight.display_active_elements())
 

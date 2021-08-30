@@ -1,7 +1,7 @@
 from discord.ext import commands
 
 from secrets import admins
-from item import generate_random_item
+from item import generate_random_item, generate_book
 
 
 class AdminController(commands.Cog):
@@ -22,3 +22,12 @@ class AdminController(commands.Cog):
 
         for _ in range(1, 10):
             character.add_to_inventory(generate_random_item(self.connection, level), False)
+
+    @commands.command(hidden=True)
+    @commands.check(check_if_admin)
+    async def spawn_book(self, ctx, key: str):
+        character = self.get(ctx.author)
+        book = generate_book(self.connection, key)
+
+        if book is not None:
+            character.add_to_inventory(book, False)

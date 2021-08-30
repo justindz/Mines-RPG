@@ -43,6 +43,10 @@ def get_ability_string(item) -> str:
 
 books = {
     # Spells
+    'stalagmite': {'name': 'Tome: Stalagmite', 'description': 'TODO', 'level': 1, 'rarity': 2, 'btype': 1,
+                   'key': 'stalagmite'},
+    'ignite': {'name': 'Tome: Ignite', 'description': 'TODO', 'level': 1, 'rarity': 3, 'btype': 1,
+               'key': 'ignite'},
     'mend_wounds': {'name': 'Tome: Mend Wounds', 'description': 'TODO', 'level': 1, 'rarity': 1, 'btype': 1,
                     'key': 'mend_wounds'},
     'regenerate': {'name': 'Tome: Regenerate', 'description': 'TODO', 'level': 1, 'rarity': 2, 'btype': 1,
@@ -60,6 +64,7 @@ books = {
     'slash': {'name': 'Manual: Slash', 'description': 'TODO', 'level': 1, 'rarity': 2, 'bytpe': 0, 'key': 'slash'},
     'jinx': {'name': 'Manual: Jinx', 'description': 'TODO', 'level': 2, 'rarity': 2, 'bytpe': 0, 'key': 'jinx'},
     'volley': {'name': 'Manual: Volley', 'description': 'TODO', 'level': 2, 'rarity': 2, 'bytpe': 0, 'key': 'volley'},
-    'barrage': {'name': 'Manual: Barrage', 'description': 'TODO', 'level': 2, 'rarity': 3, 'bytpe': 0, 'key': 'barrage'},
+    'barrage': {'name': 'Manual: Barrage', 'description': 'TODO', 'level': 2, 'rarity': 3, 'bytpe': 0,
+                'key': 'barrage'},
     'flurry': {'name': 'Manual: Flurry', 'description': 'TODO', 'level': 2, 'rarity': 3, 'bytpe': 0, 'key': 'flurry'},
 }

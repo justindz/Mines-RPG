@@ -12,6 +12,7 @@ import workshop_controller
 import admin_controller
 from character import Character
 from armor import Armor
+from accessory import Accessory
 from consumable import Consumable
 from weapon import Weapon
 from book import Book
@@ -28,6 +29,7 @@ logger.addHandler(handler)
 connection = Connection(secrets.MONGODB_URI)
 connection.register([Character])
 connection.register([Armor])
+connection.register([Accessory])
 connection.register([Consumable])
 connection.register([Weapon])
 connection.register([Book])
