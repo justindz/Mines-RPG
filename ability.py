@@ -10,6 +10,7 @@ class EffectType(Enum):
     debuff = 6
     summon = 7
     burn = 8
+    bleed = 9
 
 
 class Ability:

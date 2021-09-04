@@ -6,13 +6,13 @@ class Summon(Enemy):
     def __init__(self, name, strength, strength_growth, intelligence, intelligence_growth, dexterity, dexterity_growth,
                  willpower, willpower_growth, health, health_growth, health_regen, health_regen_growth, init,
                  init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth, electricity_res,
-                 electricity_res_growth, water_res, water_res_growth, dot_res, dot_res_growth, dot_reduction, actions,
-                 goals, cost, ele_pens):
+                 electricity_res_growth, water_res, water_res_growth, dot_res, dot_res_growth, dot_reduction, dot_str,
+                 dot_str_growth, dot_duration, actions, goals, cost, ele_pens):
         super().__init__(name, strength, strength_growth, intelligence, intelligence_growth, dexterity,
                          dexterity_growth, willpower, willpower_growth, health, health_growth, health_regen,
                          health_regen_growth, init, init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth,
                          electricity_res, electricity_res_growth, water_res, water_res_growth, dot_res, dot_res_growth,
-                         dot_reduction, actions, goals)
+                         dot_reduction, dot_str, dot_str_growth, dot_duration, actions, goals)
         self.cost = cost
         self.owner = ''
         self.bonus_health = 0  # used in planners by enemies who may target the summon like a player
@@ -64,7 +64,8 @@ class Summon(Enemy):
 
         for action in self.actions:
             if action.targets_opponents and action.is_usable(fight.states):
-                effects = list(filter(lambda effect: effect.type in [EffectType.damage_health, EffectType.burn], action.effects))
+                effects = list(filter(lambda effect: effect.type in [EffectType.damage_health, EffectType.burn,
+                                                                     EffectType.bleed], action.effects))
 
                 if len(effects) > 0:
                     for enemy in fight.enemies:

@@ -62,6 +62,8 @@ books = {
                    'key': 'discourage'},
     # Skills
     'slash': {'name': 'Manual: Slash', 'description': 'TODO', 'level': 1, 'rarity': 2, 'bytpe': 0, 'key': 'slash'},
+    'lacerate': {'name': 'Manual: Lacerate', 'description': 'TODO', 'level': 1, 'rarity': 3, 'bytpe': 0,
+                 'key': 'lacerate'},
     'jinx': {'name': 'Manual: Jinx', 'description': 'TODO', 'level': 2, 'rarity': 2, 'bytpe': 0, 'key': 'jinx'},
     'volley': {'name': 'Manual: Volley', 'description': 'TODO', 'level': 2, 'rarity': 2, 'bytpe': 0, 'key': 'volley'},
     'barrage': {'name': 'Manual: Barrage', 'description': 'TODO', 'level': 2, 'rarity': 3, 'bytpe': 0,

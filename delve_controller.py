@@ -377,6 +377,7 @@ class DelveController(commands.Cog):
                 f'- {fighter.name} {fighter.current_health}/{fighter.health}'
                 + (f' [{fighter.list_active_effects()}]' if len(fighter.status_effects) > 0 else '')
                 + (f' {utilities.get_elemental_symbol(Elements.fire)}' if fighter.burn['turns'] > 0 else '')
+                + (f' :drop_of_blood:' if fighter.bleed['turns'] > 0 else '')
             ))
 
         await delve.channel.send(fight.display_active_elements())

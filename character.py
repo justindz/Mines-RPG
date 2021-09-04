@@ -80,6 +80,7 @@ class Character(Document):
         'deaths': int,
         'status_effects': None,
         'burn': dict,
+        'bleed': dict,
     }
     required_fields = ['name']
     default_values = {
@@ -150,6 +151,7 @@ class Character(Document):
         'deaths': 0,
         'status_effects': [],  # list of dicts w/ keys = name, stat, value, turns_remaining
         'burn': {'turns': 0, 'dmg': 0},
+        'bleed': {'turns': 0, 'dmg': 0},
     }
     use_dot_notation = True
     use_autorefs = True
@@ -557,7 +559,7 @@ class Character(Document):
                 avg = (dice.count(enemy.level) * effect.dice_value) / 2 + element_scaling
                 avg += int((dice.count(enemy.level) * effect.dice_value - avg) * action.base_crit_chance)
                 amt += self.apply_element_damage_resistances(avg, effect.element)
-            elif effect.type == ability.EffectType.burn:
+            elif effect.type in [ability.EffectType.burn, ability.EffectType.bleed]:
                 turns = effect.status_effect_turns + enemy.dot_duration - self.dot_reduction - self.bonus_dot_reduction
                 turns = min(turns, 0)
                 amt += round(effect.status_effect_value * (1.0 + enemy.dot_strength - self.dot_res - self.dot_bonus_res)) * turns
@@ -622,9 +624,9 @@ class Character(Document):
         self.save()
         return out
 
-    def apply_burn(self, turns: int, dmg: int, strength: float, duration: int):
+    def apply_burn(self, turns: int, dmg: int, strength: float, duration: int) -> bool:
         turns += duration - self.dot_reduction - self.bonus_dot_reduction
-        turns = min(turns, 0)
+        turns = max(turns, 0)
         dmg = round(dmg * (1.0 + strength - self.dot_res - self.dot_bonus_res))
 
         if turns * dmg > self.burn['turns'] * self.burn['dmg']:
@@ -635,22 +637,44 @@ class Character(Document):
 
         return False
 
+    def apply_bleed(self, turns: int, dmg: int, strength: float, duration: int) -> bool:
+        pre_turns = self.bleed['turns']
+        turns += duration - self.dot_reduction - self.bonus_dot_reduction
+        turns = max(turns, 0)
+        dmg = round(dmg * (1.0 + strength - self.dot_res - self.dot_bonus_res))
+        self.bleed['turns'] += turns
+        self.bleed['dmg'] += dmg
+        self.save()
+        return True if pre_turns == 0 else False
+
     def apply_damage_over_time(self):
+        out = ''
+
+        if self.burn['turns'] <= 0 and self.bleed['turns'] <= 0:
+            return None  # no DOT occurred
+
         if self.burn['turns'] > 0:
             self.current_health -= self.burn['dmg']
             self.current_health = max(0, self.current_health)
             self.burn['turns'] -= 1
-            out = f'{self.name} burned for {self.burn["dmg"]} damage.'
+            out += f'{self.name} burned for {self.bleed["dmg"]} damage.'
 
             if self.burn['turns'] == 0:
                 self.burn['dmg'] = 0
 
-            if self.current_health <= 0:
-                return True, out
-            else:
-                return False, out
+        if self.bleed['turns'] > 0:
+            self.current_health -= self.bleed['dmg']
+            self.current_health = max(0, self.current_health)
+            self.bleed['turns'] -= 1
+            out += f'{self.name} bled for {self.burn["dmg"]} damage.'
 
-        return None  # no DOT occurred
+            if self.bleed['turns'] == 0:
+                self.bleed['dmg'] = 0
+
+        if self.current_health <= 0:
+            return True, out
+        else:
+            return False, out
 
     def end_of_turn(self):
         out = ''

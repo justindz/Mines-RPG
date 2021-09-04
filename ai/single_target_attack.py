@@ -44,6 +44,12 @@ class SingleTargetAttack(Action):
                         out += f'\n{target.name} is burning.'
                     else:
                         out += f'\n{target.name} is already seriously burning.'
+                elif effect.type == EffectType.bleed:
+                    if target.apply_bleed(effect.status_effect_turns, effect.status_effect_value,
+                                          user.dot_str, user.dot_duration):
+                        out += f'\n{target.name} is bleeding.'
+                    else:
+                        out += f'\n{target.name} is bleeding more severely.'
 
         out += self.handle_elements(fight)
         self.check_cooldown()

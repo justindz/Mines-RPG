@@ -120,6 +120,8 @@ Cost: {ab.ability_cost_to_str()}'''
                 out += f'\n- Damage Health : {dice.count(level)}d{effect.dice_value} {get_elemental_symbol(effect.element)}'
             elif effect.type == ability.EffectType.burn:
                 out += f'\n- Burn : {effect.status_effect_value} {get_elemental_symbol(effect.element)} for {effect.status_effect_turns} turns'
+            elif effect.type == ability.EffectType.bleed:
+                out += f'\n- Bleed : {effect.status_effect_value} {get_elemental_symbol(effect.element)} for {effect.status_effect_turns} turns'
 
     return out
 
