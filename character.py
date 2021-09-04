@@ -62,8 +62,8 @@ class Character(Document):
         'bonus_dot_res': float,
         'dot_reduction': int,
         'bonus_dot_reduction': int,
-        'dot_str': float,
-        'bonus_dot_str': float,
+        'dot_effect': float,
+        'bonus_dot_effect': float,
         'dot_duration': int,
         'bonus_dot_duration': int,
 
@@ -132,8 +132,8 @@ class Character(Document):
         'bonus_dot_res': 0.0,
         'dot_reduction': 0,
         'bonus_dot_reduction': 0,
-        'dot_str': 0.0,
-        'bonus_dot_str': 0.0,
+        'dot_effect': 0.0,
+        'bonus_dot_effect': 0.0,
         'dot_duration': 0,
         'bonus_dot_duration': 0,
 
@@ -363,7 +363,7 @@ class Character(Document):
         self.bonus_mana += accessory['bonus_mana']
         self.bonus_mana_regen += accessory['bonus_mana_regen']
         self.bonus_init += accessory['bonus_init']
-        self.bonus_dot_strength_res += accessory['bonus_dot_res']
+        self.bonus_dot_effect_res += accessory['bonus_dot_res']
         self.bonus_dot_duration_reduction += accessory['bonus_dot_reduction']
         self.bonus_carry += accessory['bonus_carry']
 
@@ -379,7 +379,7 @@ class Character(Document):
         self.bonus_mana -= accessory['bonus_mana']
         self.bonus_mana_regen -= accessory['bonus_mana_regen']
         self.bonus_init -= accessory['bonus_init']
-        self.bonus_dot_strength_res -= accessory['bonus_dot_res']
+        self.bonus_dot_effect_res -= accessory['bonus_dot_res']
         self.bonus_dot_duration_reduction -= accessory['bonus_dot_reduction']
         self.bonus_carry -= accessory['bonus_carry']
 
@@ -562,7 +562,7 @@ class Character(Document):
             elif effect.type in [ability.EffectType.burn, ability.EffectType.bleed]:
                 turns = effect.status_effect_turns + enemy.dot_duration - self.dot_reduction - self.bonus_dot_reduction
                 turns = min(turns, 0)
-                amt += round(effect.status_effect_value * (1.0 + enemy.dot_strength - self.dot_res - self.dot_bonus_res)) * turns
+                amt += round(effect.status_effect_value * (1.0 + enemy.dot_effect - self.dot_res - self.dot_bonus_res)) * turns
 
         return amt
 

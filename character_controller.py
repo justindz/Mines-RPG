@@ -91,6 +91,8 @@ class CharacterController(commands.Cog):
 | Water Res: {character.water_res:.0%} ({character.bonus_water_res:+.0%})
 | Damage Over Time Res: {character.dot_res:.0%} ({character.bonus_dot_res:+.0%})
 | Damage Over Time Reduction: {character.dot_reduction} ({character.bonus_dot_reduction:+})
+| Damage Over Time Effectiveness: {character.dot_effect:.0%} ({character.bonus_dot_effect:+.0%})
+| Damage Over Time Duration: {character.dot_duration} ({character.bonus_dot_duration:+})
 |----
 | Deaths: {character.deaths}
 --<-(@  --<-(@  --<-(@  --<-(@''')

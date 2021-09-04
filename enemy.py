@@ -53,8 +53,8 @@ class Enemy:
     def __init__(self, name, strength, strength_growth, intelligence, intelligence_growth, dexterity, dexterity_growth,
                  willpower, willpower_growth, health, health_growth, health_regen, health_regen_growth, init,
                  init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth, electricity_res,
-                 electricity_res_growth, water_res, water_res_growth, dot_res, dot_res_growth, dot_reduction, dot_str,
-                 dot_str_growth, dot_duration, actions, goals):
+                 electricity_res_growth, water_res, water_res_growth, dot_res, dot_res_growth, dot_reduction, dot_effect,
+                 dot_effect_growth, dot_duration, actions, goals):
         self.name = name
         self.level = 1
 
@@ -92,8 +92,8 @@ class Enemy:
         self.dot_res = dot_res
         self.dot_res_growth = dot_res_growth
         self.dot_reduction = dot_reduction
-        self.dot_str = dot_str
-        self.dot_str_growth = dot_str_growth
+        self.dot_effect = dot_effect
+        self.dot_effect_growth = dot_effect_growth
         self.dot_duration = dot_duration
 
         # AI
@@ -112,7 +112,7 @@ class Enemy:
         self.health_regen += round(self.health_regen_growth * gap)
         self.init += round(self.init_growth * gap)
         self.dot_res += round(self.dot_res_growth * gap, 2)
-        self.dot_str += round(self.dot_str_growth * gap, 2)
+        self.dot_effect += round(self.dot_effect_growth * gap, 2)
         self.name = prefixes[utilities.clamp(int(depth / 10), 1, len(prefixes))] + " " + self.name
 
     def apply_status_effect(self, name: str, stat: str, value: int, turns_remaining: int):
@@ -476,7 +476,7 @@ class Enemy:
             elif effect.type in [EffectType.burn, EffectType.bleed]:
                 turns = effect.status_effect_turns + enemy.dot_duration - self.dot_reduction
                 turns = min(turns, 0)
-                amt += round(effect.status_effect_value * (1.0 + enemy.dot_strength - self.dot_res)) * turns
+                amt += round(effect.status_effect_value * (1.0 + enemy.dot_effect - self.dot_res)) * turns
 
         return amt
 
