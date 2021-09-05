@@ -1,3 +1,4 @@
+import dice
 from ai.action import Action
 from ability import EffectType, Effect
 
@@ -29,8 +30,9 @@ class StatusEffect(Action):
 
         for target in targets:
             for effect in self.effects:
-                overwrite = target.apply_status_effect(effect.status_effect_name, effect.stat, effect.status_effect_value,
-                                                       effect.status_effect_turns)
+                amt = dice.roll(user.level, effect.dice_value)
+                amt = -amt if effect.type == EffectType.debuff else amt
+                overwrite = target.apply_status_effect(effect.status_effect_name, effect.stat, amt, effect.effect_turns)
                 out += f'\n{target.name} has been affected by {effect.status_effect_name}.'
 
                 if overwrite is not None:

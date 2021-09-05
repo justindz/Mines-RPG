@@ -40,19 +40,19 @@ class Ability:
 
 
 class Effect:
-    def __init__(self, _type, _element, _dice_value=None, _status_effect_value=None, _stat=None,
-                 _status_effect_name=None, _status_effect_turns=None):
+    def __init__(self, _type, _element, _dice_value=None, _dot_value=None, _stat=None,
+                 _status_effect_name=None, _effect_turns=None):
         if _type in [EffectType.restore_health, EffectType.restore_stamina,
                      EffectType.restore_mana] and _dice_value is None:
             raise Exception(f'Malformed dice value for SpellEffect: {_type}, {_element}, {_dice_value}')
         if _type in [EffectType.buff, EffectType.debuff] and (_status_effect_name is None or _stat is None or
-                                                              _status_effect_turns is None):
-            raise Exception(f'Malformed status effect for SpellEffect: {_type}, {_element}, {_status_effect_value}')
+                                                              _effect_turns is None):
+            raise Exception(f'Malformed status effect for SpellEffect: {_type}, {_element}, {_dot_value}')
 
         self.type = _type
         self.element = _element
-        self.status_effect_value = _status_effect_value
-        self.dice_value = _dice_value  # unused for status effects (buff, debuff)
+        self.dot_value = _dot_value
+        self.dice_value = _dice_value  # unused for DOTs
         self.status_effect_name = _status_effect_name
         self.stat = _stat
-        self.status_effect_turns = _status_effect_turns
+        self.effect_turns = _effect_turns

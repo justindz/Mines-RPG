@@ -165,13 +165,13 @@ class Fight:
                     for dmg in dmgs:
                         out += f'\n{_target.name} suffered {dmg[0]} {Elements(dmg[1]).name} damage.'
                 elif effect.type == ability.EffectType.burn:
-                    if target.apply_burn(effect.status_effect_turns, effect.status_effect_value,
+                    if target.apply_burn(effect.effect_turns, effect.dot_value,
                                          char.dot_effect + char.bonus_dot_effect, char.dot_duration + char.bonus_dot_duration):
                         out += f'\n{target.name} is burning.'
                     else:
                         out += f'\n{target.name} is already seriously burning.'
                 elif effect.type == ability.EffectType.bleed:
-                    if target.apply_bleed(effect.status_effect_turns, effect.status_effect_value,
+                    if target.apply_bleed(effect.effect_turns, effect.dot_value,
                                           char.dot_effect + char.bonus_dot_effect, char.dot_duration + char.bonus_dot_duration):
                         out += f'\n{target.name} is bleeding.'
                     else:
@@ -186,8 +186,10 @@ class Fight:
                     mana = _target.restore_mana(dice.roll(dice.count(char.level), effect.dice_value, crit), char)
                     out += f'\n{_target.name} regained {mana} mana.'
                 elif effect.type in [ability.EffectType.buff, ability.EffectType.debuff]:
-                    overwrite = _target.apply_status_effect(effect.status_effect_name, effect.stat, effect.status_effect_value,
-                                                            effect.status_effect_turns)
+                    amt = dice.roll(char.level, effect.dice_value)
+                    amt = -amt if effect.type == ability.EffectType.debuff else amt
+                    overwrite = target.apply_status_effect(effect.status_effect_name, effect.stat, amt,
+                                                           effect.effect_turns)
                     out += f'\n{_target.name} has been affected by {effect.status_effect_name}.'
 
                     if overwrite is not None:

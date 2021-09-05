@@ -119,9 +119,13 @@ Cost: {ab.ability_cost_to_str()}'''
             if effect.type == ability.EffectType.damage_health:
                 out += f'\n- Damage Health : {dice.count(level)}d{effect.dice_value} {get_elemental_symbol(effect.element)}'
             elif effect.type == ability.EffectType.burn:
-                out += f'\n- Burn : {effect.status_effect_value} {get_elemental_symbol(effect.element)} for {effect.status_effect_turns} turns'
+                out += f'\n- Burn : {effect.dot_value} {get_elemental_symbol(effect.element)} for {effect.effect_turns} turns'
             elif effect.type == ability.EffectType.bleed:
-                out += f'\n- Bleed : {effect.status_effect_value} {get_elemental_symbol(effect.element)} for {effect.status_effect_turns} turns'
+                out += f'\n- Bleed : {effect.dot_value} {get_elemental_symbol(effect.element)} for {effect.effect_turns} turns'
+            elif effect.type == ability.EffectType.buff:
+                out += f'\n- Buff : {dice.count(level)}d{effect.dice_value} {effect.stat} {get_elemental_symbol(effect.element)} for {effect.effect_turns} turns'
+            elif effect.type == ability.EffectType.debuff:
+                out += f'\n- Debuff : -{dice.count(level)}d{effect.dice_value} {effect.stat} {get_elemental_symbol(effect.element)} for {effect.effect_turns} turns'
 
     return out
 

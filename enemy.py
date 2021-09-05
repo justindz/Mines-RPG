@@ -474,9 +474,9 @@ class Enemy:
                 avg += int((dice.count(enemy.level) * effect.dice_value - avg) * action.base_crit_chance)
                 amt += self.apply_element_damage_resistances(avg, effect.element, enemy.ele_pens)
             elif effect.type in [EffectType.burn, EffectType.bleed]:
-                turns = effect.status_effect_turns + enemy.dot_duration - self.dot_reduction
+                turns = effect.effect_turns + enemy.dot_duration - self.dot_reduction
                 turns = min(turns, 0)
-                amt += round(effect.status_effect_value * (1.0 + enemy.dot_effect - self.dot_res)) * turns
+                amt += round(effect.dot_value * (1.0 + enemy.dot_effect - self.dot_res)) * turns
 
         return amt
 

@@ -305,44 +305,81 @@ Value: {it["value"]}'''
         if character.points <= 0:
             await ctx.author.send(utilities.red('You do not have any available level points.'))
         else:
-            await ctx.author.send(character.display_level_up_menu())
+            if character.level % 5 == 4:
+                await ctx.author.send(character.display_level_up_menu(True))
 
-            def check_level_up_menu_selection(m):
-                if str(m.author) == character.name and m.content in ['1', '2', '3', '4', '5', '6', '7']:
-                    return True
+                def check_level_up_menu_selection(m):
+                    if str(m.author) == character.name and m.content in ['1', '2', '3', '4', '5', '6']:
+                        return True
 
-            try:
-                msg = await self.bot.wait_for('message', check=check_level_up_menu_selection, timeout=30)
-                choice = int(msg.content)
-            except asyncio.TimeoutError:
-                await ctx.author.send(
-                    utilities.yellow('Selection timed out. Please use \\level again when you are ready.'))
-                return
+                try:
+                    msg = await self.bot.wait_for('message', check=check_level_up_menu_selection, timeout=30)
+                    choice = int(msg.content)
+                except asyncio.TimeoutError:
+                    await ctx.author.send(
+                        utilities.yellow('Selection timed out. Please use \\level again when you are ready.'))
+                    return
 
-            if choice == 1:
-                character.strength += 3
-                await ctx.author.send('Your base strength has been permanently increased by 3.')
-            elif choice == 2:
-                character.intelligence += 3
-                await ctx.author.send('Your base intelligence has been permanently increased by 3.')
-            elif choice == 3:
-                character.dexterity += 3
-                await ctx.author.send('Your base dexterity has been permanently increased by 3.')
-            elif choice == 4:
-                character.willpower += 3
-                await ctx.author.send('Your base willpower has been permanently increased by 3.')
-            elif choice == 5:
-                character.health += 5
-                await ctx.author.send('Your base health has been permanently increased by 5.')
-            elif choice == 6:
-                character.stamina += 5
-                await ctx.author.send('Your base stamina has been permanently increased by 5.')
-            elif choice == 7:
-                character.mana += 5
-                await ctx.author.send('Your base mana has been permanently increased by 5.')
+                if choice == 1:
+                    character.earth_res += 0.01
+                    await ctx.author.send('Your earth resistance has been permanently increased by 1%.')
+                elif choice == 2:
+                    character.fire_res += 0.01
+                    await ctx.author.send('Your fire resistance has been permanently increased by 1%.')
+                elif choice == 3:
+                    character.electricity_res += 0.01
+                    await ctx.author.send('Your electricity resistance has been permanently increased by 1%.')
+                elif choice == 4:
+                    character.water_res += 0.01
+                    await ctx.author.send('Your water resistance has been permanently increased by 1%.')
+                elif choice == 5:
+                    character.dot_res += 0.03
+                    await ctx.author.send('Your damage over time resistance has been permanently increased by 3%.')
+                elif choice == 6:
+                    character.dot_effect += 0.03
+                    await ctx.author.send('Your damage over time effectiveness has been permanently increased by 3%.')
+                else:
+                    await ctx.channel.send(utilities.red(f'Invalid level up reward selection {msg}.'))
+                    return
             else:
-                await ctx.channel.send(utilities.red(f'Invalid level up reward selection {msg}.'))
-                return
+                await ctx.author.send(character.display_level_up_menu(False))
+
+                def check_level_up_menu_selection(m):
+                    if str(m.author) == character.name and m.content in ['1', '2', '3', '4', '5', '6', '7']:
+                        return True
+
+                try:
+                    msg = await self.bot.wait_for('message', check=check_level_up_menu_selection, timeout=30)
+                    choice = int(msg.content)
+                except asyncio.TimeoutError:
+                    await ctx.author.send(
+                        utilities.yellow('Selection timed out. Please use \\level again when you are ready.'))
+                    return
+
+                if choice == 1:
+                    character.strength += 3
+                    await ctx.author.send('Your base strength has been permanently increased by 3.')
+                elif choice == 2:
+                    character.intelligence += 3
+                    await ctx.author.send('Your base intelligence has been permanently increased by 3.')
+                elif choice == 3:
+                    character.dexterity += 3
+                    await ctx.author.send('Your base dexterity has been permanently increased by 3.')
+                elif choice == 4:
+                    character.willpower += 3
+                    await ctx.author.send('Your base willpower has been permanently increased by 3.')
+                elif choice == 5:
+                    character.health += 5
+                    await ctx.author.send('Your base health has been permanently increased by 5.')
+                elif choice == 6:
+                    character.stamina += 5
+                    await ctx.author.send('Your base stamina has been permanently increased by 5.')
+                elif choice == 7:
+                    character.mana += 5
+                    await ctx.author.send('Your base mana has been permanently increased by 5.')
+                else:
+                    await ctx.channel.send(utilities.red(f'Invalid level up reward selection {msg}.'))
+                    return
 
             character.points -= 1
             character.level += 1

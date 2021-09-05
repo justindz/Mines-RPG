@@ -34,8 +34,8 @@ enemies = {
                        SingleTargetHeal('Regenerate', 3,
                                         [Effect(EffectType.restore_health, Elements.water, _dice_value=10)]),
                        StatusEffect('Symbiosis', 4, [
-                           Effect(EffectType.buff, Elements.water, _status_effect_value=10, _stat='bonus_strength',
-                                  _status_effect_name='Reinforced', _status_effect_turns=3)])
+                           Effect(EffectType.buff, Elements.water, _dice_value=10, _stat='bonus_strength',
+                                  _status_effect_name='Reinforced', _effect_turns=3)])
                    ],
                    [Goal(GoalType.damage_opponent, 500),
                     Goal(GoalType.heal_ally, 450),
@@ -65,9 +65,9 @@ enemies = {
                         SingleTargetAttack('Bite', 0, 0.06,
                                            [Effect(EffectType.damage_health, Elements.earth, _dice_value=4)]),
                         StatusEffect('Web', 3,
-                                     [Effect(EffectType.debuff, Elements.earth, _status_effect_value=-5,
+                                     [Effect(EffectType.debuff, Elements.earth, _dice_value=10,
                                              _stat='bonus_init', _status_effect_name='Slowed',
-                                             _status_effect_turns=2)], debuff=True),
+                                             _effect_turns=2)], debuff=True),
                     ],
                     [Goal(GoalType.damage_opponent, 500),
                      Goal(GoalType.debuff_opponent, 425)]),
@@ -148,8 +148,8 @@ enemies = {
                      SingleTargetAttack('Mischevious Flame', 0, 0.05, [Effect(EffectType.damage_health, Elements.fire,
                                                                               _dice_value=3),
                                                                        Effect(EffectType.burn, Elements.fire,
-                                                                              _status_effect_turns=2,
-                                                                              _status_effect_value=2)]),
+                                                                              _effect_turns=2,
+                                                                              _dot_value=2)]),
                  ],
                  [Goal(GoalType.damage_opponent, 500)]),
 

@@ -1,3 +1,4 @@
+import dice
 from ability import EffectType, Effect
 from elements import Elements
 from ai.action import Action
@@ -33,8 +34,10 @@ class Explode(Action):
                     for dmg in dmgs:
                         out += f'\n{target.name} suffered {dmg[0]} {Elements(dmg[1]).name} damage.'
                 elif effect.type == EffectType.debuff:
-                    overwrite = target.apply_status_effect(effect.status_effect_name, effect.stat, effect.status_effect_value,
-                                                           effect.status_effect_turns)
+                    amt = dice.roll(user.level, effect.dice_value)
+                    amt = -amt if effect.type == EffectType.debuff else amt
+                    overwrite = target.apply_status_effect(effect.status_effect_name, effect.stat, amt,
+                                                           effect.effect_turns)
                     out += f'\n{target.name} has been affected by {effect.status_effect_name}.'
 
                     if overwrite is not None:

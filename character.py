@@ -560,9 +560,9 @@ class Character(Document):
                 avg += int((dice.count(enemy.level) * effect.dice_value - avg) * action.base_crit_chance)
                 amt += self.apply_element_damage_resistances(avg, effect.element)
             elif effect.type in [ability.EffectType.burn, ability.EffectType.bleed]:
-                turns = effect.status_effect_turns + enemy.dot_duration - self.dot_reduction - self.bonus_dot_reduction
+                turns = effect.effect_turns + enemy.dot_duration - self.dot_reduction - self.bonus_dot_reduction
                 turns = min(turns, 0)
-                amt += round(effect.status_effect_value * (1.0 + enemy.dot_effect - self.dot_res - self.dot_bonus_res)) * turns
+                amt += round(effect.dot_value * (1.0 + enemy.dot_effect - self.dot_res - self.dot_bonus_res)) * turns
 
         return amt
 
@@ -730,5 +730,8 @@ class Character(Document):
         self.save()
 
     @staticmethod
-    def display_level_up_menu():
-        return 'Choose one:\n1 - Strength +3\n2 - Intelligence +3\n3 - Dexterity +3\n4 - Willpower +3\n5 - Health +5\n6 - Stamina +5\n7 - Mana +5'
+    def display_level_up_menu(threshold=False):
+        if threshold:
+            return 'Choose one:\n1 - Earth Resistance +1%\n2 - Fire Resistance +1%\n3 - Electricity Resistance +1%\n4 - Water Resistance +1%\n5 - DOT Resistance +3%\n6 - DOT Strength +3%'
+        else:
+            return 'Choose one:\n1 - Strength +3\n2 - Intelligence +3\n3 - Dexterity +3\n4 - Willpower +3\n5 - Health +5\n6 - Stamina +5\n7 - Mana +5'

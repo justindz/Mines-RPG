@@ -60,6 +60,12 @@ books = {
     'exhaust': {'name': 'Tome: Exhaust', 'description': 'TODO', 'level': 2, 'rarity': 2, 'btype': 1, 'key': 'exhaust'},
     'discourage': {'name': 'Tome: Discourage', 'description': 'TODO', 'level': 2, 'rarity': 2, 'btype': 1,
                    'key': 'discourage'},
+    'empower': {'name': 'Tome: Empower', 'description': 'TODO', 'level': 2, 'rarity': 2, 'btype': 1, 'key': 'empower'},
+    'enlighten': {'name': 'Tome: Enlighten', 'description': 'TODO', 'level': 2, 'rarity': 2, 'btype': 1,
+                  'key': 'enlighten'},
+    'unleash': {'name': 'Tome: Unleash', 'description': 'TODO', 'level': 2, 'rarity': 2, 'btype': 1, 'key': 'unleash'},
+    'inspire': {'name': 'Tome: Inspire', 'description': 'TODO', 'level': 2, 'rarity': 2, 'btype': 1,
+                'key': 'inspire'},
     # Skills
     'slash': {'name': 'Manual: Slash', 'description': 'TODO', 'level': 1, 'rarity': 2, 'bytpe': 0, 'key': 'slash'},
     'lacerate': {'name': 'Manual: Lacerate', 'description': 'TODO', 'level': 1, 'rarity': 3, 'bytpe': 0,
