@@ -64,6 +64,28 @@ class Armor(Document):
         'required_dexterity',
         'required_willpower'
     ]
+    default_values = {
+        'bonus_strength': 0,
+        'bonus_intelligence': 0,
+        'bonus_dexterity': 0,
+        'bonus_willpower': 0,
+        'bonus_health': 0,
+        'bonus_health_regen': 0,
+        'bonus_stamina': 0,
+        'bonus_stamina_regen': 0,
+        'bonus_mana': 0,
+        'bonus_mana_regen': 0,
+        'bonus_init': 0,
+        'bonus_carry': 0,
+        'bonus_earth_res': 0.0,
+        'bonus_fire_res': 0.0,
+        'bonus_electricity_res': 0.0,
+        'bonus_water_res': 0.0,
+        'required_strength': 0,
+        'required_intelligence': 0,
+        'required_dexterity': 0,
+        'required_willpower': 0,
+    }
     use_dot_notation = True
     use_autorefs = True
 

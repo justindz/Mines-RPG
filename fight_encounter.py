@@ -161,9 +161,19 @@ class Fight:
             for effect in ab.effects:
                 if effect.type == ability.EffectType.damage_health:
                     dmgs = _target.take_damage(char.deal_damage(effect, critical=crit, multi=1.0 if isinstance(ab, spell.Spell) else ab.multiplier), char.get_ele_pens())
+                    shock = False
+                    confusion = False
 
                     for dmg in dmgs:
-                        out += f'\n{_target.name} suffered {dmg[0]} {Elements(dmg[1]).name} damage.'
+                        ele = Elements(dmg[1])
+                        out += f'\n{_target.name} suffered {dmg[0]} {ele.name} damage.'
+                        shock = True if ele == Elements.electricity else False
+                        confusion = True if ele == Elements.water else False
+
+                    if shock:
+                        target.shock += 1
+                    if confusion:
+                        target.confusion += 1
                 elif effect.type == ability.EffectType.burn:
                     if target.apply_burn(effect.effect_turns, effect.dot_value,
                                          char.dot_effect + char.bonus_dot_effect, char.dot_duration + char.bonus_dot_duration):
@@ -238,16 +248,6 @@ class Fight:
                 out += f'{utilities.get_elemental_symbol(ele)} '
         else:
             out = 'No elements are infused in the environment.'
-
-        return out
-
-    def display_enemy_menu(self):
-        out = 'Enemies:'
-        i = 1
-
-        for e in self.enemies:
-            out += f'\n{i} - {e.name} ({e.level}) {e.current_health}h'
-            i += 1
 
         return out
 

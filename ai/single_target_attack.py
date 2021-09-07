@@ -35,9 +35,19 @@ class SingleTargetAttack(Action):
             for effect in self.effects:
                 if effect.type == EffectType.damage_health:
                     dmgs = target.take_damage(user.deal_damage(effect, critical=crit), user.ele_pens)
+                    shock = False
+                    confusion = False
 
                     for dmg in dmgs:
+                        ele = Elements(dmg[1])
                         out += f'\n{target.name} suffered {dmg[0]} {Elements(dmg[1]).name} damage.'
+                        shock = True if ele == Elements.electricity else False
+                        confusion = True if ele == Elements.water else False
+
+                    if shock:
+                        target.shock += 1
+                    if confusion:
+                        target.confusion += 1
                 elif effect.type == EffectType.burn:
                     if target.apply_burn(effect.effect_turns, effect.dot_value,
                                          user.dot_effect, user.dot_duration):

@@ -27,6 +27,8 @@ class Accessory(Document):
         'bonus_dot_reduction': int,
         'bonus_dot_effect': float,
         'bonus_dot_duration': int,
+        'bonus_shock_limit': int,
+        'bonus_confusion_limit': int,
         'value': int,
         'required_strength': int,
         'required_intelligence': int,
@@ -56,12 +58,36 @@ class Accessory(Document):
         'bonus_dot_reduction',
         'bonus_dot_effect',
         'bonus_dot_duration',
+        'bonus_shock_limit',
+        'bonus_confusion_limit',
         'value',
         'required_strength',
         'required_intelligence',
         'required_dexterity',
         'required_willpower'
     ]
+    default_values = {
+        'bonus_strength': 0,
+        'bonus_intelligence': 0,
+        'bonus_dexterity': 0,
+        'bonus_willpower': 0,
+        'bonus_health': 0,
+        'bonus_health_regen': 0,
+        'bonus_stamina': 0,
+        'bonus_stamina_regen': 0,
+        'bonus_mana': 0,
+        'bonus_mana_regen': 0,
+        'bonus_init': 0,
+        'bonus_carry': 0,
+        'required_strength': 0,
+        'required_intelligence': 0,
+        'required_dexterity': 0,
+        'required_willpower': 0,
+        'bonus_dot_res': 0.0,
+        'bonus_dot_reduction': 0,
+        'bonus_shock_limit': 0,
+        'bonus_confusion_limit': 0,
+    }
     use_dot_notation = True
     use_autorefs = True
 
@@ -150,5 +176,11 @@ suffixes = {
     },
     'Persistent': {
         1: {'effect': 'bonus_dot_duration', 'value': 1}
+    },
+    'Grounded': {
+        1: {'effect': 'bonus_shock_limit', 'value': 1}
+    },
+    'Centered': {
+        1: {'effect': 'bonus_confusion_limit', 'value': 1}
     },
 }

@@ -83,7 +83,25 @@ class Weapon(Document):
         'electricity_penetration',
         'water_penetration'
     ]
-    default_values = {'_itype': 1}
+    default_values = {
+        '_itype': 1,
+        'bonus_strength': 0,
+        'bonus_intelligence': 0,
+        'bonus_dexterity': 0,
+        'bonus_willpower': 0,
+        'bonus_health': 0,
+        'bonus_stamina': 0,
+        'bonus_mana': 0,
+        'bonus_init': 0,
+        'required_strength': 0,
+        'required_intelligence': 0,
+        'required_dexterity': 0,
+        'required_willpower': 0,
+        'earth_penetration': 0.0,
+        'fire_penetration': 0.0,
+        'electricity_penetration': 0.0,
+        'water_penetration': 0.0,
+    }
     use_dot_notation = True
     use_autorefs = True
 

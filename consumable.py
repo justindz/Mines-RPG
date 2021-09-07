@@ -30,27 +30,85 @@ class Consumable(Document):
         'mana',
         'value'
     ]
+    default_values = {
+        'health': 0,
+        'stamina': 0,
+        'mana': 0,
+        'weight': 1,
+    }
     use_dot_notation = True
     use_autorefs = True
 
 
 consumables = {
-    'pico_potion': {'name': 'Pico Potion', 'description': 'TODO', 'level': 1, 'weight': 1, '_itype': 10, 'uses': 1,
-                    'health': 0, 'stamina': 0, 'mana': 10},
-    'moldy_hardtack': {'name': 'Moldy Hardtack', 'description': 'TODO', 'level': 1, 'weight': 1, '_itype': 9, 'uses': 1,
-                       'health': 0, 'stamina': 10, 'mana': 0},
-    'wilted_herbs': {'name': 'Wilted Medicinal Herbs', 'description': 'TODO', 'level': 1, 'weight': 1, '_itype': 9,
-                     'uses': 1, 'health': 10, 'stamina': 0, 'mana': 0},
-    'pico_elixir': {'name': 'Pico Elixir', 'description': 'TODO', 'level': 1, 'weight': 1, '_itype': 10, 'uses': 1,
-                    'health': 5, 'stamina': 5, 'mana': 5},
-    'nano_potion': {'name': 'Nano Potion', 'description': 'TODO', 'level': 2, 'weight': 1, '_itype': 10, 'uses': 1,
-                    'health': 0, 'stamina': 0, 'mana': 10},
-    'hardtack': {'name': 'Hardtack', 'description': 'TODO', 'level': 2, 'weight': 1, '_itype': 9, 'uses': 2,
-                 'health': 0, 'stamina': 10, 'mana': 0},
-    'bitter_herbs': {'name': 'Bitter Medicinal Herbs', 'description': 'TODO', 'level': 2, 'weight': 1, '_itype': 9,
-                     'uses': 2, 'health': 10, 'stamina': 0, 'mana': 0},
-    'nano_elixir': {'name': 'Nano Elixir', 'description': 'TODO', 'level': 2, 'weight': 1, '_itype': 10, 'uses': 2,
-                    'health': 6, 'stamina': 6, 'mana': 6},
+    'pico_potion': {
+        'name': 'Pico Potion',
+        'description': 'TODO',
+        'level': 1,
+        '_itype': 10,
+        'uses': 1,
+        'mana': 10
+    },
+    'moldy_hardtack': {
+        'name': 'Moldy Hardtack',
+        'description': 'TODO',
+        'level': 1,
+        '_itype': 9,
+        'uses': 1,
+        'stamina': 10
+    },
+    'wilted_herbs': {
+        'name': 'Wilted Medicinal Herbs',
+        'description': 'TODO',
+        'level': 1,
+        '_itype': 9,
+        'uses': 1,
+        'health': 10
+    },
+    'pico_elixir': {
+        'name': 'Pico Elixir',
+        'description': 'TODO',
+        'level': 1,
+        '_itype': 10,
+        'uses': 1,
+        'health': 5,
+        'stamina': 5,
+        'mana': 5
+    },
+    'nano_potion': {
+        'name': 'Nano Potion',
+        'description': 'TODO',
+        'level': 2,
+        '_itype': 10,
+        'uses': 1,
+        'mana': 10
+    },
+    'hardtack': {
+        'name': 'Hardtack',
+        'description': 'TODO',
+        'level': 2,
+        '_itype': 9,
+        'uses': 2,
+        'stamina': 10
+    },
+    'bitter_herbs': {
+        'name': 'Bitter Medicinal Herbs',
+        'description': 'TODO',
+        'level': 2,
+        '_itype': 9,
+        'uses': 2,
+        'health': 10
+    },
+    'nano_elixir': {
+        'name': 'Nano Elixir',
+        'description': 'TODO',
+        'level': 2,
+        '_itype': 10,
+        'uses': 2,
+        'health': 6,
+        'stamina': 6,
+        'mana': 6
+    },
 }
 
 prefixes = {

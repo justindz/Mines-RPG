@@ -81,6 +81,12 @@ class Character(Document):
         'status_effects': None,
         'burn': dict,
         'bleed': dict,
+        'shock': int,
+        'shock_limit': int,
+        'bonus_shock_limit': int,
+        'confusion': int,
+        'confusion_limit': int,
+        'bonus_confusion_limit': int,
     }
     required_fields = ['name']
     default_values = {
@@ -152,6 +158,12 @@ class Character(Document):
         'status_effects': [],  # list of dicts w/ keys = name, stat, value, turns_remaining
         'burn': {'turns': 0, 'dmg': 0},
         'bleed': {'turns': 0, 'dmg': 0},
+        'shock': 0,
+        'shock_limit': 5,
+        'bonus_shock_limit': 0,
+        'confusion': 0,
+        'confusion_limit': 5,
+        'bonus_confusion_limit': 0,
     }
     use_dot_notation = True
     use_autorefs = True

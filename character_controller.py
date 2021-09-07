@@ -93,6 +93,8 @@ class CharacterController(commands.Cog):
 | Damage Over Time Reduction: {character.dot_reduction} ({character.bonus_dot_reduction:+})
 | Damage Over Time Effectiveness: {character.dot_effect:.0%} ({character.bonus_dot_effect:+.0%})
 | Damage Over Time Duration: {character.dot_duration} ({character.bonus_dot_duration:+})
+| Shock Limit: {character.shock_limit} ({character.bonus_shock_limit:+})
+| Confusion Limit: {character.confusion_limit} ({character.bonus_confusion_limit:+})
 |----
 | Deaths: {character.deaths}
 --<-(@  --<-(@  --<-(@  --<-(@''')

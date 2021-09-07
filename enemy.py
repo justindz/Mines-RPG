@@ -1,3 +1,4 @@
+import random
 from enum import Enum
 
 from elements import Elements
@@ -54,7 +55,8 @@ class Enemy:
                  willpower, willpower_growth, health, health_growth, health_regen, health_regen_growth, init,
                  init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth, electricity_res,
                  electricity_res_growth, water_res, water_res_growth, dot_res, dot_res_growth, dot_reduction, dot_effect,
-                 dot_effect_growth, dot_duration, actions, goals):
+                 dot_effect_growth, dot_duration, shock_limit, shock_limit_growth, confusion_limit,
+                 confusion_limit_growth, actions, goals):
         self.name = name
         self.level = 1
 
@@ -95,6 +97,12 @@ class Enemy:
         self.dot_effect = dot_effect
         self.dot_effect_growth = dot_effect_growth
         self.dot_duration = dot_duration
+        self.shock = self.bonus_shock_limit = 0
+        self.shock_limit = shock_limit
+        self.shock_limit_growth = shock_limit_growth
+        self.confusion = self.bonus_confusion_limit = 0
+        self.confusion_limit = confusion_limit
+        self.confusion_limit_growth = confusion_limit_growth
 
         # AI
         self.actions = actions
@@ -113,6 +121,8 @@ class Enemy:
         self.init += round(self.init_growth * gap)
         self.dot_res += round(self.dot_res_growth * gap, 2)
         self.dot_effect += round(self.dot_effect_growth * gap, 2)
+        self.shock_limit += round(self.shock_limit_growth * gap)
+        self.confusion_limit += round(self.confusion_limit_growth * gap)
         self.name = prefixes[utilities.clamp(int(depth / 10), 1, len(prefixes))] + " " + self.name
 
     def apply_status_effect(self, name: str, stat: str, value: int, turns_remaining: int):
@@ -232,6 +242,10 @@ class Enemy:
 
     def take_a_turn(self, fight):
         plans = self.get_action_plans(fight)
+
+        if self.confusion >= self.confusion_limit:
+            self.confusion = 0
+            return random.choice(plans).action()
 
         if len(plans) > 0:
             print(f'{self.name}\'s plans:')

@@ -2,6 +2,7 @@ import discord
 from discord.errors import NotFound
 from discord.ext import commands
 import asyncio
+import random
 
 import skill
 import spell
@@ -179,6 +180,7 @@ class DelveController(commands.Cog):
             for se in character.status_effects:
                 out += f'\n- {se["name"]}: {se["value"]:+} {se["stat"]} ({se["turns_remaining"]} turns)'
 
+        out += f'\n\nShock: {character.shock}/{character.shock_limit}\nConfusion: {character.confusion}/{character.confusion_limit}'
         await ctx.channel.send(out)
 
     @commands.command()
@@ -238,7 +240,40 @@ class DelveController(commands.Cog):
                 except NotFound:
                     return  # The channel has been deleted because the delve ended
 
+                if actor.shock >= actor.shock_limit + (actor.bonus_shock_limit if isinstance(actor, Character) else 0):
+                    await delve.channel.send(f'{actor.name} is shocked and cannot act.')
+                    actor.shock = 0
+                    if isinstance(actor, Character):
+                        actor.save()
+                    await asyncio.sleep(1)
+                    continue
+                elif actor.confusion >= actor.confusion_limit + (actor.bonus_confusion_limit if isinstance(actor, Character) else 0):
+                    await delve.channel.send(f'{actor.name} is confused.')
+
                 if isinstance(actor, Character):  # Player
+                    if actor.confusion >= actor.confusion_limit + actor.bonus_confusion_limit:
+                        actions = ['ability', 'item', 'recover']
+
+                        if not actor.has_consumables():
+                            actions.remove('item')
+
+                        chosen = random.choice(actions)
+
+                        if chosen == 'ability':
+                            ability = random.choice([utilities.get_ability_by_name(x) for x in actor.ability_slots])
+                            target = random.choice(fight.enemies)
+                            await delve.channel.send(f'{actor.name} tries to use {ability.name} on {target.name}')
+                            await check_ability_requirements_and_use(ability, actor, delve, target, fight)
+                        elif chosen == 'item':
+                            await delve.channel.send(actor.use_consumable(self.connection, random.choice([x for x in actor.inventory if x['_itype'] in [9, 10]])))
+                        else:
+                            await self.recover(actor, delve)
+
+                        actor.confusion = 0
+                        actor.save()
+                        await asyncio.sleep(1)
+                        continue
+
                     def check_action_menu(m):
                         if str(m.author) == actor.name and m.channel == delve.channel:
                             if m.content in ['1', '2', '3']:
@@ -264,14 +299,13 @@ class DelveController(commands.Cog):
                             ability = utilities.get_ability_by_name(actor.ability_slots[msg.content])
 
                             if isinstance(ability, skill.Skill) or (isinstance(ability, spell.Spell) and ability.targets_enemies):
-                                await delve.channel.send(fight.display_enemy_menu())
-
                                 def check_enemy_menu(m):
                                     if str(m.author) == actor.name and m.channel == delve.channel:
                                         if 0 < int(m.content) <= len(fight.enemies):
                                             return True
                                     return False
 
+                                await self.display_enemy_list(delve)
                                 msg = await self.bot.wait_for('message', check=check_enemy_menu, timeout=30)
                                 enemy_choice = int(msg.content)
                                 enemy = fight.enemies[enemy_choice - 1]
@@ -373,14 +407,31 @@ class DelveController(commands.Cog):
         await delve.channel.send(utilities.underline('Turn order:'))
 
         for fighter in fight.inits:
-            await delve.channel.send(utilities.underline(
-                f'- {fighter.name} {fighter.current_health}/{fighter.health}'
-                + (f' [{fighter.list_active_effects()}]' if len(fighter.status_effects) > 0 else '')
-                + (f' {utilities.get_elemental_symbol(Elements.fire)}' if fighter.burn['turns'] > 0 else '')
-                + (f' :drop_of_blood:' if fighter.bleed['turns'] > 0 else '')
-            ))
+            await self.display_fighter_summary(delve, fighter)
 
         await delve.channel.send(fight.display_active_elements())
+
+    @staticmethod
+    async def display_enemy_list(delve):
+        i = 1
+
+        for enemy in delve.fight.enemies:
+            await delve.display_fighter_summary(delve, enemy, i)
+            i += 1
+
+    @staticmethod
+    async def display_fighter_summary(delve, fighter, index=None):
+        await delve.channel.send(utilities.underline(
+            (f'{index} - ' if index is not None else '- ')
+            + f'{fighter.name} {fighter.current_health}/{fighter.health}'
+            + (f' [{fighter.list_active_effects()}]' if len(fighter.status_effects) > 0 else '')
+            + (f' {utilities.get_elemental_symbol(Elements.fire)}' if fighter.burn['turns'] > 0 else '')
+            + (f' :drop_of_blood:' if fighter.bleed['turns'] > 0 else '')
+            + (
+                f' {utilities.get_elemental_symbol(Elements.electricity)} {fighter.shock}/{fighter.shock_limit + fighter.bonus_shock_limit}' if fighter.shock > 0 else '')
+            + (f' :grey_question: {fighter.confusion}/{fighter.confusion_limit + fighter.bonus_confusion_limit}' if
+               fighter.confusion > 0 else '')
+        ))
 
     @staticmethod
     async def pay_summon_upkeep(actor, delve, fight):
@@ -434,6 +485,8 @@ class DelveController(commands.Cog):
 
             for character in [x for x in delve.characters if isinstance(x, Character)]:
                 character.remove_all_status_effects()
+                character.shock = 0
+                character.confusion = 0
 
             fight.unsummon_all()
             delve.status = 'idle'

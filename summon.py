@@ -7,12 +7,14 @@ class Summon(Enemy):
                  willpower, willpower_growth, health, health_growth, health_regen, health_regen_growth, init,
                  init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth, electricity_res,
                  electricity_res_growth, water_res, water_res_growth, dot_res, dot_res_growth, dot_reduction, dot_effect,
-                 dot_effect_growth, dot_duration, actions, goals, cost, ele_pens):
+                 dot_effect_growth, dot_duration, shock_limit, shock_limit_growth, confusion_limit,
+                 confusion_limit_growth, actions, goals, cost, ele_pens):
         super().__init__(name, strength, strength_growth, intelligence, intelligence_growth, dexterity,
                          dexterity_growth, willpower, willpower_growth, health, health_growth, health_regen,
                          health_regen_growth, init, init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth,
                          electricity_res, electricity_res_growth, water_res, water_res_growth, dot_res, dot_res_growth,
-                         dot_reduction, dot_effect, dot_effect_growth, dot_duration, actions, goals)
+                         dot_reduction, dot_effect, dot_effect_growth, dot_duration, shock_limit, shock_limit_growth,
+                         confusion_limit, confusion_limit_growth, actions, goals)
         self.cost = cost
         self.owner = ''
         self.bonus_health = 0  # used in planners by enemies who may target the summon like a player
