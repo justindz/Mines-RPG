@@ -52,6 +52,30 @@ books = {
         'btype': 1,
         'key': 'stalagmite'
     },
+    'ignite': {
+        'name': 'Tome: Ignite',
+        'description': 'TODO',
+        'level': 1,
+        'rarity': 2,
+        'btype': 1,
+        'key': 'ignite'
+    },
+    'spark': {
+        'name': 'Tome: Spark',
+        'description': 'TODO',
+        'level': 1,
+        'rarity': 1,
+        'btype': 1,
+        'key': 'spark'
+    },
+    'wave': {
+        'name': 'Tome: Wave',
+        'description': 'TODO',
+        'level': 1,
+        'rarity': 2,
+        'btype': 1,
+        'key': 'wave'
+    },
     'mend_wounds': {
         'name': 'Tome: Mend Wounds',
         'description': 'TODO',
@@ -67,14 +91,6 @@ books = {
         'rarity': 2,
         'btype': 1,
         'key': 'regenerate'
-    },
-    'ignite': {
-        'name': 'Tome: Ignite',
-        'description': 'TODO',
-        'level': 1,
-        'rarity': 3,
-        'btype': 1,
-        'key': 'ignite'
     },
     'summon_coal_golem': {
         'name': 'Tome: Summon Coal Golem',
@@ -215,5 +231,38 @@ books = {
         'rarity': 3,
         'bytpe': 0,
         'key': 'flurry'
+    },
+    # L3
+    'focused_empower': {
+        'name': 'Tome: Focused Empower',
+        'description': 'TODO',
+        'level': 3,
+        'rarity': 2,
+        'btype': 1,
+        'key': 'focused_empower'
+    },
+    'focused_enlighten': {
+        'name': 'Tome: Focused Enlighten',
+        'description': 'TODO',
+        'level': 3,
+        'rarity': 2,
+        'btype': 1,
+        'key': 'focused_enlighten'
+    },
+    'focused_unleash': {
+        'name': 'Tome: Focused Unleash',
+        'description': 'TODO',
+        'level': 3,
+        'rarity': 2,
+        'btype': 1,
+        'key': 'focused_unleash'
+    },
+    'focused_inspire': {
+        'name': 'Tome: Focused Inspire',
+        'description': 'TODO',
+        'level': 3,
+        'rarity': 2,
+        'btype': 1,
+        'key': 'focused_inspire'
     },
 }

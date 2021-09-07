@@ -169,6 +169,12 @@ Sockets
 -------
 {utilities.get_socket_display(it)}
 '''
+            elif it['_itype'] in [ItemType.potion.value, ItemType.food.value]:
+                item_string += f'''
+Effects
+-------
+{utilities.get_consumable_effects_display_string(it)}
+'''
             elif it['_itype'] in [ItemType.head.value, ItemType.chest.value, ItemType.belt.value,
                                   ItemType.boots.value, ItemType.gloves.value, ItemType.amulet.value,
                                   ItemType.ring.value]:

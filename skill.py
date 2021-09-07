@@ -17,7 +17,7 @@ class Skill(ability.Ability):
         self.multiplier = _multiplier
 
 
-skills = {  # Note: Element should always be None for Skill effects--they inherit the weapon element
+skills = {
     'strike': Skill(
         'Strike',
         'Strike skill description.',
@@ -96,7 +96,7 @@ skills = {  # Note: Element should always be None for Skill effects--they inheri
         0.4),
     'flurry': Skill(
         'Flurry',
-        'Barrage skill description.',
+        'Flurry skill description.',
         {'h': 0, 's': 20, 'm': 0},
         [
             Effect(EffectType.damage_health, None),

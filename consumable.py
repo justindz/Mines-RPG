@@ -15,6 +15,10 @@ class Consumable(Document):
         'health': int,
         'stamina': int,
         'mana': int,
+        'burn': int,
+        'bleed': int,
+        'shock': int,
+        'confusion': int,
         'value': int,
     }
     required_fields = [
@@ -28,12 +32,20 @@ class Consumable(Document):
         'health',
         'stamina',
         'mana',
+        'burn',
+        'bleed',
+        'shock',
+        'confusion',
         'value'
     ]
     default_values = {
         'health': 0,
         'stamina': 0,
         'mana': 0,
+        'burn': 0,
+        'bleed': 0,
+        'shock': 0,
+        'confusion': 0,
         'weight': 1,
     }
     use_dot_notation = True
@@ -109,6 +121,17 @@ consumables = {
         'stamina': 6,
         'mana': 6
     },
+    'smelling_salts': {
+        'name': 'Smelling Salts',
+        'description': 'TODO',
+        'level': 3,
+        '_itype': 10,
+        'uses': 1,
+        'burn': 2,
+        'bleed': 2,
+        'shock': 2,
+        'confusion': 2
+    }
 }
 
 prefixes = {
@@ -140,5 +163,17 @@ suffixes = {
     },
     'Infused': {
         1: {'effect': 'uses', 'value': 1}
+    },
+    'Cooling': {
+        1: {'effect': 'burn', 'value': -2}
+    },
+    'Staunching': {
+        1: {'effect': 'bleed', 'value': -2}
+    },
+    'Grounding': {
+        1: {'effect': 'shock', 'value': -2}
+    },
+    'Reorienting': {
+        1: {'effect': 'confusion', 'value': -2}
     },
 }

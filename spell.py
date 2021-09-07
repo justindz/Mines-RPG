@@ -22,7 +22,7 @@ spells = {
         'Stalagmite',
         'Stalagmite description.',
         {'h': 0, 's': 0, 'm': 5},
-        [Effect(EffectType.damage_health, Elements.earth, _dice_value=4)],
+        [Effect(EffectType.damage_health, Elements.earth, _dice_value=8)],
         [],
         [Elements.earth],
         _targets_enemies=True
@@ -33,10 +33,28 @@ spells = {
         {'h': 0, 's': 0, 'm': 8},
         [
             Effect(EffectType.damage_health, Elements.fire, _dice_value=2),
-            Effect(EffectType.burn, Elements.fire, _dot_value=1, _effect_turns=2)
+            Effect(EffectType.burn, Elements.fire, _dot_value=2, _effect_turns=2)
         ],
         [],
         [Elements.fire],
+        _targets_enemies=True
+    ),
+    'spark': Spell(
+        'Spark',
+        'Spark description.',
+        {'h': 0, 's': 0, 'm': 6},
+        [Effect(EffectType.damage_health, Elements.electricity, _dice_value=6)],
+        [Elements.electricity],
+        [],
+        _targets_enemies=True
+    ),
+    'wave': Spell(
+        'Wave',
+        'Wave description.',
+        {'h': 0, 's': 0, 'm': 7},
+        [Effect(EffectType.damage_health, Elements.earth, _dice_value=6)],
+        [Elements.water],
+        [],
         _targets_enemies=True
     ),
     # Healing
@@ -175,6 +193,50 @@ spells = {
         [
             Effect(EffectType.buff, Elements.water, _dice_value=10, _stat='willpower', _status_effect_name='Inspired',
                    _effect_turns=3)
+        ],
+        [Elements.water],
+        []
+    ),
+    'focused_empower': Spell(
+        'Focused Empower',
+        'Focused Empower description.',
+        {'h': 0, 's': 0, 'm': 8},
+        [
+            Effect(EffectType.buff, Elements.earth, _dice_value=30, _stat='strength', _status_effect_name='Empowered',
+                   _effect_turns=2)
+        ],
+        [Elements.earth],
+        []
+    ),
+    'focused_enlighten': Spell(
+        'Focused Enlighten',
+        'Focused Enlighten description.',
+        {'h': 0, 's': 0, 'm': 8},
+        [
+            Effect(EffectType.buff, Elements.fire, _dice_value=30, _stat='intelligence',
+                   _status_effect_name='Enlightened', _effect_turns=2)
+        ],
+        [Elements.fire],
+        []
+    ),
+    'focused_unleash': Spell(
+        'Focused Unleash',
+        'Focused Unleash description.',
+        {'h': 0, 's': 0, 'm': 8},
+        [
+            Effect(EffectType.buff, Elements.electricity, _dice_value=30, _stat='dexterity',
+                   _status_effect_name='Unleashed', _effect_turns=2)
+        ],
+        [Elements.electricity],
+        []
+    ),
+    'focused_inspire': Spell(
+        'Focused Inspire',
+        'Focused Inspire description.',
+        {'h': 0, 's': 0, 'm': 8},
+        [
+            Effect(EffectType.buff, Elements.water, _dice_value=30, _stat='willpower', _status_effect_name='Inspired',
+                   _effect_turns=2)
         ],
         [Elements.water],
         []

@@ -156,6 +156,22 @@ def get_socket_display(item) -> str:
 
     return out.lstrip(' ')
 
+
+def get_consumable_effects_display_string(item) -> str:
+    if item["_itype"] not in [9, 10]:
+        raise Exception(f'get_consumable_effects_display_string for unsupported _itype {item["_itype"]} on {item["name"]}')
+
+    out = ''
+    out += f'\n{item["health"]:+} health' if item["health"] != 0 else ''
+    out += f'\n{item["stamina"]:+} stamina' if item["stamina"] != 0 else ''
+    out += f'\n{item["mana"]:+} mana' if item["mana"] != 0 else ''
+    out += f'\n{item["burn"]:+} burn duration' if item["burn"] != 0 else ''
+    out += f'\n{item["bleed"]:+} bleed duration' if item["bleed"] != 0 else ''
+    out += f'\n{item["shock"]:+} shock level' if item["shock"] != 0 else ''
+    out += f'\n{item["confusion"]:+} confusion level' if item["confusion"] != 0 else ''
+    return out.lstrip('\n')
+
+
 #  MATHS  #
 
 

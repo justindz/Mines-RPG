@@ -3,6 +3,7 @@ from mongokit_ng import Document
 
 import ability
 import item
+import utilities
 from item import ItemType
 from elements import Elements
 import book
@@ -427,6 +428,30 @@ class Character(Document):
                 else:
                     out += f'\nDrains {result} mana'
 
+            if consumable['burn'] != 0:
+                result = self.affect_burning(consumable['burn'])
+
+                if result != 0:
+                    out += f'\nBurning duration {result:+}'
+
+            if consumable['bleed'] != 0:
+                result = self.affect_bleeding(consumable['bleed'])
+
+                if result != 0:
+                    out += f'\nBleeding duration {result:+}'
+
+            if consumable['shock'] != 0:
+                result = self.affect_shock(consumable['shock'])
+
+                if result != 0:
+                    out += f'\nShock level {result:+}'
+
+            if consumable['confusion'] != 0:
+                result = self.affect_confusion(consumable['confusion'])
+
+                if result != 0:
+                    out += f'\nConfusion level {result:+}'
+
             consumable['uses'] -= 1
 
             if consumable['uses'] < 1:
@@ -494,6 +519,34 @@ class Character(Document):
     def regen(self):
         return self.restore_all(self.health_regen + self.bonus_health_regen,
                                 self.stamina_regen + self.bonus_stamina_regen, self.mana_regen + self.bonus_mana_regen)
+
+    def affect_burning(self, turns: int) -> int:
+        start = self.burn['turns']
+        self.burn['turns'] = max(self.burn['turns'] + turns, 0)
+
+        if self.burn['turns'] == 0:
+            self.burn['dmg'] = 0
+
+        return self.burn['turns'] - start
+
+    def affect_bleeding(self, turns: int) -> int:
+        start = self.bleed['turns']
+        self.bleed['turns'] = max(self.bleed['turns'] + turns, 0)
+
+        if self.bleed['turns'] == 0:
+            self.bleed['dmg'] = 0
+
+        return self.bleed['turns'] - start
+
+    def affect_shock(self, amount: int) -> int:
+        start = self.shock
+        self.shock = utilities.clamp(self.shock + amount, 0, self.shock_limit + self.bonus_shock_limit)
+        return self.shock - start
+
+    def affect_confusion(self, amount: int) -> int:
+        start = self.confusion
+        self.confusion = utilities.clamp(self.confusion + amount, 0, self.confusion_limit + self.bonus_confusion_limit)
+        return self.confusion - start
 
     def get_ele_pens(self) -> tuple:
         if self.equipped['weapon'] is None:
