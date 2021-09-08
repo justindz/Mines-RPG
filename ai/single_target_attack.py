@@ -9,7 +9,7 @@ import random
 class SingleTargetAttack(Action):
     def __init__(self, name: str, cooldown: int, base_crit_chance: float, effects: [Effect]):
         for effect in effects:
-            if effect.type not in [EffectType.damage_health, EffectType.burn]:
+            if effect.type not in [EffectType.damage_health, EffectType.burn, EffectType.bleed]:
                 raise Exception(f'SingleTargetAttack {name} has an unsupported effect type {effect.type}')
 
         super().__init__()

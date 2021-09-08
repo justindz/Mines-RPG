@@ -4,15 +4,15 @@ from mongokit_ng import RequireFieldError
 
 import accessory
 import armor
-import consumable
 import gemstone
+import ingredient
 import weapon
 from accessories import accessories
 from armors import armors
-from consumable import consumables
 from weapons import weapons
 from book import books
 from gemstone import gemstones
+from ingredient import ingredients
 
 
 class ItemType(Enum):
@@ -24,10 +24,10 @@ class ItemType(Enum):
     gloves = 6
     amulet = 7
     ring = 8
-    food = 9
-    potion = 10
-    book = 11
-    gemstone = 12
+    potion = 9
+    book = 10
+    gemstone = 11
+    ingredient = 12
 
 
 class Rarity(Enum):
@@ -47,9 +47,6 @@ def generate_item(connection, key: str, selection: dict, level: int, rarity=None
             item = connection.Weapon()
             item['sockets'] = [None, None, None]
             value += 5 * base['level']
-        elif selection == consumables:
-            item = connection.Consumable()
-            value += 1 * base['level']
         elif selection == accessories:
             item = connection.Accessory()
             value += 5 * base['level']
@@ -90,9 +87,6 @@ def generate_item(connection, key: str, selection: dict, level: int, rarity=None
         if selection == weapons:
             prefixes = weapon.prefixes
             suffixes = weapon.suffixes
-        elif selection == consumables:
-            prefixes = consumable.prefixes
-            suffixes = consumable.suffixes
         elif selection == accessories:
             prefixes = accessory.prefixes
             suffixes = accessory.suffixes
@@ -120,15 +114,16 @@ def generate_random_item(connection, level: int, item_type=None, rarity=None, lu
     lvl_check = [level - 1, level, level + 1]
 
     if item_type is None:
-        selection = random.choice([armors, consumables, weapons, gemstones])
+        selection = random.choice([armors, weapons, gemstones, ingredients])
 
         if selection == gemstones:
             return gemstone.get_random_gemstone(connection, random.choice(lvl_check))
+        elif selection == ingredients:
+            return ingredient.get_random_ingredient(connection, random.choice(lvl_check),
+                                                    rarity=(1 if rarity is None else rarity.value))
     else:
         if item_type == ItemType.weapon:
             selection = weapons
-        elif item_type in [ItemType.potion, ItemType.food]:
-            selection = consumables
         elif item_type in [ItemType.amulet, ItemType.ring, ItemType.belt]:
             selection = accessories
         elif item_type in [ItemType.head, ItemType.chest, ItemType.gloves, ItemType.boots]:
@@ -217,12 +212,14 @@ def delete_item(connection, item):
         connection.delverpg.accessory.remove(_id)
     elif item['_itype'] == ItemType.weapon.value:
         weapons.weapons.remove(_id)
-    elif item['_itype'] == ItemType.potion.value or item['_itype'] == ItemType.food.value:
+    elif item['_itype'] == ItemType.potion.value:
         connection.delverpg.consumables.remove(_id)
     elif item['_itype'] == ItemType.book.value:
         connection.delverpg.books.remove(_id)
     elif item['_itype'] == ItemType.gemstone.value:
         connection.delverpg.gemstones.remove(_id)
+    elif item['_itype'] == ItemType.ingredient.value:
+        connection.delverpg.ingredients.remove(_id)
     else:
         raise Exception(f'delete_item called on unknown item type {item["_itype"]} w/ id {_id}')
 

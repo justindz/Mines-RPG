@@ -1,5 +1,3 @@
-import random
-
 import ability
 import dice
 import spell
@@ -158,7 +156,7 @@ def get_socket_display(item) -> str:
 
 
 def get_consumable_effects_display_string(item) -> str:
-    if item["_itype"] not in [9, 10]:
+    if item["_itype"] != 9:
         raise Exception(f'get_consumable_effects_display_string for unsupported _itype {item["_itype"]} on {item["name"]}')
 
     out = ''

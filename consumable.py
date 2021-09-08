@@ -1,4 +1,9 @@
 from mongokit_ng import Document
+import random
+
+from ingredient import IngredientType
+from item import add_affix
+from prefixes import level_prefixes
 
 
 class Consumable(Document):
@@ -39,100 +44,95 @@ class Consumable(Document):
         'value'
     ]
     default_values = {
-        'health': 0,
-        'stamina': 0,
-        'mana': 0,
-        'burn': 0,
-        'bleed': 0,
-        'shock': 0,
-        'confusion': 0,
-        'weight': 1,
+        '_itype': 9,
     }
     use_dot_notation = True
     use_autorefs = True
 
 
-consumables = {
-    'pico_potion': {
-        'name': 'Pico Potion',
-        'description': 'TODO',
-        'level': 1,
-        '_itype': 10,
-        'uses': 1,
-        'mana': 10
-    },
-    'moldy_hardtack': {
-        'name': 'Moldy Hardtack',
-        'description': 'TODO',
-        'level': 1,
-        '_itype': 9,
-        'uses': 1,
-        'stamina': 10
-    },
-    'wilted_herbs': {
-        'name': 'Wilted Medicinal Herbs',
-        'description': 'TODO',
-        'level': 1,
-        '_itype': 9,
-        'uses': 1,
-        'health': 10
-    },
-    'pico_elixir': {
-        'name': 'Pico Elixir',
-        'description': 'TODO',
-        'level': 1,
-        '_itype': 10,
-        'uses': 1,
-        'health': 5,
-        'stamina': 5,
-        'mana': 5
-    },
-    'nano_potion': {
-        'name': 'Nano Potion',
-        'description': 'TODO',
-        'level': 2,
-        '_itype': 10,
-        'uses': 1,
-        'mana': 10
-    },
-    'hardtack': {
-        'name': 'Hardtack',
-        'description': 'TODO',
-        'level': 2,
-        '_itype': 9,
-        'uses': 2,
-        'stamina': 10
-    },
-    'bitter_herbs': {
-        'name': 'Bitter Medicinal Herbs',
-        'description': 'TODO',
-        'level': 2,
-        '_itype': 9,
-        'uses': 2,
-        'health': 10
-    },
-    'nano_elixir': {
-        'name': 'Nano Elixir',
-        'description': 'TODO',
-        'level': 2,
-        '_itype': 10,
-        'uses': 2,
-        'health': 6,
-        'stamina': 6,
-        'mana': 6
-    },
-    'smelling_salts': {
-        'name': 'Smelling Salts',
-        'description': 'TODO',
-        'level': 3,
-        '_itype': 10,
-        'uses': 1,
-        'burn': 2,
-        'bleed': 2,
-        'shock': 2,
-        'confusion': 2
-    }
-}
+def create_consumable(connection, ingredients: list):
+    if len(ingredients) > 3 or len(ingredients) < 1:
+        return False
+
+    result = connection.Consumable()
+    result['level'] = max(round(sum([x['level'] for x in ingredients if x['type'] != IngredientType.neutral.value]) / len(ingredients)), 1)
+    result['name'] = f'{level_prefixes[min(result["level"], 17)]} Potion'
+    result['description'] = 'A consumable potion brewed by |.'
+    result['rarity'] = max(x['rarity'] for x in ingredients)
+    result['health'] = 0
+    result['stamina'] = 0
+    result['mana'] = 0
+    result['burn'] = 0
+    result['bleed'] = 0
+    result['shock'] = 0
+    result['confusion'] = 0
+    result['uses'] = 1
+    result['weight'] = 1
+    result['value'] = 0
+
+    for ingredient in ingredients:
+        if ingredient['effect'] is not None:
+            result[ingredient['effect']] += hsm_level_values[result['level']]
+        elif ingredient['type'] == IngredientType.guano.value:
+            result['burn'] = result['bleed'] = result['shock'] = result['confusion'] = status_level_values[result['level']]
+
+        result['value'] += ingredient['level'] * ingredient['rarity']
+
+    if result['rarity'] in [2, 3]:
+        if result['rarity'] == 3:
+            key = random.choice(list(suffixes.keys()))
+            result = add_affix(result, key, suffixes[key], result['level'])
+
+        key = random.choice(list(prefixes.keys()))
+        result = add_affix(result, key, prefixes[key], result['level'])
+
+    result.save()
+    return result
+
+
+hsm_level_values = [
+    0,  # Skipped
+    5,
+    8,
+    12,
+    17,
+    23,
+    30,
+    38,
+    57,
+    67,
+    78,
+    90,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+]
+
+
+status_level_values = [
+    0,  # Skipped
+    -1,
+    -1,
+    -2,
+    -2,
+    -2,
+    -3,
+    -3,
+    -3,
+    -3,
+    -3,
+    -3,
+    -3,
+    -3,
+    -3,
+    -3,
+    -3,
+    -3,
+]
+
 
 prefixes = {
     'Collectible': {

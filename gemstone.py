@@ -15,7 +15,7 @@ class Gemstone(Document):
         'weight': int,
         '_itype': int,
         'effect': str,
-        'amount': int,
+        'amount': None,
         'value': int,
     }
     required_fields = [
@@ -31,7 +31,7 @@ class Gemstone(Document):
     ]
     default_values = {
         'weight': 1,
-        '_itype': 12,
+        '_itype': 11,
     }
     use_dot_notation = True
     use_autorefs = True
@@ -63,7 +63,7 @@ def get_random_gemstone(connection, level: int) -> Gemstone:
         g.value = g.level * 3 + (g.level * 5)
     else:
         g = get_gemstone(connection, random.choice([
-            'tourmaline', 'garnet', 'citrine', 'lapis', 'marble', 'onyx', 'amethyst', 'hematite', 'moonstone']), level)
+            'tourmaline', 'garnet', 'citrine', 'lapis', 'marble', 'obsidian', 'amethyst', 'hematite', 'moonstone']), level)
         g.rarity = 1
         g.value = g.level * 3
 

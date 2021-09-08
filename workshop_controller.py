@@ -4,6 +4,7 @@ import random
 import gemstone
 import utilities
 from item import socket_gemstone
+from consumable import create_consumable
 from secrets import workshop_channel_id
 
 
@@ -94,15 +95,20 @@ class WorkshopController(commands.Cog):
         if profession == 'jeweler':
             character.profession = 'jeweler'
             character.save()
-            await self.bot.get_channel(workshop_channel_id).send(f'{self.name} announces, "Congratulations to {character.name}, our newest {character.profession}!"')
+            await self.bot.get_channel(workshop_channel_id).send(
+                f'{self.name} announces, "Congratulations to {character.name}, our newest {character.profession}!"')
         elif profession == 'alchemist':
-            # character.profession = 'alchemist'
-            await ctx.author.send(utilities.blue(f'{self.name} says, "I\'m not taking on any new students in this profession at the moment."'))
+            character.profession = 'alchemist'
+            character.save()
+            await self.bot.get_channel(workshop_channel_id).send(
+                f'{self.name} announces, "Congratulations to {character.name}, our newest {character.profession}!"')
         elif profession == 'cartographer':
             # character.profession = 'cartographer'
-            await ctx.author.send(utilities.blue(f'{self.name} says, "I\'m not taking on any new students in this profession at the moment."'))
+            await ctx.author.send(utilities.blue(
+                f'{self.name} says, "I\'m not taking on any new students in this profession at the moment."'))
         else:
-            await ctx.author.send(utilities.blue(f'{self.name} says, "I\'m afraid I don\'t know the {profession} trade."'))
+            await ctx.author.send(utilities.blue(
+                f'{self.name} says, "I\'m afraid I don\'t know the {profession} trade."'))
 
     @commands.command()
     @commands.check(check_workshop_channel)
@@ -122,7 +128,7 @@ class WorkshopController(commands.Cog):
             gem = character.inventory[gemstone_index]
             item = character.inventory[item_index]
 
-            if gem['_itype'] != 12:
+            if gem['_itype'] != 11:
                 await ctx.author.send(utilities.red('That is not a gemstone.'))
                 return
             if item['_itype'] not in [1, 2, 3, 5, 6]:
@@ -145,10 +151,61 @@ class WorkshopController(commands.Cog):
         else:
             await ctx.author.send(utilities.yellow(f'{item["name"]} has no open sockets.'))
 
+    @commands.command()
+    @commands.check(check_workshop_channel)
+    @commands.check(check_not_delving)
+    async def brew(self, ctx, *indices):
+        """Combine up to 3 ingredients to create a potion with deterministic properties depending on the ingredients used. The ingredients are consumed."""
+        character = self.get(ctx.author)
+        ingredients = []
+
+        if character.profession != 'alchemist':
+            return
+
+        workshop_channel = self.bot.get_channel(workshop_channel_id)
+
+        if len(indices) < 1 or len(indices) > 3:
+            await ctx.author.send(utilities.yellow(
+                'You must provide 1-3 ingredients by inventory position to brew a potion.'))
+            return
+
+        try:
+            for index in [int(x) for x in indices]:
+                ing = character.inventory[index]
+
+                if ing['_itype'] != 12:
+                    await ctx.author.send(utilities.red(f'{ing["name"]} is not an ingredient.'))
+                    return
+
+                if ing['level'] > character.level:
+                    await ctx.author.send(
+                        utilities.yellow('You are not experienced enough to work with these ingredients.'))
+                    return
+
+                ingredients.append(ing)
+        except IndexError:
+            await ctx.author.send(utilities.red('Invalid inventory position.'))
+
+        consumable = create_consumable(self.connection, ingredients)
+
+        if consumable is False:
+            await workshop_channel.send(utilities.yellow(
+                'You must provide 1-3 ingredients by inventory position to brew a potion.'))
+            return
+
+        consumable['description'] = consumable['description'].replace('|', character.name)
+        consumable.save()
+
+        for ing in ingredients:
+            character.remove_from_inventory(ing)
+
+        character.add_to_inventory(consumable, True)
+        await workshop_channel.send(f'{ctx.author.name} brewed: {consumable["name"]}.')
+
 
 professions_desc = "So, you're interested in learning a trade to practice here in my workshop? Wonderful! At the moment, I'm equipped to support the activities of \\jewelers, \\alchemists, and \\cartographers. When you have made up your mind, you can \\choose a profession. While professions are entirely optional, they can help you in your journey. You can choose your profession at any time, but only once! As you become more experienced in the mines, your capabilities in your chosen profession will improve accordingly."
 jeweler_desc = "Jewelers can socket gemstones into weapons and armor, enhancing the item's properties. Items have a limited number of sockets, and gemstones cannot be safely removed, so this profession is not or the anxiety-prone!"
-alchemist_desc = "Alchemists can use various organic reagants to enhance the properties of potions and food. I'm not taking on any new students in this profession at the moment."
+alchemist_desc = "Alchemists can combine specific organic reagants to create restorative potions to aid in exploring the mines. Or, you know, sell them, I guess."
 cartographer_desc = "Cartographers can use a variety of resources to make modifications to maps discovered in the mine. These modifications generally adjust the risk and reward levels of the delve into that mine, using the enhanced map. I'm not taking on any new students in this profession at the moment."
 
 monolog = [
@@ -157,5 +214,5 @@ monolog = [
 ]
 
 monolog_rare = [
-    "I highly recommend you don't combine those two ingre... oh. Oh dear.",
+    "I highly recommend you don't combine those two ingre... oh.",
 ]

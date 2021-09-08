@@ -28,7 +28,7 @@ class Book(Document):
     ]
     default_values = {
         'weight': 1,
-        '_itype': 11,
+        '_itype': 10,
     }
     use_dot_notation = True
     use_autorefs = True

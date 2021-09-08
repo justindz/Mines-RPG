@@ -328,7 +328,7 @@ class Fight:
         indices = []
 
         for item in character.inventory:
-            if item['_itype'] in [ItemType.potion.value, ItemType.food.value]:
+            if item['_itype'] == ItemType.potion.value:
                 display_string += f'\n{display_counter} - {item["name"]} ({item["uses"]})'
                 display_counter += 1
                 indices.append(indices_counter)

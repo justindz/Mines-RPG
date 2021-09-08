@@ -169,7 +169,7 @@ Sockets
 -------
 {utilities.get_socket_display(it)}
 '''
-            elif it['_itype'] in [ItemType.potion.value, ItemType.food.value]:
+            elif it['_itype'] == ItemType.potion.value:
                 item_string += f'''
 Effects
 -------

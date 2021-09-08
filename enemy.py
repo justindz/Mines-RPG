@@ -6,6 +6,7 @@ from ability import EffectType
 from character import Character
 import utilities
 import dice
+from prefixes import level_prefixes
 
 
 class GoalType(Enum):
@@ -123,7 +124,7 @@ class Enemy:
         self.dot_effect += round(self.dot_effect_growth * gap, 2)
         self.shock_limit += round(self.shock_limit_growth * gap)
         self.confusion_limit += round(self.confusion_limit_growth * gap)
-        self.name = prefixes[utilities.clamp(int(depth / 10), 1, len(prefixes))] + " " + self.name
+        self.name = level_prefixes[utilities.clamp(int(depth / 10), 1, len(level_prefixes))] + " " + self.name
 
     def apply_status_effect(self, name: str, stat: str, value: int, turns_remaining: int):
         remove = None
@@ -506,24 +507,3 @@ class Enemy:
             self.current_health = self.health
 
         return self.current_health - start
-
-
-prefixes = {
-    1: 'Pico',
-    2: 'Nano',
-    3: 'Micro',
-    4: 'Milli',
-    5: 'Centi',
-    6: 'Deci',
-    7: 'Nomi',
-    8: 'Deca',
-    9: 'Hecto',
-    10: 'Kilo',
-    11: 'Mega',
-    12: 'Giga',
-    13: 'Tera',
-    14: 'Peta',
-    15: 'Exa',
-    16: 'Zetta',
-    17: 'Yotta'
-}

@@ -14,6 +14,7 @@ from character import Character
 from armor import Armor
 from accessory import Accessory
 from consumable import Consumable
+from ingredient import Ingredient
 from weapon import Weapon
 from book import Book
 from gemstone import Gemstone
@@ -31,6 +32,7 @@ connection.register([Character])
 connection.register([Armor])
 connection.register([Accessory])
 connection.register([Consumable])
+connection.register([Ingredient])
 connection.register([Weapon])
 connection.register([Book])
 connection.register([Gemstone])

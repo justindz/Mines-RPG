@@ -8,7 +8,7 @@ class Explode(Action):
     """targets_players and _allies are set to False, which prevents this from being chosen for non-enrage plans."""
     def __init__(self, name: str, effects: [Effect]):
         for effect in effects:
-            if effect.type not in [EffectType.damage_health, EffectType.debuff]:
+            if effect.type not in [EffectType.damage_health, EffectType.debuff, EffectType.restore_health]:
                 raise Exception(f'Explode action {name} has an unsupported effect type {effect.type}')
 
         super().__init__()

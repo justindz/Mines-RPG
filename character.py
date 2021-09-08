@@ -397,7 +397,7 @@ class Character(Document):
         self.bonus_carry -= accessory['bonus_carry']
 
     def use_consumable(self, connection, consumable):
-        if consumable['_itype'] not in [ItemType.potion.value, ItemType.food.value]:
+        if consumable['_itype'] != ItemType.potion.value:
             return f'{consumable["name"]} is not consumable.'
         elif consumable['uses'] <= 0:
             raise Exception(f'Consumable {consumable["name"]} used by {self.name} had {consumable["uses"]} uses.')
@@ -464,7 +464,7 @@ class Character(Document):
 
     def has_consumables(self):
         for item in self.inventory:
-            if item['_itype'] in [ItemType.potion.value, ItemType.food.value]:
+            if item['_itype'] == ItemType.potion.value:
                 return True
 
         return False
