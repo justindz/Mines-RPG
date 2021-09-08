@@ -52,6 +52,9 @@ class Explode(Action):
 
                     if overwrite is not None:
                         out += f' The existing {overwrite} was replaced.'
+                elif effect.type == EffectType.restore_health:
+                    heal = target.restore_health(dice.roll(dice.count(user.level), effect.dice_value), user)
+                    out += f'\n{target.name} regained {heal} health.'
 
         fight.enemies.remove(user)
         out += f'\n{user.name} suffered {user.current_health} damage and died.'

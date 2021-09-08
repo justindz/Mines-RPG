@@ -181,6 +181,15 @@ books = {
         'btype': 1,
         'key': 'inspire'
     },
+    # L3
+    'summon_blood_golem': {
+        'name': 'Tome: Summon Blood Golem',
+        'description': 'TODO',
+        'level': 3,
+        'rarity': 3,
+        'btype': 1,
+        'key': 'summon_blood_golem'
+    },
     # Skills
     # L1
     'slash': {
