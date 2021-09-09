@@ -52,12 +52,13 @@ class Plan:
 
 
 class Enemy:
-    def __init__(self, name, strength, strength_growth, intelligence, intelligence_growth, dexterity, dexterity_growth,
-                 willpower, willpower_growth, health, health_growth, health_regen, health_regen_growth, init,
-                 init_growth, earth_res, earth_res_growth, fire_res, fire_res_growth, electricity_res,
-                 electricity_res_growth, water_res, water_res_growth, dot_res, dot_res_growth, dot_reduction, dot_effect,
-                 dot_effect_growth, dot_duration, shock_limit, shock_limit_growth, confusion_limit,
-                 confusion_limit_growth, actions, goals):
+    def __init__(self, name, actions, goals, strength=0, strength_growth=5, intelligence=0, intelligence_growth=5,
+                 dexterity=0, dexterity_growth=5, willpower=0, willpower_growth=5, health=10, health_growth=10,
+                 health_regen=0, health_regen_growth=0, init=1, init_growth=3, earth_res=0.0, earth_res_growth=0.02,
+                 fire_res=0.0, fire_res_growth=0.02, electricity_res=0.0, electricity_res_growth=0.02, water_res=0.0,
+                 water_res_growth=0.02, dot_res=0.0, dot_res_growth=0.02, dot_reduction=0, dot_effect=0.0,
+                 dot_effect_growth=0.02, dot_duration=0, shock_limit=4, shock_limit_growth=0.2, confusion_limit=4,
+                 confusion_limit_growth=0.2):
         self.name = name
         self.level = 1
 
@@ -78,10 +79,6 @@ class Enemy:
         self.init = init
         self.init_growth = init_growth
         self.bonus_init = 0  # exists for the purpose of init sorting in fight encounters with characters
-        self.status_effects = []  # list of dicts w/ keys = name, stat, value, turns_remaining
-        self.burn = {'turns': 0, 'dmg': 0}
-        self.bleed = {'turns': 0, 'dmg': 0}
-        self.ele_pens = (0.0, 0.0, 0.0, 0.0)  # used for enemy on summon damage calcs
 
         # Resistances
         self.earth_res = earth_res
@@ -92,12 +89,19 @@ class Enemy:
         self.electricity_res_growth = electricity_res_growth
         self.water_res = water_res
         self.water_res_growth = water_res_growth
+
+        # DOT
         self.dot_res = dot_res
         self.dot_res_growth = dot_res_growth
         self.dot_reduction = dot_reduction
         self.dot_effect = dot_effect
         self.dot_effect_growth = dot_effect_growth
         self.dot_duration = dot_duration
+        self.burn = {'turns': 0, 'dmg': 0}
+        self.bleed = {'turns': 0, 'dmg': 0}
+
+        # Status
+        self.status_effects = []  # list of dicts w/ keys = name, stat, value, turns_remaining
         self.shock = self.bonus_shock_limit = 0
         self.shock_limit = shock_limit
         self.shock_limit_growth = shock_limit_growth
@@ -108,6 +112,7 @@ class Enemy:
         # AI
         self.actions = actions
         self.goals = goals
+        self.ele_pens = (0.0, 0.0, 0.0, 0.0)  # used for enemy on summon damage calcs
 
     def scale(self, depth):
         self.level = depth
