@@ -1,9 +1,13 @@
+import copy
+import random
+
+import enemies
 import loot_encounter
 import utilities
 import biome
 from biome import Biome
-import fight_encounter
 from character import Character
+from fight_encounter import Fight
 
 
 class Zone(object):
@@ -22,9 +26,32 @@ class Zone(object):
         if depth % 5 == 0:
             room.encounter = loot_encounter.Loot(connection, characters)
         else:
-            room.encounter = fight_encounter.get_random_fight(self.biome.enemy_tags, characters, depth)
+            room.encounter = self.get_random_fight(characters, depth)
 
         return room
+
+    def get_random_fight(self, characters: [Character], depth: int) -> Fight:
+        enemy_group = []
+        size = 2
+        candidates = self.biome.enemy_tags[1]
+
+        if depth >= 21:
+            candidates += self.biome.enemy_tags[21]
+
+        if len(characters) == 2:
+            size = 4
+        elif len(characters) == 3:
+            size = 6
+        elif len(characters) < 1 or len(characters) > 3:
+            raise Exception(f'get_random_fight unexpected party size: {",".join([x.name for x in characters])}')
+
+        for _ in range(1, size + 1):
+            e_str = random.choice(candidates)
+            e = copy.deepcopy(enemies.enemies[e_str])
+            e.scale(depth)
+            enemy_group.append(e)
+
+        return Fight(enemy_group, characters)
 
     @staticmethod
     def get_restart_level(max_depth):

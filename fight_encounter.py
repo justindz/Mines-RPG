@@ -5,7 +5,6 @@ import utilities
 from character import Character
 import enemy
 from enemy import Enemy
-import enemy_group
 from enemies import enemies
 from summon import Summon
 from summons import summons
@@ -15,21 +14,6 @@ import ability
 import spell
 import skill
 import dice
-
-
-def get_random_fight(tags: [str], characters: [Character], depth: int):
-    candidates = []
-    _enemies = []
-
-    for tag in tags:
-        candidates.append(random.choice(enemy_group.enemy_groups[tag]))
-
-    for enemy_str in random.choice(candidates)[len(characters) - 1]:
-        e = copy.deepcopy(enemies[enemy_str])
-        e.scale(depth)
-        _enemies.append(e)
-
-    return Fight(_enemies, characters)
 
 
 class Fight:

@@ -104,8 +104,11 @@ class WorkshopController(commands.Cog):
                 f'{self.name} announces, "Congratulations to {character.name}, our newest {character.profession}!"')
         elif profession == 'cartographer':
             # character.profession = 'cartographer'
+            # character.save()
+            # await self.bot.get_channel(workshop_channel_id).send(
+            #     f'{self.name} announces, "Congratulations to {character.name}, our newest {character.profession}!"')
             await ctx.author.send(utilities.blue(
-                f'{self.name} says, "I\'m not taking on any new students in this profession at the moment."'))
+                f'{self.name} says, "I\'m not currently taking new students in the {profession} trade."'))
         else:
             await ctx.author.send(utilities.blue(
                 f'{self.name} says, "I\'m afraid I don\'t know the {profession} trade."'))
@@ -205,8 +208,8 @@ class WorkshopController(commands.Cog):
 
 professions_desc = "So, you're interested in learning a trade to practice here in my workshop? Wonderful! At the moment, I'm equipped to support the activities of \\jewelers, \\alchemists, and \\cartographers. When you have made up your mind, you can \\choose a profession. While professions are entirely optional, they can help you in your journey. You can choose your profession at any time, but only once! As you become more experienced in the mines, your capabilities in your chosen profession will improve accordingly."
 jeweler_desc = "Jewelers can socket gemstones into weapons and armor, enhancing the item's properties. Items have a limited number of sockets, and gemstones cannot be safely removed, so this profession is not or the anxiety-prone!"
-alchemist_desc = "Alchemists can combine specific organic reagants to create restorative potions to aid in exploring the mines. Or, you know, sell them, I guess."
-cartographer_desc = "Cartographers can use a variety of resources to make modifications to maps discovered in the mine. These modifications generally adjust the risk and reward levels of the delve into that mine, using the enhanced map. I'm not taking on any new students in this profession at the moment."
+alchemist_desc = "Alchemists can combine specific organic reagants to create restorative potions to aid in exploring the mines. Potions are consumed on use, but can have multiple uses."
+cartographer_desc = "Cartographers can use a variety of resources to make modifications to maps discovered in the mines. These modifications affect the risk and reward levels of a delve using the enhanced map, and are consumed. I'm not currently taking new students in this profession."
 
 monolog = [
     "Let me know if you have any questions about the \\professions you can pursue in my workshop.",

@@ -4,10 +4,10 @@ import room
 
 
 class Biome(object):
-    def __init__(self, name: str, enemy_tags: list[str], room_tags: list[str]):
+    def __init__(self, name: str, room_tags: list[str], enemy_tags: dict):
         self.name = name
-        self.enemy_tags = enemy_tags
         self.room_tags = room_tags
+        self.enemy_tags = enemy_tags
 
     def get_random_room(self):
         candidates = []
@@ -23,12 +23,20 @@ class Biome(object):
 
 
 biomes = {
-    'generic': Biome('generic', ['basic'], ['basic']),
-    'infernal': Biome('infernal', ['basic', 'infernal'], ['infernal']),
-    # Verdant - damp, mossy, simians, exotic birds
+    'generic': Biome('generic', ['basic'],
+                     {
+                         1: ['slime', 'scarab', 'spider'],
+                         21: [],
+                     }),
+    'infernal': Biome('infernal', ['infernal'],
+                      {
+                          1: ['imp', 'bomb', 'slime'],
+                          21: [],
+                      }),
     # Arcane - golems, animated workers (picks, carts, etc.), electric weak
     # Necromantic - undead workers, undead overseers, fire weak
     # Eldritch - weird angles, impossible loops, moving corridors, horrors (dust, insects), earth weak
-    # Ancestral - ruins, evidence of civilization, ghosts, feral former domestic animals
-    # Clockwork - gears, steam, mechanical robots
+    # Verdant - damp, mossy, simians, exotic birds - map only
+    # Ancestral - ruins, evidence of civilization, ghosts, feral former domestic animals - map only
+    # Clockwork - gears, steam, mechanical robots - map only
 }
