@@ -114,9 +114,9 @@ class Enemy:
         self.goals = goals
         self.ele_pens = (0.0, 0.0, 0.0, 0.0)  # used for enemy on summon damage calcs
 
-    def scale(self, depth):
-        self.level = depth
-        gap = depth - 1
+    def scale(self, level):
+        self.level = level
+        gap = level - 1
         self.strength += round(self.strength_growth * gap)
         self.intelligence += round(self.intelligence_growth * gap)
         self.dexterity += round(self.dexterity_growth * gap)
@@ -125,11 +125,15 @@ class Enemy:
         self.current_health = self.health
         self.health_regen += round(self.health_regen_growth * gap)
         self.init += round(self.init_growth * gap)
+        self.earth_res += round(self.earth_res_growth * gap, 2)
+        self.fire_res += round(self.fire_res_growth * gap, 2)
+        self.electricity_res += round(self.electricity_res_growth * gap, 2)
+        self.water_res += round(self.water_res_growth * gap, 2)
         self.dot_res += round(self.dot_res_growth * gap, 2)
         self.dot_effect += round(self.dot_effect_growth * gap, 2)
         self.shock_limit += round(self.shock_limit_growth * gap)
         self.confusion_limit += round(self.confusion_limit_growth * gap)
-        self.name = level_prefixes[utilities.clamp(int(depth / 10), 1, len(level_prefixes))] + " " + self.name
+        self.name = level_prefixes[min(level, 17)] + " " + self.name
 
     def apply_status_effect(self, name: str, stat: str, value: int, turns_remaining: int):
         remove = None

@@ -181,6 +181,14 @@ books = {
         'btype': 1,
         'key': 'inspire'
     },
+    'summon_wisp': {
+        'name': 'Tome: Summon Will-o-the-Wisp',
+        'description': 'TODO',
+        'level': 2,
+        'rarity': 3,
+        'bytpe': 1,
+        'key': 'summon_wisp'
+    },
     # L3
     'summon_blood_golem': {
         'name': 'Tome: Summon Blood Golem',

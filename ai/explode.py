@@ -8,7 +8,8 @@ class Explode(Action):
     """targets_players and _allies are set to False, which prevents this from being chosen for non-enrage plans."""
     def __init__(self, name: str, effects: [Effect]):
         for effect in effects:
-            if effect.type not in [EffectType.damage_health, EffectType.debuff, EffectType.restore_health]:
+            if effect.type not in [EffectType.damage_health, EffectType.burn, EffectType.bleed, EffectType.debuff,
+                                   EffectType.restore_health]:
                 raise Exception(f'Explode action {name} has an unsupported effect type {effect.type}')
 
         super().__init__()
@@ -43,6 +44,18 @@ class Explode(Action):
                         target.shock += 1
                     if confusion:
                         target.confusion += 1
+                elif effect.type == EffectType.burn:
+                    if target.apply_burn(effect.effect_turns, effect.dot_value,
+                                         user.dot_effect, user.dot_duration):
+                        out += f'\n{target.name} is burning.'
+                    else:
+                        out += f'\n{target.name} is already seriously burning.'
+                elif effect.type == EffectType.bleed:
+                    if target.apply_bleed(effect.effect_turns, effect.dot_value,
+                                          user.dot_effect, user.dot_duration):
+                        out += f'\n{target.name} is bleeding.'
+                    else:
+                        out += f'\n{target.name} is bleeding more severely.'
                 elif effect.type == EffectType.debuff:
                     amt = dice.roll(user.level, effect.dice_value)
                     amt = -amt if effect.type == EffectType.debuff else amt

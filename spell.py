@@ -252,5 +252,25 @@ spells = {
         _targets_enemies=False,
         _summon=['coal_golem']
     ),
+    'summon_blood_golem': Spell(
+        'Summon Blood Golem',
+        'Summon Blood Golem description.',
+        {'h': 0, 's': 0, 'm': 8},
+        [],
+        [],
+        [],
+        _targets_enemies=False,
+        _summon=['blood_golem']
+    ),
+    'summon_wisp': Spell(
+        'Summon Will-o-the-Wisp',
+        'Summon Will-o-the-Wisp description.',
+        {'h': 0, 's': 0, 'm': 5},
+        [],
+        [],
+        [],
+        _targets_enemies=False,
+        _summon=['wisp']
+    ),
     # Combo Spells
 }

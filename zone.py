@@ -21,7 +21,7 @@ class Zone(object):
         if self.name == 'Boon Mine':
             room = Biome.get_tutorial_room_by_depth(depth)
         else:
-            room = self.biome.get_random_room()
+            room = self.biome.get_random_room(depth)
 
         if depth % 5 == 0:
             room.encounter = loot_encounter.Loot(connection, characters)
@@ -31,6 +31,7 @@ class Zone(object):
         return room
 
     def get_random_fight(self, characters: [Character], depth: int) -> Fight:
+        level = int(depth / 5) + 1
         enemy_group = []
         size = 2
         candidates = self.biome.enemy_tags[1]
@@ -48,10 +49,10 @@ class Zone(object):
         for _ in range(1, size + 1):
             e_str = random.choice(candidates)
             e = copy.deepcopy(enemies.enemies[e_str])
-            e.scale(depth)
+            e.scale(level)
             enemy_group.append(e)
 
-        return Fight(enemy_group, characters)
+        return Fight(enemy_group, characters, level)
 
     @staticmethod
     def get_restart_level(max_depth):

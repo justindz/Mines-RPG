@@ -17,17 +17,15 @@ import dice
 
 
 class Fight:
-    def __init__(self, _enemies: [enemy.Enemy], characters: [Character]):
+    def __init__(self, _enemies: [enemy.Enemy], characters: [Character], level: int):
         self.enemies = _enemies
         self.characters = characters
-        self.level = self.coins = 0
+        self.level = level
         self.description = 'You see:'
 
         for e in self.enemies:
             self.description += f'\n {e.name}'
-            self.level += e.level
 
-        self.level = int(self.level / len(self.enemies))
         self.inits = self.characters + self.enemies
         self.update_turn_order()
         self.elements_strong = []
@@ -61,6 +59,7 @@ class Fight:
     def summon(self, summon: Summon, owner: Character):
         summon.owner = owner.name
         summon.name = f'{owner.name}\'s {summon.name}'
+        summon.scale(self.level)
         self.characters.append(summon)
         self.inits.append(summon)
         return f'{summon.owner} summoned {summon.name}.'

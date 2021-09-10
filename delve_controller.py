@@ -305,7 +305,7 @@ class DelveController(commands.Cog):
                                             return True
                                     return False
 
-                                await self.display_enemy_list(delve)
+                                await self.display_enemy_list(delve, fight)
                                 msg = await self.bot.wait_for('message', check=check_enemy_menu, timeout=30)
                                 enemy_choice = int(msg.content)
                                 enemy = fight.enemies[enemy_choice - 1]
@@ -412,14 +412,6 @@ class DelveController(commands.Cog):
         await delve.channel.send(fight.display_active_elements())
 
     @staticmethod
-    async def display_enemy_list(delve):
-        i = 1
-
-        for enemy in delve.fight.enemies:
-            await delve.display_fighter_summary(delve, enemy, i)
-            i += 1
-
-    @staticmethod
     async def display_fighter_summary(delve, fighter, index=None):
         await delve.channel.send(utilities.underline(
             (f'{index} - ' if index is not None else '- ')
@@ -432,6 +424,14 @@ class DelveController(commands.Cog):
             + (f' :grey_question: {fighter.confusion}/{fighter.confusion_limit + fighter.bonus_confusion_limit}' if
                fighter.confusion > 0 else '')
         ))
+
+    @staticmethod
+    async def display_enemy_list(delve, fight):
+        i = 1
+
+        for enemy in fight.enemies:
+            await DelveController.display_fighter_summary(delve, enemy, i)
+            i += 1
 
     @staticmethod
     async def pay_summon_upkeep(actor, delve, fight):
