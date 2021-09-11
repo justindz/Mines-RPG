@@ -72,7 +72,7 @@ class Summon(Enemy):
 
                 if len(effects) > 0:
                     for enemy in fight.enemies:
-                        dmg = enemy.estimate_damage_from_enemy_action(self, action)
+                        dmg = fight.estimate_damage_from_enemy_action(self, enemy, action)  # check total aoe dmg
                         plan = Plan()
                         plan.score = goal.value + 100 - int(max(enemy.current_health - dmg, 1) / enemy.current_health * 100)
                         plan.action = lambda action=action, enemy=enemy: action.do(self, enemy, fight)

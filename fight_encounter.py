@@ -218,6 +218,15 @@ class Fight:
         char.save()
         return out
 
+    def estimate_damage_from_enemy_action(self, user, character, action):
+        amt = 0
+        characters = action.get_aoe_targets(self.characters, character)
+
+        for c in characters:
+            amt += c.estimate_damage_from_enemy_action(user, action)
+
+        return amt
+
     def display_active_elements(self):
         if len(self.elements_strong) + len(self.elements_weak) > 0:
             out = 'Strong: '

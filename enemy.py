@@ -322,7 +322,7 @@ class Enemy:
 
                 if len(effects) > 0:
                     for character in [x for x in fight.characters if isinstance(x, Character)]:
-                        dmg = character.estimate_damage_from_enemy_action(self, action)
+                        dmg = character.estimate_damage_from_enemy_action(self, action)  # only check player kill
 
                         if dmg >= character.current_health:
                             plan = Plan()
@@ -343,7 +343,7 @@ class Enemy:
 
                 if len(effects) > 0:
                     for character in fight.characters:
-                        dmg = character.estimate_damage_from_enemy_action(self, action)
+                        dmg = fight.estimate_damage_from_enemy_action(self, character, action)  # check total aoe dmg
                         plan = Plan()
                         plan.score = goal.value + 100 - int(max(character.current_health - dmg, 1) / (character.current_health + character.bonus_health) * 100)
                         plan.action = lambda action=action, character=character: action.do(self, character, fight)

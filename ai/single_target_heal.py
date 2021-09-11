@@ -20,7 +20,7 @@ class SingleTargetHeal(Action):
 
     def do(self, user, target, fight):
         out = f'{user.name} used {self.name} on {target.name}.'
-        targets = super().get_aoe_targets(fight, target)
+        targets = super().get_aoe_targets(fight.enemies, target)
 
         for target in targets:
             for effect in self.effects:

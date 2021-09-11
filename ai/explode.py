@@ -1,6 +1,4 @@
-import dice
 from ability import EffectType, Effect
-from elements import Elements
 from ai.action import Action
 
 
@@ -25,50 +23,8 @@ class Explode(Action):
     def do(self, user, target, fight):
         """target parameter is unused, since Explode is designed to always target all characters"""
         out = f'Enraged {user.name} used {self.name}.'
-        targets = super().get_aoe_targets(fight, fight.characters[0])
-
-        for target in targets:
-            for effect in self.effects:
-                if effect.type == EffectType.damage_health:
-                    dmgs = target.take_damage(user.deal_damage(effect, critical=False), user.ele_pens)
-                    shock = False
-                    confusion = False
-
-                    for dmg in dmgs:
-                        ele = Elements(dmg[1])
-                        out += f'\n{target.name} suffered {dmg[0]} {Elements(dmg[1]).name} damage.'
-                        shock = True if ele == Elements.electricity else False
-                        confusion = True if ele == Elements.water else False
-
-                    if shock:
-                        target.shock += 1
-                    if confusion:
-                        target.confusion += 1
-                elif effect.type == EffectType.burn:
-                    if target.apply_burn(effect.effect_turns, effect.dot_value,
-                                         user.dot_effect, user.dot_duration):
-                        out += f'\n{target.name} is burning.'
-                    else:
-                        out += f'\n{target.name} is already seriously burning.'
-                elif effect.type == EffectType.bleed:
-                    if target.apply_bleed(effect.effect_turns, effect.dot_value,
-                                          user.dot_effect, user.dot_duration):
-                        out += f'\n{target.name} is bleeding.'
-                    else:
-                        out += f'\n{target.name} is bleeding more severely.'
-                elif effect.type == EffectType.debuff:
-                    amt = dice.roll(user.level, effect.dice_value)
-                    amt = -amt if effect.type == EffectType.debuff else amt
-                    overwrite = target.apply_status_effect(effect.status_effect_name, effect.stat, amt,
-                                                           effect.effect_turns)
-                    out += f'\n{target.name} has been affected by {effect.status_effect_name}.'
-
-                    if overwrite is not None:
-                        out += f' The existing {overwrite} was replaced.'
-                elif effect.type == EffectType.restore_health:
-                    heal = target.restore_health(dice.roll(dice.count(user.level), effect.dice_value), user)
-                    out += f'\n{target.name} regained {heal} health.'
-
+        targets = super().get_aoe_targets(fight.characters, fight.characters[0])
+        out = self.deal_damage(False, fight, out, targets, user)
         fight.enemies.remove(user)
         out += f'\n{user.name} suffered {user.current_health} damage and died.'
         out += self.handle_elements(fight)
