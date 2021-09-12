@@ -228,17 +228,18 @@ class Character(Document):
         if self.level < item['level']:
             return False
 
-        if self.strength + self.bonus_strength < item['required_strength']:
-            return False
+        if item['_itype'] == ItemType.weapon.value:
+            if self.strength + self.bonus_strength < item['required_strength']:
+                return False
 
-        if self.intelligence + self.bonus_intelligence < item['required_intelligence']:
-            return False
+            if self.intelligence + self.bonus_intelligence < item['required_intelligence']:
+                return False
 
-        if self.dexterity + self.bonus_dexterity < item['required_dexterity']:
-            return False
+            if self.dexterity + self.bonus_dexterity < item['required_dexterity']:
+                return False
 
-        if self.willpower + self.bonus_willpower < item['required_willpower']:
-            return False
+            if self.willpower + self.bonus_willpower < item['required_willpower']:
+                return False
 
         slot = ItemType(item['_itype']).name
 

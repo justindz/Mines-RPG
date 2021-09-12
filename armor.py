@@ -29,10 +29,6 @@ class Armor(Document):
         'bonus_electricity_res': float,
         'bonus_water_res': float,
         'value': int,
-        'required_strength': int,
-        'required_intelligence': int,
-        'required_dexterity': int,
-        'required_willpower': int,
     }
     required_fields = [
         'name',
@@ -59,10 +55,6 @@ class Armor(Document):
         'bonus_electricity_res',
         'bonus_water_res',
         'value',
-        'required_strength',
-        'required_intelligence',
-        'required_dexterity',
-        'required_willpower'
     ]
     default_values = {
         'bonus_strength': 0,
@@ -81,10 +73,6 @@ class Armor(Document):
         'bonus_fire_res': 0.0,
         'bonus_electricity_res': 0.0,
         'bonus_water_res': 0.0,
-        'required_strength': 0,
-        'required_intelligence': 0,
-        'required_dexterity': 0,
-        'required_willpower': 0,
     }
     use_dot_notation = True
     use_autorefs = True
@@ -112,18 +100,6 @@ def get_bonuses_display_string(item):
 
 
 prefixes = {
-    'Streamlined': {
-        1: {'effect': 'required_strength', 'value': -1}
-    },
-    'Striking': {
-        1: {'effect': 'required_intelligence', 'value': -1}
-    },
-    'Fitted': {
-        1: {'effect': 'required_dexterity', 'value': -1}
-    },
-    'Pious': {
-        1: {'effect': 'required_willpower', 'value': -1}
-    },
     'Collectible': {
         1: {'effect': 'value', 'value': 30}
     },

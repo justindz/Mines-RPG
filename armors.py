@@ -43,7 +43,8 @@ armors = {
         'level': 3,
         'weight': 2,
         '_itype': 2,
-        'bonus_init': 1
+        'bonus_init': 1,
+        'bonus_electric_res': 0.01,
     },
     'cloth_armor': {
         'name': 'Cloth Armor',
@@ -52,7 +53,8 @@ armors = {
         'weight': 3,
         '_itype': 3,
         'bonus_init': 1,
-        'bonus_carry': 10
+        'bonus_carry': 10,
+        'bonus_electric_res': 0.01,
     },
     'cloth_boots': {
         'name': 'Cloth Boots',
@@ -60,7 +62,8 @@ armors = {
         'level': 3,
         'weight': 2,
         '_itype': 5,
-        'bonus_init': 1
+        'bonus_init': 1,
+        'bonus_electric_res': 0.01,
     },
     'cloth_gloves': {
         'name': 'Cloth Gloves',
@@ -68,9 +71,57 @@ armors = {
         'level': 3,
         'weight': 2,
         '_itype': 6,
-        'bonus_init': 1
+        'bonus_init': 1,
+        'bonus_electric_res': 0.01,
     },
     # 5 - Boiled Leather
+    'boiled_leather_helm': {
+        'name': 'Boiled Leather Helm',
+        'description': 'TODO',
+        'level': 5,
+        'weight': 4,
+        '_itype': 2,
+        'bonus_earth_res': 0.01,
+        'bonus_fire_res': 0.01,
+        'bonus_electric_res': 0.01,
+        'bonus_water_res': 0.01,
+    },
+    'boiled_leather_armor': {
+        'name': 'Boiled Leather Armor',
+        'description': 'TODO',
+        'level': 5,
+        'weight': 8,
+        '_itype': 3,
+        'bonus_carry': 20,
+        'bonus_earth_res': 0.01,
+        'bonus_fire_res': 0.01,
+        'bonus_electric_res': 0.01,
+        'bonus_water_res': 0.01,
+    },
+    'boiled_leather_boots': {
+        'name': 'Boiled Leather Boots',
+        'description': 'TODO',
+        'level': 5,
+        'weight': 4,
+        '_itype': 5,
+        'bonus_init': 1,
+        'bonus_earth_res': 0.01,
+        'bonus_fire_res': 0.01,
+        'bonus_electric_res': 0.01,
+        'bonus_water_res': 0.01,
+    },
+    'boiled_leather_gloves': {
+        'name': 'Boiled Leather Gloves',
+        'description': 'TODO',
+        'level': 5,
+        'weight': 4,
+        '_itype': 6,
+        'bonus_init': 1,
+        'bonus_earth_res': 0.01,
+        'bonus_fire_res': 0.01,
+        'bonus_electric_res': 0.01,
+        'bonus_water_res': 0.01,
+    },
     # 7 - Studded Leather
     # 9 - Chainmail
     # ----- Heavy ------
@@ -83,7 +134,6 @@ armors = {
         '_itype': 2,
         'bonus_init': -1,
         'bonus_earth_res': 0.01,
-        'required_strength': 3
     },
     'rusty_armor': {
         'name': 'Rusty Armor',
@@ -94,7 +144,6 @@ armors = {
         'bonus_init': -1,
         'bonus_carry': 10,
         'bonus_earth_res': 0.01,
-        'required_strength': 3
     },
     'rusty_boots': {
         'name': 'Rusty Boots',
@@ -103,7 +152,6 @@ armors = {
         'weight': 3,
         '_itype': 5,
         'bonus_earth_res': 0.01,
-        'required_strength': 3
     },
     'rusty_gauntlets': {
         'name': 'Rusty Gauntlets',
@@ -112,7 +160,6 @@ armors = {
         'weight': 3,
         '_itype': 6,
         'bonus_earth_res': 0.01,
-        'required_strength': 3
     },
     # 3 - Wood
     'wood_helmet': {
@@ -125,7 +172,6 @@ armors = {
         'bonus_earth_res': 0.01,
         'bonus_electricity_res': 0.01,
         'bonus_water_res': 0.01,
-        'required_strength': 3
     },
     'wood_armor': {
         'name': 'Wooden Armor',
@@ -138,7 +184,6 @@ armors = {
         'bonus_earth_res': 0.01,
         'bonus_electricity_res': 0.01,
         'bonus_water_res': 0.01,
-        'required_strength': 3
     },
     'wood_guards': {
         'name': 'Wooden Guards',
@@ -149,7 +194,6 @@ armors = {
         'bonus_earth_res': 0.01,
         'bonus_electricity_res': 0.01,
         'bonus_water_res': 0.01,
-        'required_strength': 3
     },
     'wood_gloves': {
         'name': 'Wooden Padded Gloves',
@@ -158,12 +202,105 @@ armors = {
         'weight': 2,
         '_itype': 6,
         'bonus_earth_res': 0.01,
-        'bonus_fire_res': 0.0,
         'bonus_electricity_res': 0.01,
         'bonus_water_res': 0.01,
-        'required_strength': 3
     },
     # 5 - Bronze
+    'bronze_helmet': {
+        'name': 'Bronze Helmet',
+        'description': 'TODO',
+        'level': 5,
+        'weight': 8,
+        '_itype': 2,
+        'bonus_init': -1,
+        'bonus_earth_res': 0.02,
+        'bonus_fire_res': 0.02,
+        'bonus_water_res': 0.01,
+    },
+    'bronze_armor': {
+        'name': 'Bronze Armor',
+        'description': 'TODO',
+        'level': 5,
+        'weight': 15,
+        '_itype': 3,
+        'bonus_init': -2,
+        'bonus_carry': 10,
+        'bonus_earth_res': 0.02,
+        'bonus_fire_res': 0.02,
+        'bonus_water_res': 0.01,
+    },
+    'bronze_sabotons': {
+        'name': 'Bronze Sabotons',
+        'description': 'TODO',
+        'level': 5,
+        'weight': 7,
+        '_itype': 5,
+        'bonus_earth_res': 0.02,
+        'bonus_fire_res': 0.02,
+        'bonus_water_res': 0.01,
+    },
+    'bronze_gloves': {
+        'name': 'Bronze Padded Gloves',
+        'description': 'TODO',
+        'level': 5,
+        'weight': 5,
+        '_itype': 6,
+        'bonus_earth_res': 0.02,
+        'bonus_fire_res': 0.02,
+        'bonus_water_res': 0.01,
+    },
     # 7 - Iron
     # 9 - Steel
+    # ----- Ceremonial -----
+    # 3
+    'worn_headband': {
+        'name': 'Worn Headband',
+        'description': 'TODO',
+        'level': 3,
+        'weight': 3,
+        '_itype': 2,
+        'bonus_stamina_regen': 1,
+    },
+    'worn_coat': {
+        'name': 'Worn Coat',
+        'description': 'TODO',
+        'level': 3,
+        'weight': 3,
+        '_itype': 3,
+        'bonus_carry': 10,
+        'bonus_electricity_res': 0.01,
+        'bonus_water_res': 0.01,
+        'bonus_stamina': 10,
+    },
+    'worn_hakama': {
+        'name': 'Worn Hakama',
+        'description': 'TODO',
+        'level': 3,
+        'weight': 3,
+        '_itype': 5,
+        'bonus_electricity_res': 0.01,
+        'bonus_water_res': 0.01,
+        'bonus_stamina': 10,
+    },
+    # ----- Spiritual -----
+    # 3
+    'vine_circlet': {
+        'name': 'Vine Circlet',
+        'description': 'TODO',
+        'level': 3,
+        'weight': 3,
+        '_itype': 2,
+        'bonus_mana_regen': 1,
+    },
+    'fur_robe': {
+        'name': 'Fur Robe',
+        'description': 'TODO',
+        'level': 3,
+        'weight': 4,
+        '_itype': 3,
+        'bonus_carry': 10,
+        'bonus_electricity_res': 0.01,
+        'bonus_water_res': 0.01,
+        'bonus_mana': 20,
+    },
 }

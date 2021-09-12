@@ -129,15 +129,14 @@ Cost: {ab.ability_cost_to_str()}'''
 
 
 def get_requirements_display_string(item) -> str:
-    if item["_itype"] not in [1, 2, 3, 4, 5, 6, 7, 8]:
-        raise Exception(f'get_requirements_display_string for unsupported _itype {item["_itype"]} on {item["name"]}')
-
-    display_string = ''
-    display_string += f'\nStrength {item["required_strength"]}' if item['required_strength'] != 0 else ''
-    display_string += f'\nIntelligence {item["required_intelligence"]}' if item['required_intelligence'] != 0 else ''
-    display_string += f'\nDexterity {item["required_dexterity"]}' if item['required_dexterity'] != 0 else ''
-    display_string += f'\nWillpower {item["required_willpower"]}' if item['required_willpower'] != 0 else ''
-    return display_string.lstrip('\n')
+    if item["_itype"] == 1:
+        display_string = f'\nStrength {item["required_strength"]}' if item['required_strength'] != 0 else ''
+        display_string += f'\nIntelligence {item["required_intelligence"]}' if item['required_intelligence'] != 0 else ''
+        display_string += f'\nDexterity {item["required_dexterity"]}' if item['required_dexterity'] != 0 else ''
+        display_string += f'\nWillpower {item["required_willpower"]}' if item['required_willpower'] != 0 else ''
+        return display_string.lstrip('\n')
+    else:
+        return 'None'
 
 
 def get_socket_display(item) -> str:

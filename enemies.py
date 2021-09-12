@@ -154,7 +154,7 @@ enemies = {
     'lust_demon':
         Enemy('Lust Demon',
               [
-                  SingleTargetAttack('Sensuous Embrace', 0, 0.05, [
+                  SingleTargetAttack('Fluid Embrace', 0, 0.05, [
                       Effect(EffectType.damage_health, Elements.water, _dice_value=6),
                       Effect(EffectType.damage_health, Elements.water, _dice_value=6),
                   ]),
