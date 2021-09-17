@@ -202,8 +202,8 @@ Value: {it["value"]}'''
 
     @commands.command(aliases=['skills', 'spells'])
     async def abilities(self, ctx):
-        character = self.get(ctx.author)
         """List your prepared abilities, and all abilities known to your character."""
+        character = self.get(ctx.author)
         out = f'''
 ==========Prepared=========='''
         for i in range(1, len(character.ability_slots) + 1):

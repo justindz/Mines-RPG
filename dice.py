@@ -8,7 +8,7 @@ def roll(count, die, crit=False) -> int:
     total = 0
 
     for _ in range(0, count):
-        total += random.randint(1, die)
+        total += random.randint(1, die) if isinstance(die, int) else round(random.uniform(0.01, die), 2)
 
     return total
 

@@ -181,6 +181,14 @@ books = {
         'btype': 1,
         'key': 'inspire'
     },
+    'lesser_ward': {
+        'name': 'Tome: Lesser Ward',
+        'description': 'TODO',
+        'level': 2,
+        'rarity': 2,
+        'btype': 1,
+        'key': 'lesser_ward'
+    },
     'summon_wisp': {
         'name': 'Tome: Summon Will-o-the-Wisp',
         'description': 'TODO',
@@ -190,6 +198,78 @@ books = {
         'key': 'summon_wisp'
     },
     # L3
+    'calcified_skin': {
+        'name': 'Tome: Calcified Skin',
+        'description': 'TODO',
+        'level': 3,
+        'rarity': 2,
+        'btype': 1,
+        'key': 'calcified_skin'
+    },
+    'quenching_skin': {
+        'name': 'Tome: Quenching Skin',
+        'description': 'TODO',
+        'level': 3,
+        'rarity': 2,
+        'btype': 1,
+        'key': 'quenching_skin'
+    },
+    'insulated_skin': {
+        'name': 'Tome: Insulated Skin',
+        'description': 'TODO',
+        'level': 3,
+        'rarity': 2,
+        'btype': 1,
+        'key': 'insulated_skin'
+    },
+    'absorbent_skin': {
+        'name': 'Tome: Absorbent Skin',
+        'description': 'TODO',
+        'level': 3,
+        'rarity': 2,
+        'btype': 1,
+        'key': 'absorbent_skin'
+    },
+    'focused_lesser_ward': {
+        'name': 'Tome: Focused Lesser Ward',
+        'description': 'TODO',
+        'level': 3,
+        'rarity': 2,
+        'btype': 1,
+        'key': 'focused_lesser_ward'
+    },
+    'focused_empower': {
+        'name': 'Tome: Focused Empower',
+        'description': 'TODO',
+        'level': 3,
+        'rarity': 2,
+        'btype': 1,
+        'key': 'focused_empower'
+    },
+    'focused_enlighten': {
+        'name': 'Tome: Focused Enlighten',
+        'description': 'TODO',
+        'level': 3,
+        'rarity': 2,
+        'btype': 1,
+        'key': 'focused_enlighten'
+    },
+    'focused_unleash': {
+        'name': 'Tome: Focused Unleash',
+        'description': 'TODO',
+        'level': 3,
+        'rarity': 2,
+        'btype': 1,
+        'key': 'focused_unleash'
+    },
+    'focused_inspire': {
+        'name': 'Tome: Focused Inspire',
+        'description': 'TODO',
+        'level': 3,
+        'rarity': 2,
+        'btype': 1,
+        'key': 'focused_inspire'
+    },
     'summon_blood_golem': {
         'name': 'Tome: Summon Blood Golem',
         'description': 'TODO',
@@ -198,6 +278,7 @@ books = {
         'btype': 1,
         'key': 'summon_blood_golem'
     },
+    # L4
     # Skills
     # L1
     'slash': {
@@ -250,36 +331,4 @@ books = {
         'key': 'flurry'
     },
     # L3
-    'focused_empower': {
-        'name': 'Tome: Focused Empower',
-        'description': 'TODO',
-        'level': 3,
-        'rarity': 2,
-        'btype': 1,
-        'key': 'focused_empower'
-    },
-    'focused_enlighten': {
-        'name': 'Tome: Focused Enlighten',
-        'description': 'TODO',
-        'level': 3,
-        'rarity': 2,
-        'btype': 1,
-        'key': 'focused_enlighten'
-    },
-    'focused_unleash': {
-        'name': 'Tome: Focused Unleash',
-        'description': 'TODO',
-        'level': 3,
-        'rarity': 2,
-        'btype': 1,
-        'key': 'focused_unleash'
-    },
-    'focused_inspire': {
-        'name': 'Tome: Focused Inspire',
-        'description': 'TODO',
-        'level': 3,
-        'rarity': 2,
-        'btype': 1,
-        'key': 'focused_inspire'
-    },
 }
