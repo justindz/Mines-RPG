@@ -17,14 +17,14 @@ class Zone(object):
         self.description = description
         self.biome = _biome
 
-    def get_next_room(self, connection, characters: [Character], depth: int):
+    def get_next_room(self, characters: [Character], depth: int):
         if self.name == 'Boon Mine':
             room = Biome.get_tutorial_room_by_depth(depth)
         else:
             room = self.biome.get_random_room(depth)
 
         if depth % 5 == 0:
-            room.encounter = loot_encounter.Loot(connection, characters)
+            room.encounter = loot_encounter.Loot(characters)
         else:
             room.encounter = self.get_random_fight(characters, depth)
 

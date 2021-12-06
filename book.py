@@ -1,37 +1,11 @@
-from mongokit_ng import Document
+from item import Item
+from pymodm import fields
 
 
-class Book(Document):
-    __database__ = 'delverpg'
-    __collection__ = 'books'
-    structure = {
-        'name': str,
-        'description': str,
-        'level': int,
-        'rarity': int,
-        'weight': int,
-        '_itype': int,
-        'btype': int,  # 0 = Skill Manual, 1 = Spell Tome
-        'key': str,
-        'value': int,
-    }
-    required_fields = [
-        'name',
-        'description',
-        'level',
-        'rarity',
-        'weight',
-        '_itype',
-        'btype',
-        'key',
-        'value'
-    ]
-    default_values = {
-        'weight': 1,
-        '_itype': 10,
-    }
-    use_dot_notation = True
-    use_autorefs = True
+class Book(Item):
+    btype = fields.IntegerField(required=True)  # 0 = Skill Manual, 1 = Spell Tome
+    key = fields.CharField(required=True)
+    value = fields.IntegerField(required=True, default=0)
 
 
 def get_ability_string(item) -> str:

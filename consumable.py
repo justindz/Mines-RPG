@@ -1,60 +1,29 @@
-from mongokit_ng import Document
+from item import Item
+from pymodm import fields
 import random
 
 from ingredient import IngredientType
-from item import add_affix
+from item_factory import add_affix
 from prefixes import level_prefixes
 
 
-class Consumable(Document):
-    __database__ = 'delverpg'
-    __collection__ = 'consumables'
-    structure = {
-        'name': str,
-        'description': str,
-        'level': int,
-        'rarity': int,
-        'weight': int,
-        '_itype': int,
-        'uses': int,
-        'health': int,
-        'stamina': int,
-        'mana': int,
-        'burn': int,
-        'bleed': int,
-        'shock': int,
-        'confusion': int,
-        'value': int,
-    }
-    required_fields = [
-        'name',
-        'description',
-        'level',
-        'rarity',
-        'weight',
-        '_itype',
-        'uses',
-        'health',
-        'stamina',
-        'mana',
-        'burn',
-        'bleed',
-        'shock',
-        'confusion',
-        'value'
-    ]
-    default_values = {
-        '_itype': 9,
-    }
-    use_dot_notation = True
-    use_autorefs = True
+class Consumable(Item):
+    itype = fields.IntegerField(required=True, default=9)
+    uses = fields.IntegerField(required=True)
+    health = fields.IntegerField(required=True)
+    stamina = fields.IntegerField(required=True)
+    mana = fields.IntegerField(required=True)
+    burn = fields.IntegerField(required=True)
+    bleed = fields.IntegerField(required=True)
+    shock = fields.IntegerField(required=True)
+    confusion = fields.IntegerField(required=True)
 
 
-def create_consumable(connection, ingredients: list):
+def create_consumable(ingredients: list):
     if len(ingredients) > 3 or len(ingredients) < 1:
         return False
 
-    result = connection.Consumable()
+    result = Consumable()
     result['level'] = max(round(sum([x['level'] for x in ingredients if x['type'] != IngredientType.neutral.value]) / len(ingredients)), 1)
     result['name'] = f'{level_prefixes[min(result["level"], 17)]} Potion'
     result['description'] = 'A consumable potion brewed by |.'
@@ -86,7 +55,7 @@ def create_consumable(connection, ingredients: list):
         key = random.choice(list(prefixes.keys()))
         result = add_affix(result, key, prefixes[key], result['level'])
 
-    result.save()
+    # result.save()
     return result
 
 

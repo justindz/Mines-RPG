@@ -2,14 +2,12 @@ from discord.ext import commands, tasks
 import random
 
 import utilities
-from item import delete_item
 from secrets import market_channel_id
 
 
 class MarketController(commands.Cog):
-    def __init__(self, bot, connection):
+    def __init__(self, bot):
         self.bot = bot
-        self.connection = connection
         self.banter.start()
         self.get = self.bot.get_cog('CharacterController').get
         self.name = 'Bigsby'
@@ -63,7 +61,7 @@ class MarketController(commands.Cog):
         i = 0
 
         for item in character.shop:
-            out += f'\n{i} - {item["name"]} ({int(item["value"] * self.sell_rate)}c)'
+            out += f'\n{i} - {item.name} ({int(item.value * self.sell_rate)}c)'
             i += 1
 
         await ctx.author.send(out)
@@ -77,14 +75,14 @@ class MarketController(commands.Cog):
 
         try:
             item = character.shop[index]
-            price = int(item["value"] * self.sell_rate)
+            price = int(item.value * self.sell_rate)
 
             if character.coins >= price:
                 if character.add_to_inventory(item, False):
                     character.coins -= price
                     character.shop.remove(item)
                     character.save()
-                    await ctx.channel.send(f'{character.name} bought: {item["name"]}')
+                    await ctx.channel.send(f'{character.name} bought: {item.name}')
                 else:
                     await ctx.author.send(utilities.yellow('You are carrying too much to buy that.'))
             else:
@@ -101,8 +99,8 @@ class MarketController(commands.Cog):
 
         try:
             item = character.inventory[index]
-            n = item['name']
-            offer = int(item['value'] * self.buy_rate)
+            n = item.name  # TODO is this needed?
+            offer = int(item.value * self.buy_rate)
             await ctx.channel.send(f'{self.name} says, "I\'d give you {offer} coins for your {n}, {character.name}."')
         except KeyError:
             await ctx.author.send(utilities.red('Invalid inventory position.'))
@@ -116,11 +114,11 @@ class MarketController(commands.Cog):
 
         try:
             item = character.inventory[index]
-            n = item['name']
-            offer = int(item['value'] * self.buy_rate)
+            n = item.name  # TODO is this needed?
+            offer = int(item.value * self.buy_rate)
             character.coins += offer
             character.remove_from_inventory(item, False)
-            delete_item(self.connection, item)
+            # item.delete()
             await ctx.channel.send(f'{character.name} sold {n} to {self.name} for {offer} coins."')
         except KeyError:
             await ctx.author.send(utilities.red('Invalid inventory position.'))
@@ -135,7 +133,7 @@ class MarketController(commands.Cog):
         i = 0
 
         for item in character.bank:
-            out += f'\n{i} - {item["name"]}'
+            out += f'\n{i} - {item.name}'
             i += 1
 
         await ctx.author.send(out)
@@ -148,7 +146,7 @@ class MarketController(commands.Cog):
         character = self.get(ctx.author)
 
         try:
-            name = character.inventory[index]['name']
+            name = character.inventory[index].name
         except IndexError:
             await ctx.author.send(utilities.red('Invalid inventory position.'))
             return
@@ -166,7 +164,7 @@ class MarketController(commands.Cog):
         character = self.get(ctx.author)
 
         try:
-            name = character.bank[index]['name']
+            name = character.bank[index].name
         except IndexError:
             await ctx.author.send(utilities.red('Invalid bank position.'))
             return

@@ -15,7 +15,6 @@ from enemy import Enemy
 from summon import Summon
 from fight_encounter import Fight
 from loot_encounter import Loot
-from item import delete_item
 
 
 async def check_ability_requirements_and_use(ability, actor, delve, target, fight):
@@ -38,11 +37,11 @@ async def check_ability_requirements_and_use(ability, actor, delve, target, figh
             elif stat not in ['h', 's', 'm']:
                 raise Exception(f'Invalid stat {stat} cost checked in check_ability_requirements_and_use for ability {ability.name}')
 
-    if isinstance(ability, skill.Skill) and actor.equipped['weapon'] is None:
+    if isinstance(ability, skill.Skill) and actor.eq_weapon is None:
         await delve.channel.send('You cannot use this skill without an equipped weapon.')
         await DelveController.recover(actor, delve)
         return False
-    elif isinstance(ability, skill.Skill) and actor.equipped['weapon']['_weapon_type'] in ability.weapon_types:
+    elif isinstance(ability, skill.Skill) and actor.eq_weapon.weapon_type in ability.weapon_types:
         await delve.channel.send(f'You cannot use this skill with this weapon type.')
         await DelveController.recover(actor, delve)
         return False
@@ -56,10 +55,9 @@ async def check_ability_requirements_and_use(ability, actor, delve, target, figh
 
 
 class DelveController(commands.Cog):
-    def __init__(self, bot, connection):
+    def __init__(self, bot):
         self.bot = bot
         self.delves = {}
-        self.connection = connection
         self.get = self.bot.get_cog('CharacterController').get
 
     async def check_correct_delve_channel(ctx):
@@ -119,7 +117,7 @@ class DelveController(commands.Cog):
 
         category = discord.utils.get(ctx.guild.categories, name='Delve RPG')
         channel = await ctx.guild.create_text_channel('{}-{}'.format(leader.name, zone.name), overwrites=overwrites, category=category)
-        self.delves[channel.name] = Delve(ctx.bot, self.connection, leader, players, zone, channel, restart)
+        self.delves[channel.name] = Delve(ctx.bot, leader, players, zone, channel, restart)
 
         for player in players:
             await player.send('Your delve has begun! Please join <#{}>'.format(channel.id))
@@ -195,7 +193,7 @@ class DelveController(commands.Cog):
             await ctx.author.send(utilities.red('Invalid inventory position.'))
             return
 
-        await ctx.channel.send(character.use_consumable(self.connection, consumable))
+        await ctx.channel.send(character.use_consumable(consumable))
 
     @commands.command()
     @commands.check(check_correct_delve_channel)
@@ -265,7 +263,7 @@ class DelveController(commands.Cog):
                             await delve.channel.send(f'{actor.name} tries to use {ability.name} on {target.name}')
                             await check_ability_requirements_and_use(ability, actor, delve, target, fight)
                         elif chosen == 'item':
-                            await delve.channel.send(actor.use_consumable(self.connection, random.choice([x for x in actor.inventory if x['_itype'] in [9, 10]])))
+                            await delve.channel.send(actor.use_consumable(random.choice([x for x in actor.inventory if x.itype in [9, 10]])))
                         else:
                             await self.recover(actor, delve)
 
@@ -334,7 +332,7 @@ class DelveController(commands.Cog):
 
                             msg = await self.bot.wait_for('message', check=check_item_menu, timeout=30)
                             choice = msg.content
-                            await delve.channel.send(actor.use_consumable(self.connection, actor.inventory[indices[int(choice) - 1]]))
+                            await delve.channel.send(actor.use_consumable(actor.inventory[indices[int(choice) - 1]]))
                         elif action == '3':  # Recover
                             await self.recover(actor, delve)
 
@@ -501,7 +499,7 @@ class DelveController(commands.Cog):
     async def encounter_loot(self, delve):
         loot = delve.current_room.encounter
         await delve.channel.send(utilities.green(loot.description))
-        await delve.channel.send(f'The party also found: {loot.roll_item["name"]} {utilities.get_rarity_symbol(loot.roll_item["rarity"])}')
+        await delve.channel.send(f'The party also found: {loot.roll_item.name} {utilities.get_rarity_symbol(loot.roll_item.rarity)}')
         await asyncio.sleep(1)
         await delve.channel.send(f'Each player may +roll in the next 15 seconds to attempt to acquire.')
 
@@ -517,9 +515,9 @@ class DelveController(commands.Cog):
 
             if winner is not None:
                 for character in delve.characters:
-                    if character['name'] == winner:
+                    if character.name == winner:
                         character.add_to_inventory(loot.roll_item, True)
-                        await delve.channel.send(utilities.green(f'{character["name"]} acquired the {loot.roll_item["name"]}!'))
+                        await delve.channel.send(utilities.green(f'{character.name} acquired the {loot.roll_item.name}!'))
                         break
             else:
                 await delve.channel.send(utilities.green(f'The party leaves the item behind.'))
@@ -527,12 +525,7 @@ class DelveController(commands.Cog):
         delve.current_room.encounter = None
 
     async def player_dead(self, delve, character):
-        for slot in character.equipped.keys():
-            character.unequip(slot)
-
-        for item in character.inventory:
-            delete_item(self.connection, item)
-
+        character.unequip_all()
         character.inventory = []
         character.current_carry = 0
         character.deaths += 1

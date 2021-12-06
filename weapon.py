@@ -1,5 +1,6 @@
 from enum import Enum
-from mongokit_ng import Document
+from item import Item
+from pymodm import fields
 
 import utilities
 from elements import Elements
@@ -20,96 +21,35 @@ class WeaponType(Enum):
     thrown = 10
 
 
-class Weapon(Document):
-    __database__ = 'delverpg'
-    __collection__ = 'weapons'
-    structure = {
-        'name': str,
-        'description': str,
-        'level': int,
-        'rarity': int,
-        'weight': int,
-        '_itype': int,
-        '_weapon_type': int,
-        'sockets': list,
-        'bonus_strength': int,
-        'bonus_intelligence': int,
-        'bonus_dexterity': int,
-        'bonus_willpower': int,
-        'bonus_health': int,
-        'bonus_stamina': int,
-        'bonus_mana': int,
-        'bonus_init': int,
-        'base_crit_chance': float,
-        'damages': None,
-        'crit_damage': int,
-        'value': int,
-        'required_strength': int,
-        'required_intelligence': int,
-        'required_dexterity': int,
-        'required_willpower': int,
-        'earth_penetration': float,
-        'fire_penetration': float,
-        'electricity_penetration': float,
-        'water_penetration': float,
-    }
-    required_fields = [
-        'name',
-        'description',
-        'level',
-        'rarity',
-        'weight',
-        '_itype',
-        '_weapon_type',
-        'sockets',
-        'bonus_strength',
-        'bonus_intelligence',
-        'bonus_dexterity',
-        'bonus_willpower',
-        'bonus_health',
-        'bonus_stamina',
-        'bonus_mana',
-        'bonus_init',
-        'base_crit_chance',
-        'damages',
-        'crit_damage',
-        'value',
-        'required_strength',
-        'required_intelligence',
-        'required_dexterity',
-        'required_willpower',
-        'earth_penetration',
-        'fire_penetration',
-        'electricity_penetration',
-        'water_penetration'
-    ]
-    default_values = {
-        '_itype': 1,
-        'bonus_strength': 0,
-        'bonus_intelligence': 0,
-        'bonus_dexterity': 0,
-        'bonus_willpower': 0,
-        'bonus_health': 0,
-        'bonus_stamina': 0,
-        'bonus_mana': 0,
-        'bonus_init': 0,
-        'required_strength': 0,
-        'required_intelligence': 0,
-        'required_dexterity': 0,
-        'required_willpower': 0,
-        'earth_penetration': 0.0,
-        'fire_penetration': 0.0,
-        'electricity_penetration': 0.0,
-        'water_penetration': 0.0,
-    }
-    use_dot_notation = True
-    use_autorefs = True
+class Weapon(Item):
+    itype = fields.IntegerField(required=True, default=1)
+    weapon_type = fields.IntegerField(required=True)
+    sockets = fields.ListField(required=True)
+    bonus_strength = fields.IntegerField(required=True, default=0)
+    bonus_intelligence = fields.IntegerField(required=True, default=0)
+    bonus_dexterity = fields.IntegerField(required=True, default=0)
+    bonus_willpower = fields.IntegerField(required=True, default=0)
+    bonus_health = fields.IntegerField(required=True, default=0)
+    bonus_stamina = fields.IntegerField(required=True, default=0)
+    bonus_mana = fields.IntegerField(required=True, default=0)
+    bonus_init = fields.IntegerField(required=True, default=0)
+    base_crit_chance = fields.FloatField(required=True)
+    damages = fields.ListField(required=True)  # was None
+    crit_damage = fields.IntegerField(required=True)
+    required_strength = fields.IntegerField(required=True, default=0)
+    required_intelligence = fields.IntegerField(required=True, default=0)
+    required_dexterity = fields.IntegerField(required=True, default=0)
+    required_willpower = fields.IntegerField(required=True, default=0)
+    earth_penetration = fields.FloatField(required=True, default=0.0)
+    fire_penetration = fields.FloatField(required=True, default=0.0)
+    electricity_penetration = fields.FloatField(required=True, default=0.0)
+    water_penetration = fields.FloatField(required=True, default=0.0)
 
 
 def get_damages_display_string(item):
     display_string = ''
 
-    for damage in item['damages']:
+    for damage in item.damages:
         display_string += f'\n  {damage[0]}d{damage[1]} {utilities.get_elemental_symbol(Elements(damage[2]))}'
 
     return display_string
@@ -117,19 +57,18 @@ def get_damages_display_string(item):
 
 def get_bonuses_display_string(item):
     display_string = ''
-    display_string += f'\nStrength {item["bonus_strength"]:+}' if item['bonus_strength'] != 0 else ''
-    display_string += f'\nIntelligence {item["bonus_intelligence"]:+}' if item['bonus_intelligence'] != 0 else ''
-    display_string += f'\nDexterity {item["bonus_dexterity"]:+}' if item['bonus_dexterity'] != 0 else ''
-    display_string += f'\nWillpower {item["bonus_willpower"]:+}' if item['bonus_willpower'] != 0 else ''
-    display_string += f'\nHealth {item["bonus_health"]:+}' if item['bonus_health'] != 0 else ''
-    display_string += f'\nStamina {item["bonus_stamina"]:+}' if item['bonus_stamina'] != 0 else ''
-    display_string += f'\nMana {item["bonus_mana"]:+}' if item['bonus_mana'] != 0 else ''
-    display_string += f'\nInitiative {item["bonus_init"]:+}' if item['bonus_init'] != 0 else ''
-    display_string += f'\nEarth Penetration {item["earth_penetration"]:.0%}' if item['earth_penetration'] > 0 else ''
-    display_string += f'\nFire Penetration {item["fire_penetration"]:.0%}' if item['fire_penetration'] > 0 else ''
-    display_string += f'\nElectricity Penetration {item["electricity_penetration"]:.0%}' if item[
-                                                                                                'electricity_penetration'] > 0 else ''
-    display_string += f'\nWater Penetration {item["water_penetration"]:.0%}' if item['water_penetration'] > 0 else ''
+    display_string += f'\nStrength {item.bonus_strength:+}' if item.bonus_strength != 0 else ''
+    display_string += f'\nIntelligence {item.bonus_intelligence:+}' if item.bonus_intelligence != 0 else ''
+    display_string += f'\nDexterity {item.bonus_dexterity:+}' if item.bonus_dexterity != 0 else ''
+    display_string += f'\nWillpower {item.bonus_willpower:+}' if item.bonus_willpower != 0 else ''
+    display_string += f'\nHealth {item.bonus_health:+}' if item.bonus_health != 0 else ''
+    display_string += f'\nStamina {item.bonus_stamina:+}' if item.bonus_stamina != 0 else ''
+    display_string += f'\nMana {item.bonus_mana:+}' if item.bonus_mana != 0 else ''
+    display_string += f'\nInitiative {item.bonus_init:+}' if item.bonus_init != 0 else ''
+    display_string += f'\nEarth Penetration {item.earth_penetration:.0%}' if item.earth_penetration > 0 else ''
+    display_string += f'\nFire Penetration {item.fire_penetration:.0%}' if item.fire_penetration > 0 else ''
+    display_string += f'\nElectricity Penetration {item.electricity_penetration:.0%}' if item.electricity_penetration > 0 else ''
+    display_string += f'\nWater Penetration {item.water_penetration:.0%}' if item.water_penetration > 0 else ''
     return display_string.lstrip('\n')
 
 

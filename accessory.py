@@ -1,95 +1,40 @@
-from mongokit_ng import Document
+from pymongo.write_concern import WriteConcern
+from pymodm import MongoModel, fields
 
 
-class Accessory(Document):
-    __database__ = 'delverpg'
-    __collection__ = 'accessory'
-    structure = {
-        'name': str,
-        'description': str,
-        'level': int,
-        'rarity': int,
-        'weight': int,
-        '_itype': int,
-        'bonus_strength': int,
-        'bonus_intelligence': int,
-        'bonus_dexterity': int,
-        'bonus_willpower': int,
-        'bonus_health': int,
-        'bonus_health_regen': int,
-        'bonus_stamina': int,
-        'bonus_stamina_regen': int,
-        'bonus_mana': int,
-        'bonus_mana_regen': int,
-        'bonus_init': int,
-        'bonus_carry': int,
-        'bonus_dot_res': float,
-        'bonus_dot_reduction': int,
-        'bonus_dot_effect': float,
-        'bonus_dot_duration': int,
-        'bonus_shock_limit': int,
-        'bonus_confusion_limit': int,
-        'value': int,
-        'required_strength': int,
-        'required_intelligence': int,
-        'required_dexterity': int,
-        'required_willpower': int,
-    }
-    required_fields = [
-        'name',
-        'description',
-        'level',
-        'rarity',
-        'weight',
-        '_itype',
-        'bonus_strength',
-        'bonus_intelligence',
-        'bonus_dexterity',
-        'bonus_willpower',
-        'bonus_health',
-        'bonus_health_regen',
-        'bonus_stamina',
-        'bonus_stamina_regen',
-        'bonus_mana',
-        'bonus_mana_regen',
-        'bonus_init',
-        'bonus_carry',
-        'bonus_dot_res',
-        'bonus_dot_reduction',
-        'bonus_dot_effect',
-        'bonus_dot_duration',
-        'bonus_shock_limit',
-        'bonus_confusion_limit',
-        'value',
-        'required_strength',
-        'required_intelligence',
-        'required_dexterity',
-        'required_willpower'
-    ]
-    default_values = {
-        'bonus_strength': 0,
-        'bonus_intelligence': 0,
-        'bonus_dexterity': 0,
-        'bonus_willpower': 0,
-        'bonus_health': 0,
-        'bonus_health_regen': 0,
-        'bonus_stamina': 0,
-        'bonus_stamina_regen': 0,
-        'bonus_mana': 0,
-        'bonus_mana_regen': 0,
-        'bonus_init': 0,
-        'bonus_carry': 0,
-        'required_strength': 0,
-        'required_intelligence': 0,
-        'required_dexterity': 0,
-        'required_willpower': 0,
-        'bonus_dot_res': 0.0,
-        'bonus_dot_reduction': 0,
-        'bonus_shock_limit': 0,
-        'bonus_confusion_limit': 0,
-    }
-    use_dot_notation = True
-    use_autorefs = True
+class Accessory(MongoModel):
+    name = fields.CharField(primary_key=True, required=True)
+    description = fields.CharField(required=True)
+    level = fields.IntegerField(required=True)
+    rarity = fields.IntegerField(required=True)
+    weight = fields.IntegerField(required=True)
+    itype = fields.IntegerField(required=True)
+    bonus_strength = fields.IntegerField(required=True, default=0)
+    bonus_intelligence = fields.IntegerField(required=True, default=0)
+    bonus_dexterity = fields.IntegerField(required=True, default=0)
+    bonus_willpower = fields.IntegerField(required=True, default=0)
+    bonus_health = fields.IntegerField(required=True, default=0)
+    bonus_health_regen = fields.IntegerField(required=True, default=0)
+    bonus_stamina = fields.IntegerField(required=True, default=0)
+    bonus_stamina_regen = fields.IntegerField(required=True, default=0)
+    bonus_mana = fields.IntegerField(required=True, default=0)
+    bonus_mana_regen = fields.IntegerField(required=True, default=0)
+    bonus_init = fields.IntegerField(required=True, default=0)
+    bonus_carry = fields.IntegerField(required=True, default=0)
+    bonus_dot_res = fields.FloatField(required=True, default=0.0)
+    bonus_dot_reduction = fields.IntegerField(required=True, default=0)
+    bonus_dot_effect = fields.FloatField(required=True, default=0.0)
+    bonus_dot_duration = fields.IntegerField(required=True, default=0)
+    bonus_shock_limit = fields.IntegerField(required=True, default=0)
+    bonus_confusion_limit = fields.IntegerField(required=True, default=0)
+    value = fields.IntegerField(required=True, default=0)
+    required_strength = fields.IntegerField(required=True, default=0)
+    required_intelligence = fields.IntegerField(required=True, default=0)
+    required_dexterity = fields.IntegerField(required=True, default=0)
+    required_willpower = fields.IntegerField(required=True, default=0)
+
+    class Meta:
+        write_concern = WriteConcern(j=True)
 
 
 def get_bonuses_display_string(item):

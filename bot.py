@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 import logging
-from mongokit_ng import Connection
+from pymodm import connect
 
 import secrets
 import character_controller
@@ -10,14 +10,6 @@ import delve_controller
 import market_controller
 import workshop_controller
 import admin_controller
-from character import Character
-from armor import Armor
-from accessory import Accessory
-from consumable import Consumable
-from ingredient import Ingredient
-from weapon import Weapon
-from book import Book
-from gemstone import Gemstone
 
 #   LOGGING CONFIG   #
 logger = logging.getLogger('discord')
@@ -27,27 +19,19 @@ handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(me
 logger.addHandler(handler)
 
 #   DB CONFIG   #
-connection = Connection(secrets.MONGODB_URI)
-connection.register([Character])
-connection.register([Armor])
-connection.register([Accessory])
-connection.register([Consumable])
-connection.register([Ingredient])
-connection.register([Weapon])
-connection.register([Book])
-connection.register([Gemstone])
+connect(secrets.MONGODB_URI)
 
 #   BOT CONFIG   #
 intents = discord.Intents.default()
 intents.members = True
 intents.reactions = True
 bot = commands.Bot(command_prefix='\\', intents=intents)
-bot.add_cog(character_controller.CharacterController(bot, connection))
+bot.add_cog(character_controller.CharacterController(bot))
 bot.add_cog(party_controller.PartyController(bot))
-bot.add_cog(delve_controller.DelveController(bot, connection))
-bot.add_cog(market_controller.MarketController(bot, connection))
-bot.add_cog(workshop_controller.WorkshopController(bot, connection))
-bot.add_cog(admin_controller.AdminController(bot, connection))
+bot.add_cog(delve_controller.DelveController(bot))
+bot.add_cog(market_controller.MarketController(bot))
+bot.add_cog(workshop_controller.WorkshopController(bot))
+bot.add_cog(admin_controller.AdminController(bot))
 
 
 @bot.check

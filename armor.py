@@ -1,81 +1,26 @@
-from mongokit_ng import Document
+from item import Item
+from pymodm import fields
 
 
-class Armor(Document):
-    __database__ = 'delverpg'
-    __collection__ = 'armor'
-    structure = {
-        'name': str,
-        'description': str,
-        'level': int,
-        'rarity': int,
-        'weight': int,
-        '_itype': int,
-        'sockets': list,
-        'bonus_strength': int,
-        'bonus_intelligence': int,
-        'bonus_dexterity': int,
-        'bonus_willpower': int,
-        'bonus_health': int,
-        'bonus_health_regen': int,
-        'bonus_stamina': int,
-        'bonus_stamina_regen': int,
-        'bonus_mana': int,
-        'bonus_mana_regen': int,
-        'bonus_init': int,
-        'bonus_carry': int,
-        'bonus_earth_res': float,
-        'bonus_fire_res': float,
-        'bonus_electricity_res': float,
-        'bonus_water_res': float,
-        'value': int,
-    }
-    required_fields = [
-        'name',
-        'description',
-        'level',
-        'rarity',
-        'weight',
-        '_itype',
-        'sockets',
-        'bonus_strength',
-        'bonus_intelligence',
-        'bonus_dexterity',
-        'bonus_willpower',
-        'bonus_health',
-        'bonus_health_regen',
-        'bonus_stamina',
-        'bonus_stamina_regen',
-        'bonus_mana',
-        'bonus_mana_regen',
-        'bonus_init',
-        'bonus_carry',
-        'bonus_earth_res',
-        'bonus_fire_res',
-        'bonus_electricity_res',
-        'bonus_water_res',
-        'value',
-    ]
-    default_values = {
-        'bonus_strength': 0,
-        'bonus_intelligence': 0,
-        'bonus_dexterity': 0,
-        'bonus_willpower': 0,
-        'bonus_health': 0,
-        'bonus_health_regen': 0,
-        'bonus_stamina': 0,
-        'bonus_stamina_regen': 0,
-        'bonus_mana': 0,
-        'bonus_mana_regen': 0,
-        'bonus_init': 0,
-        'bonus_carry': 0,
-        'bonus_earth_res': 0.0,
-        'bonus_fire_res': 0.0,
-        'bonus_electricity_res': 0.0,
-        'bonus_water_res': 0.0,
-    }
-    use_dot_notation = True
-    use_autorefs = True
+class Armor(Item):
+    value = fields.IntegerField(required=True, default=0)
+    sockets = fields.ListField(required=True)
+    bonus_strength = fields.IntegerField(required=True, default=0)
+    bonus_intelligence = fields.IntegerField(required=True, default=0)
+    bonus_dexterity = fields.IntegerField(required=True, default=0)
+    bonus_willpower = fields.IntegerField(required=True, default=0)
+    bonus_health = fields.IntegerField(required=True, default=0)
+    bonus_health_regen = fields.IntegerField(required=True, default=0)
+    bonus_stamina = fields.IntegerField(required=True, default=0)
+    bonus_stamina_regen = fields.IntegerField(required=True, default=0)
+    bonus_mana = fields.IntegerField(required=True, default=0)
+    bonus_mana_regen = fields.IntegerField(required=True, default=0)
+    bonus_init = fields.IntegerField(required=True, default=0)
+    bonus_carry = fields.IntegerField(required=True, default=0)
+    bonus_earth_res = fields.FloatField(required=True, default=0.0)
+    bonus_fire_res = fields.FloatField(required=True, default=0.0)
+    bonus_electricity_res = fields.FloatField(required=True, default=0.0)
+    bonus_water_res = fields.FloatField(required=True, default=0.0)
 
 
 def get_bonuses_display_string(item):

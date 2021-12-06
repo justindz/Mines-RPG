@@ -5,9 +5,8 @@ from character import Character
 
 
 class Delve(object):
-    def __init__(self, bot, connection, leader: discord.Member, players: [discord.Member], zone: Zone, channel: discord.TextChannel, restart: bool):
+    def __init__(self, bot, leader: discord.Member, players: [discord.Member], zone: Zone, channel: discord.TextChannel, restart: bool):
         self.bot = bot
-        self.connection = connection
         self.leader = leader
         self.players = players
         self.players.append(leader)
@@ -31,12 +30,12 @@ class Delve(object):
 
         self.solo = True if len(players) == 1 else False
         self.channel = channel
-        self.current_room = self.zone.get_next_room(self.connection, self.characters, self.depth)
+        self.current_room = self.zone.get_next_room(self.characters, self.depth)
         self.status = 'idle'  # idle, fighting
 
     def proceed(self):
         self.depth += 1
-        self.current_room = self.zone.get_next_room(self.connection, self.characters, self.depth)
+        self.current_room = self.zone.get_next_room(self.characters, self.depth)
 
     async def remove_player(self, player: discord.Member):
         self.players.remove(player)

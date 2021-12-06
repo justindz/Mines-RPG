@@ -6,8 +6,6 @@ from elements import Elements
 
 
 #  DISPLAY  #
-
-
 def red(txt):
     return '```diff\n- {}```'.format(txt)
 
@@ -67,8 +65,6 @@ def dmgs_to_str(dmgs):
 
 
 #  LOOKUPS  #
-
-
 def get_ability_by_name(ability_name: str) -> ability:
     try:
         if ability_name.startswith('spell-'):
@@ -129,11 +125,11 @@ Cost: {ab.ability_cost_to_str()}'''
 
 
 def get_requirements_display_string(item) -> str:
-    if item["_itype"] == 1:
-        display_string = f'\nStrength {item["required_strength"]}' if item['required_strength'] != 0 else ''
-        display_string += f'\nIntelligence {item["required_intelligence"]}' if item['required_intelligence'] != 0 else ''
-        display_string += f'\nDexterity {item["required_dexterity"]}' if item['required_dexterity'] != 0 else ''
-        display_string += f'\nWillpower {item["required_willpower"]}' if item['required_willpower'] != 0 else ''
+    if item.itype == 1:
+        display_string = f'\nStrength {item.required_strength}' if item.required_strength != 0 else ''
+        display_string += f'\nIntelligence {item.required_intelligence}' if item.required_intelligence != 0 else ''
+        display_string += f'\nDexterity {item.required_dexterity}' if item.required_dexterity != 0 else ''
+        display_string += f'\nWillpower {item.required_willpower}' if item.required_willpower != 0 else ''
         return display_string.lstrip('\n')
     else:
         return 'None'
@@ -142,10 +138,10 @@ def get_requirements_display_string(item) -> str:
 def get_socket_display(item) -> str:
     out = ''
 
-    if item['_itype'] in [4, 7, 8]:
+    if item.itype in [4, 7, 8]:
         return out
 
-    for socket in item['sockets']:
+    for socket in item.sockets:
         if socket is None:
             out += ' {  }'
         else:
@@ -155,23 +151,21 @@ def get_socket_display(item) -> str:
 
 
 def get_consumable_effects_display_string(item) -> str:
-    if item["_itype"] != 9:
-        raise Exception(f'get_consumable_effects_display_string for unsupported _itype {item["_itype"]} on {item["name"]}')
+    if item.itype != 9:
+        raise Exception(f'get_consumable_effects_display_string for unsupported itype {item.itype} on {item.name}')
 
     out = ''
-    out += f'\n{item["health"]:+} health' if item["health"] != 0 else ''
-    out += f'\n{item["stamina"]:+} stamina' if item["stamina"] != 0 else ''
-    out += f'\n{item["mana"]:+} mana' if item["mana"] != 0 else ''
-    out += f'\n{item["burn"]:+} burn duration' if item["burn"] != 0 else ''
-    out += f'\n{item["bleed"]:+} bleed duration' if item["bleed"] != 0 else ''
-    out += f'\n{item["shock"]:+} shock level' if item["shock"] != 0 else ''
-    out += f'\n{item["confusion"]:+} confusion level' if item["confusion"] != 0 else ''
+    out += f'\n{item.health:+} health' if item.health != 0 else ''
+    out += f'\n{item.stamina:+} stamina' if item.stamina != 0 else ''
+    out += f'\n{item.mana:+} mana' if item.mana != 0 else ''
+    out += f'\n{item.burn:+} burn duration' if item.burn != 0 else ''
+    out += f'\n{item.bleed:+} bleed duration' if item.bleed != 0 else ''
+    out += f'\n{item.shock:+} shock level' if item.shock != 0 else ''
+    out += f'\n{item.confusion:+} confusion level' if item.confusion != 0 else ''
     return out.lstrip('\n')
 
 
 #  MATHS  #
-
-
 # def stat_check(total: int, difficulty: int, scaling: float, depth: int):
 #     chance = 0.0001 * (total - difficulty + (depth * scaling)) ** 3 + .75
 #     chance = clamp(chance, 0.05, 0.95)

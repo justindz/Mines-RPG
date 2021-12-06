@@ -1,5 +1,6 @@
 import datetime
-from mongokit_ng import Document
+from pymodm import MongoModel, fields
+from pymongo import WriteConcern
 
 import ability
 import item
@@ -10,164 +11,92 @@ import book
 import dice
 
 
-class Character(Document):
-    __database__ = 'delverpg'
-    __collection__ = 'characters'
-    structure = {
-        'name': str,
-        'level': int,
-        'xp': int,
-        'coins': int,
-        'created': datetime.datetime,
+class Character(MongoModel):
+    name = fields.CharField(required=True)
+    created = fields.DateTimeField(default=datetime.datetime.utcnow())
 
-        'strength': int,
-        'bonus_strength': int,
-        'intelligence': int,
-        'bonus_intelligence': int,
-        'dexterity': int,
-        'bonus_dexterity': int,
-        'willpower': int,
-        'bonus_willpower': int,
+    level = fields.IntegerField(default=1)
+    xp = fields.IntegerField(default=0)
+    coins = fields.IntegerField(default=0)
+    strength = fields.IntegerField(default=0)
+    bonus_strength = fields.IntegerField(default=0)
+    intelligence = fields.IntegerField(default=0)
+    bonus_intelligence = fields.IntegerField(default=0)
+    dexterity = fields.IntegerField(default=0)
+    bonus_dexterity = fields.IntegerField(default=0)
+    willpower = fields.IntegerField(default=0)
+    bonus_willpower = fields.IntegerField(default=0)
+    health = fields.IntegerField(default=100)
+    bonus_health = fields.IntegerField(default=0)
+    current_health = fields.IntegerField(default=100)
+    health_regen = fields.IntegerField(default=0)
+    bonus_health_regen = fields.IntegerField(default=0)
+    stamina = fields.IntegerField(default=100)
+    bonus_stamina = fields.IntegerField(default=0)
+    current_stamina = fields.IntegerField(default=100)
+    stamina_regen = fields.IntegerField(default=0)
+    bonus_stamina_regen = fields.IntegerField(default=0)
+    mana = fields.IntegerField(default=100)
+    bonus_mana = fields.IntegerField(default=0)
+    current_mana = fields.IntegerField(default=100)
+    mana_regen = fields.IntegerField(default=0)
+    bonus_mana_regen = fields.IntegerField(default=0)
+    init = fields.IntegerField(default=0)
+    bonus_init = fields.IntegerField(default=0)
+    carry = fields.IntegerField(default=100)
+    bonus_carry = fields.IntegerField(default=0)
+    current_carry = fields.IntegerField(default=0)
 
-        'health': int,
-        'bonus_health': int,
-        'current_health': int,
-        'health_regen': int,
-        'bonus_health_regen': int,
-        'stamina': int,
-        'bonus_stamina': int,
-        'current_stamina': int,
-        'stamina_regen': int,
-        'bonus_stamina_regen': int,
-        'mana': int,
-        'bonus_mana': int,
-        'current_mana': int,
-        'mana_regen': int,
-        'bonus_mana_regen': int,
+    earth_res = fields.FloatField(default=0.0)
+    bonus_earth_res = fields.FloatField(default=0.0)
+    fire_res = fields.FloatField(default=0.0)
+    bonus_fire_res = fields.FloatField(default=0.0)
+    electricity_res = fields.FloatField(default=0.0)
+    bonus_electricity_res = fields.FloatField(default=0.0)
+    water_res = fields.FloatField(default=0.0)
+    bonus_water_res = fields.FloatField(default=0.0)
+    dot_res = fields.FloatField(default=0.0)
+    bonus_dot_res = fields.FloatField(default=0.0)
+    dot_reduction = fields.IntegerField(default=0)
+    bonus_dot_reduction = fields.IntegerField(default=0)
+    dot_effect = fields.FloatField(default=0.0)
+    bonus_dot_effect = fields.FloatField(default=0.0)
+    dot_duration = fields.IntegerField(default=0)
+    bonus_dot_duration = fields.IntegerField(default=0)
 
-        'init': int,
-        'bonus_init': int,
-        'carry': int,
-        'bonus_carry': int,
-        'current_carry': int,
+    points = fields.IntegerField(default=0)
+    abilities = fields.ListField(default=['skill-strike'])
+    ability_slots = fields.DictField(default={'1': 'skill-strike', '2': None, '3': None, '4': None})
 
-        'earth_res': float,
-        'bonus_earth_res': float,
-        'fire_res': float,
-        'bonus_fire_res': float,
-        'electricity_res': float,
-        'bonus_electricity_res': float,
-        'water_res': float,
-        'bonus_water_res': float,
-        'dot_res': float,
-        'bonus_dot_res': float,
-        'dot_reduction': int,
-        'bonus_dot_reduction': int,
-        'dot_effect': float,
-        'bonus_dot_effect': float,
-        'dot_duration': int,
-        'bonus_dot_duration': int,
+    eq_weapon = fields.EmbeddedDocumentField(item.Item, default=None, blank=True)
+    eq_head = fields.EmbeddedDocumentField(item.Item, default=None, blank=True)
+    eq_chest = fields.EmbeddedDocumentField(item.Item, default=None, blank=True)
+    eq_belt = fields.EmbeddedDocumentField(item.Item, default=None, blank=True)
+    eq_boots = fields.EmbeddedDocumentField(item.Item, default=None, blank=True)
+    eq_gloves = fields.EmbeddedDocumentField(item.Item, default=None, blank=True)
+    eq_amulet = fields.EmbeddedDocumentField(item.Item, default=None, blank=True)
+    eq_ring = fields.EmbeddedDocumentField(item.Item, default=None, blank=True)
 
-        'points': int,
-        'abilities': [str],
-        'ability_slots': dict,
-        'equipped': dict,
-        'inventory': None,
-        'bank': None,
-        'bank_limit': int,
-        'shop': None,
-        'depths': dict,
-        'profession': str,
-        'deaths': int,
-        'status_effects': None,
-        'burn': dict,
-        'bleed': dict,
-        'shock': int,
-        'shock_limit': int,
-        'bonus_shock_limit': int,
-        'confusion': int,
-        'confusion_limit': int,
-        'bonus_confusion_limit': int,
-    }
-    required_fields = ['name']
-    default_values = {
-        'level': 1,
-        'xp': 0,
-        'coins': 0,
-        'created': datetime.datetime.utcnow,
+    inventory = fields.EmbeddedDocumentListField(item.Item, default=[], blank=True)
+    bank = fields.EmbeddedDocumentListField(item.Item, default=[], blank=True)
+    bank_limit = fields.IntegerField(default=10)
+    shop = fields.EmbeddedDocumentListField(item.Item, default=[], blank=True)
 
-        'strength': 0,
-        'bonus_strength': 0,
-        'intelligence': 0,
-        'bonus_intelligence': 0,
-        'dexterity': 0,
-        'bonus_dexterity': 0,
-        'willpower': 0,
-        'bonus_willpower': 0,
+    depths = fields.DictField(default={})
+    profession = fields.CharField(default='')
+    deaths = fields.IntegerField(default=0)
+    status_effects = fields.ListField(default=[])  # list of dicts w/ keys = name, stat, value, turns_remaining
+    burn = fields.DictField(default={'turns': 0, 'dmg': 0})
+    bleed = fields.DictField(default={'turns': 0, 'dmg': 0})
+    shock = fields.IntegerField(default=0)
+    shock_limit = fields.IntegerField(default=5)
+    bonus_shock_limit = fields.IntegerField(default=0)
+    confusion = fields.IntegerField(default=0)
+    confusion_limit = fields.IntegerField(default=5)
+    bonus_confusion_limit = fields.IntegerField(default=0)
 
-        'health': 100,
-        'bonus_health': 0,
-        'current_health': 100,
-        'health_regen': 0,
-        'bonus_health_regen': 0,
-        'stamina': 100,
-        'bonus_stamina': 0,
-        'current_stamina': 100,
-        'stamina_regen': 0,
-        'bonus_stamina_regen': 0,
-        'mana': 100,
-        'bonus_mana': 0,
-        'current_mana': 100,
-        'mana_regen': 0,
-        'bonus_mana_regen': 0,
-
-        'init': 0,
-        'bonus_init': 0,
-        'carry': 100,
-        'current_carry': 0,
-        'bonus_carry': 0,
-
-        'earth_res': 0.0,
-        'bonus_earth_res': 0.0,
-        'fire_res': 0.0,
-        'bonus_fire_res': 0.0,
-        'electricity_res': 0.0,
-        'bonus_electricity_res': 0.0,
-        'water_res': 0.0,
-        'bonus_water_res': 0.0,
-        'dot_res': 0.0,
-        'bonus_dot_res': 0.0,
-        'dot_reduction': 0,
-        'bonus_dot_reduction': 0,
-        'dot_effect': 0.0,
-        'bonus_dot_effect': 0.0,
-        'dot_duration': 0,
-        'bonus_dot_duration': 0,
-
-        'points': 0,
-        'abilities': ['skill-strike'],
-        'ability_slots': {'1': 'skill-strike', '2': None, '3': None, '4': None},
-        'equipped': {'weapon': None, 'head': None, 'chest': None, 'belt': None, 'boots': None, 'gloves': None,
-                     'amulet': None, 'ring': None},
-        'inventory': [],
-        'bank': [],
-        'bank_limit': 10,
-        'shop': [],
-        'depths': {},
-        'profession': '',
-        'deaths': 0,
-        'status_effects': [],  # list of dicts w/ keys = name, stat, value, turns_remaining
-        'burn': {'turns': 0, 'dmg': 0},
-        'bleed': {'turns': 0, 'dmg': 0},
-        'shock': 0,
-        'shock_limit': 5,
-        'bonus_shock_limit': 0,
-        'confusion': 0,
-        'confusion_limit': 5,
-        'bonus_confusion_limit': 0,
-    }
-    use_dot_notation = True
-    use_autorefs = True
+    class Meta:
+        write_concern = WriteConcern(j=True)
 
     def reset_stats(self):
         self.current_health = self.health + self.bonus_health
@@ -177,7 +106,7 @@ class Character(Document):
         self.save()
 
     def learn(self, _book) -> bool:
-        if _book['level'] <= self.level and self.add_ability(book.get_ability_string(_book)):
+        if _book.level <= self.level and self.add_ability(book.get_ability_string(_book)):
             self.remove_from_inventory(_book)
             return True
 
@@ -201,11 +130,11 @@ class Character(Document):
         return False
 
     def add_to_inventory(self, item, ignore_carry, unequipping=False):
-        if ignore_carry or self.current_carry + item['weight'] <= self.carry + self.bonus_carry:
+        if ignore_carry or self.current_carry + item.weight <= self.carry + self.bonus_carry:
             self.inventory.append(item)
 
             if not unequipping:
-                self.current_carry += item['weight']
+                self.current_carry += item.weight
 
             self.save()
             return True
@@ -215,75 +144,75 @@ class Character(Document):
         self.inventory.remove(item)
 
         if not equipping:
-            self.current_carry -= item['weight']
+            self.current_carry -= item.weight
 
         self.save()
 
     def equip(self, item):
-        if item['_itype'] not in [ItemType.weapon.value, ItemType.head.value, ItemType.chest.value, ItemType.belt.value,
-                                  ItemType.boots.value, ItemType.gloves.value, ItemType.amulet.value,
-                                  ItemType.ring.value]:
+        if item.itype not in [ItemType.weapon.value, ItemType.head.value, ItemType.chest.value, ItemType.belt.value,
+                              ItemType.boots.value, ItemType.gloves.value, ItemType.amulet.value, ItemType.ring.value]:
             return False
 
-        if self.level < item['level']:
+        if self.level < item.level:
             return False
 
-        if item['_itype'] == ItemType.weapon.value:
-            if self.strength + self.bonus_strength < item['required_strength']:
+        if item.itype == ItemType.weapon.value:
+            if self.strength + self.bonus_strength < item.required_strength:
                 return False
 
-            if self.intelligence + self.bonus_intelligence < item['required_intelligence']:
+            if self.intelligence + self.bonus_intelligence < item.required_intelligence:
                 return False
 
-            if self.dexterity + self.bonus_dexterity < item['required_dexterity']:
+            if self.dexterity + self.bonus_dexterity < item.required_dexterity:
                 return False
 
-            if self.willpower + self.bonus_willpower < item['required_willpower']:
+            if self.willpower + self.bonus_willpower < item.required_willpower:
                 return False
 
-        slot = ItemType(item['_itype']).name
+        slot = ItemType(item.itype).name
 
-        if self.equipped[slot] is not None:
+        if getattr(self, 'eq_' + slot) is not None:
             self.unequip(slot)
             self.save()
 
-        if self.level >= item['level']:
+        if self.level >= item.level:
             self.remove_from_inventory(item, True)
-            self.equipped[slot] = item
+            setattr(self, 'eq_' + slot, item)
             self.update_stats(item, True)
             return True
 
         return False
 
     def unequip(self, slot: str):
-        if slot not in ['weapon', 'head', 'chest', 'belt', 'boots', 'gloves', 'amulet', 'ring']\
-                or self.equipped[slot] is None:
+        if slot not in ['weapon', 'head', 'chest', 'belt', 'boots', 'gloves', 'amulet', 'ring'] \
+                or getattr(self, 'eq_' + slot) is None:
             return False
         else:
-            item = self.equipped[slot]
-            self.equipped[slot] = None
+            item = getattr(self, 'eq_' + slot)
+            setattr(self, 'eq_' + slot, None)
             self.update_stats(item, False)
             self.add_to_inventory(item, True, True)
             return item
 
+    def unequip_all(self):
+        for slot in ['weapon', 'head', 'chest', 'belt', 'boots', 'gloves', 'amulet', 'ring']:
+            self.unequip(slot)
+
     def update_stats(self, item, equip: bool):
-        if item['_itype'] == ItemType.weapon.value:
-            if equip:
-                self.apply_weapon_bonuses(item)
-            else:
-                self.remove_weapon_bonuses(item)
-        elif item['_itype'] in [ItemType.head.value, ItemType.chest.value, ItemType.boots.value, ItemType.gloves.value]:
-            if equip:
-                self.apply_armor_bonuses(item)
-            else:
-                self.remove_armor_bonuses(item)
-        elif item['_itype'] in [ItemType.belt.value, ItemType.amulet.value, ItemType.ring.value]:
-            if equip:
-                self.apply_accessory_bonuses(item)
-            else:
-                self.remove_accessory_bonuses(item)
+        if equip:
+            self.apply_equippable_bonuses(item)
+        else:
+            self.remove_equippable_bonuses(item)
 
         self.save()
+
+    def apply_equippable_bonuses(self, item):
+        for bonus in [x for x in dir(item) if x.startswith('bonus_')]:
+            setattr(self, bonus, getattr(self, bonus) + getattr(item, bonus))
+
+    def remove_equippable_bonuses(self, item):
+        for bonus in [x for x in dir(item) if x.startswith('bonus_')]:
+            setattr(self, bonus, getattr(self, bonus) - getattr(item, bonus))
 
     def deposit(self, index: int) -> bool:
         if len(self.inventory) - 1 < index < 0 or len(self.bank) >= self.bank_limit:
@@ -309,155 +238,67 @@ class Character(Document):
 
         return False
 
-    def apply_weapon_bonuses(self, weapon):
-        self.bonus_strength += weapon['bonus_strength']
-        self.bonus_intelligence += weapon['bonus_intelligence']
-        self.bonus_dexterity += weapon['bonus_dexterity']
-        self.bonus_willpower += weapon['bonus_willpower']
-        self.bonus_health += weapon['bonus_health']
-        self.bonus_stamina += weapon['bonus_stamina']
-        self.bonus_mana += weapon['bonus_mana']
-        self.bonus_init += weapon['bonus_init']
-
-    def remove_weapon_bonuses(self, weapon):
-        self.bonus_strength -= weapon['bonus_strength']
-        self.bonus_intelligence -= weapon['bonus_intelligence']
-        self.bonus_dexterity -= weapon['bonus_dexterity']
-        self.bonus_willpower -= weapon['bonus_willpower']
-        self.bonus_health -= weapon['bonus_health']
-        self.bonus_stamina -= weapon['bonus_stamina']
-        self.bonus_mana -= weapon['bonus_mana']
-        self.bonus_init -= weapon['bonus_init']
-
-    def apply_armor_bonuses(self, armor):
-        self.bonus_strength += armor['bonus_strength']
-        self.bonus_intelligence += armor['bonus_intelligence']
-        self.bonus_dexterity += armor['bonus_dexterity']
-        self.bonus_willpower += armor['bonus_willpower']
-        self.bonus_health += armor['bonus_health']
-        self.bonus_health_regen += armor['bonus_health_regen']
-        self.bonus_stamina += armor['bonus_stamina']
-        self.bonus_stamina_regen += armor['bonus_stamina_regen']
-        self.bonus_mana += armor['bonus_mana']
-        self.bonus_mana_regen += armor['bonus_mana_regen']
-        self.bonus_init += armor['bonus_init']
-        self.bonus_carry += armor['bonus_carry']
-        self.earth_res += armor['bonus_earth_res']
-        self.fire_res += armor['bonus_fire_res']
-        self.electricity_res += armor['bonus_electricity_res']
-        self.water_res += armor['bonus_water_res']
-
-    def remove_armor_bonuses(self, armor):
-        self.bonus_strength -= armor['bonus_strength']
-        self.bonus_intelligence -= armor['bonus_intelligence']
-        self.bonus_dexterity -= armor['bonus_dexterity']
-        self.bonus_willpower -= armor['bonus_willpower']
-        self.bonus_health -= armor['bonus_health']
-        self.bonus_health_regen -= armor['bonus_health_regen']
-        self.bonus_stamina -= armor['bonus_stamina']
-        self.bonus_stamina_regen -= armor['bonus_stamina_regen']
-        self.bonus_mana -= armor['bonus_mana']
-        self.bonus_mana_regen -= armor['bonus_mana_regen']
-        self.bonus_init -= armor['bonus_init']
-        self.bonus_carry -= armor['bonus_carry']
-        self.earth_res -= armor['bonus_earth_res']
-        self.fire_res -= armor['bonus_fire_res']
-        self.electricity_res -= armor['bonus_electricity_res']
-        self.water_res -= armor['bonus_water_res']
-
-    def apply_accessory_bonuses(self, accessory):
-        self.bonus_strength += accessory['bonus_strength']
-        self.bonus_intelligence += accessory['bonus_intelligence']
-        self.bonus_dexterity += accessory['bonus_dexterity']
-        self.bonus_willpower += accessory['bonus_willpower']
-        self.bonus_health += accessory['bonus_health']
-        self.bonus_health_regen += accessory['bonus_health_regen']
-        self.bonus_stamina += accessory['bonus_stamina']
-        self.bonus_stamina_regen += accessory['bonus_stamina_regen']
-        self.bonus_mana += accessory['bonus_mana']
-        self.bonus_mana_regen += accessory['bonus_mana_regen']
-        self.bonus_init += accessory['bonus_init']
-        self.bonus_dot_effect_res += accessory['bonus_dot_res']
-        self.bonus_dot_duration_reduction += accessory['bonus_dot_reduction']
-        self.bonus_carry += accessory['bonus_carry']
-
-    def remove_accessory_bonuses(self, accessory):
-        self.bonus_strength -= accessory['bonus_strength']
-        self.bonus_intelligence -= accessory['bonus_intelligence']
-        self.bonus_dexterity -= accessory['bonus_dexterity']
-        self.bonus_willpower -= accessory['bonus_willpower']
-        self.bonus_health -= accessory['bonus_health']
-        self.bonus_health_regen -= accessory['bonus_health_regen']
-        self.bonus_stamina -= accessory['bonus_stamina']
-        self.bonus_stamina_regen -= accessory['bonus_stamina_regen']
-        self.bonus_mana -= accessory['bonus_mana']
-        self.bonus_mana_regen -= accessory['bonus_mana_regen']
-        self.bonus_init -= accessory['bonus_init']
-        self.bonus_dot_effect_res -= accessory['bonus_dot_res']
-        self.bonus_dot_duration_reduction -= accessory['bonus_dot_reduction']
-        self.bonus_carry -= accessory['bonus_carry']
-
-    def use_consumable(self, connection, consumable):
-        if consumable['_itype'] != ItemType.potion.value:
-            return f'{consumable["name"]} is not consumable.'
+    def use_consumable(self, consumable):
+        if consumable.itype != ItemType.potion.value:
+            return f'{consumable.name} is not consumable.'
         elif consumable['uses'] <= 0:
-            raise Exception(f'Consumable {consumable["name"]} used by {self.name} had {consumable["uses"]} uses.')
+            raise Exception(f'Consumable {consumable.name} used by {self.name} had {consumable.uses} uses.')
         else:
-            out = f'The {ItemType(consumable["_itype"]).name}:'
+            out = f'The {ItemType(consumable.itype).name}:'
 
-            if consumable['health'] != 0:
-                result = self.restore_health(consumable['health'])
+            if consumable.health != 0:
+                result = self.restore_health(consumable.health)
 
                 if result >= 0:
                     out += f'\nRestores {result} health'
                 else:
                     out += f'\nDrains {result} health'
 
-            if consumable['stamina'] != 0:
-                result = self.restore_stamina(consumable['stamina'])
+            if consumable.stamina != 0:
+                result = self.restore_stamina(consumable.stamina)
 
                 if result >= 0:
                     out += f'\nRestores {result} stamina'
                 else:
                     out += f'\nDrains {result} stamina'
 
-            if consumable['mana'] != 0:
-                result = self.restore_mana(consumable['mana'])
+            if consumable.mana != 0:
+                result = self.restore_mana(consumable.mana)
 
                 if result >= 0:
                     out += f'\nRestores {result} mana'
                 else:
                     out += f'\nDrains {result} mana'
 
-            if consumable['burn'] != 0:
-                result = self.affect_burning(consumable['burn'])
+            if consumable.burn != 0:
+                result = self.affect_burning(consumable.burn)
 
                 if result != 0:
                     out += f'\nBurning duration {result:+}'
 
-            if consumable['bleed'] != 0:
-                result = self.affect_bleeding(consumable['bleed'])
+            if consumable.bleed != 0:
+                result = self.affect_bleeding(consumable.bleed)
 
                 if result != 0:
                     out += f'\nBleeding duration {result:+}'
 
-            if consumable['shock'] != 0:
-                result = self.affect_shock(consumable['shock'])
+            if consumable.shock != 0:
+                result = self.affect_shock(consumable.shock)
 
                 if result != 0:
                     out += f'\nShock level {result:+}'
 
-            if consumable['confusion'] != 0:
-                result = self.affect_confusion(consumable['confusion'])
+            if consumable.confusion != 0:
+                result = self.affect_confusion(consumable.confusion)
 
                 if result != 0:
                     out += f'\nConfusion level {result:+}'
 
-            consumable['uses'] -= 1
+            consumable.uses -= 1
 
-            if consumable['uses'] < 1:
+            if consumable.uses < 1:
                 self.remove_from_inventory(consumable)
-                item.delete_item(connection, consumable)
+                # consumable.delete()
                 out += '\n... and was consumed'
 
             self.save()
@@ -465,7 +306,7 @@ class Character(Document):
 
     def has_consumables(self):
         for item in self.inventory:
-            if item['_itype'] == ItemType.potion.value:
+            if item.itype == ItemType.potion.value:
                 return True
 
         return False
@@ -550,11 +391,10 @@ class Character(Document):
         return self.confusion - start
 
     def get_ele_pens(self) -> tuple:
-        if self.equipped['weapon'] is None:
+        if self.eq_weapon is None:
             return 0.0, 0.0, 0.0, 0.0
 
-        return self.equipped['weapon']['earth_penetration'], self.equipped['weapon']['fire_penetration'], \
-               self.equipped['weapon']['electricity_penetration'], self.equipped['weapon']['water_penetration']
+        return self.eq_weapon.earth_penetration, self.eq_weapon.fire_penetration, self.eq_weapon.electricity_penetration, self.eq_weapon.water_penetration
 
     def get_element_scaling(self, element: Elements):
         if element == Elements.earth:
@@ -586,15 +426,15 @@ class Character(Document):
 
         if effect.type == ability.EffectType.damage_health:
             if effect.element is None:
-                weapon = self.equipped['weapon']
+                weapon = self.eq_weapon
 
-                for dmg in weapon['damages']:
+                for dmg in weapon.damages:
                     total = dice.roll(dmg[0], dmg[1], critical)
                     total *= self.get_element_scaling(Elements(dmg[2]))
                     total = round(total * multi)
 
                     if critical:
-                        total += weapon['crit_damage']
+                        total += weapon.crit_damage
 
                     dmgs.append((total, Elements(dmg[2])))
             elif type(effect) == ability.Effect:
@@ -645,7 +485,7 @@ class Character(Document):
             self.remove_status_effect(remove)
 
         self.status_effects.append({'name': name, 'stat': stat, 'value': value, 'turns_remaining': turns_remaining})
-        self[stat] += value
+        setattr(self, stat, getattr(self, stat) + value)
         self.save()
 
         if remove is not None:
@@ -655,7 +495,7 @@ class Character(Document):
 
     def remove_status_effect(self, se):
         try:
-            self[se['stat']] -= se['value']
+            setattr(self, se['stat'], getattr(self, set['stat'] - se['value']))
             self.status_effects.remove(se)
         except KeyError:
             raise Exception(f'remove_status_effect failed for {self.name}: {se["name"]}, {se["stat"]}')
@@ -789,9 +629,7 @@ class Character(Document):
             return True
 
     def restock(self, items: list):
-        for item in self.shop:
-            item.delete()
-
+        self.shop = []
         self.shop += items
         self.save()
 

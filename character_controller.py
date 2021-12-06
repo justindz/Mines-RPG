@@ -6,13 +6,14 @@ import utilities
 import weapon
 from weapon import WeaponType
 import armor
-from item import delete_item, generate_random_item, generate_random_book, ItemType, Rarity
+from item import ItemType, Rarity
+from item_factory import generate_random_item, generate_random_book
+from character import Character
 
 
 class CharacterController(commands.Cog):
-    def __init__(self, bot, connection):
+    def __init__(self, bot):
         self.bot = bot
-        self.connection = connection
 
     def get(self, player: discord.Member):
         # if the player is delving, get that reference instead of reloading from the DB
@@ -27,18 +28,18 @@ class CharacterController(commands.Cog):
                         return char
 
         # if the player is not delving, get the DB reference
-        character = self.connection.Character.find_one({'name': str(player)})
-
-        # otherwise, this is a new player and we want to create a new character
-        if character is None:
-            character = self.connection.Character()
+        try:
+            character = Character.objects.get({'name': str(player)})
+        except Character.DoesNotExist:
+            # otherwise, this is a new player and we want to create a new character
+            character = Character()
             character.name = str(player)
             character.reset_stats()
-            character.add_to_inventory(generate_random_item(self.connection, 1, item_type=ItemType.weapon,
+            character.add_to_inventory(generate_random_item(1, item_type=ItemType.weapon,
                                                             rarity=Rarity.common), False)
-            character.add_to_inventory(generate_random_item(self.connection, 1, item_type=ItemType.head,
+            character.add_to_inventory(generate_random_item(1, item_type=ItemType.head,
                                                             rarity=Rarity.common), False)
-            character.add_to_inventory(generate_random_item(self.connection, 1, item_type=ItemType.potion,
+            character.add_to_inventory(generate_random_item(1, item_type=ItemType.potion,
                                                             rarity=Rarity.common), False)
             character.save()
             print(f'Created new character for {str(player)}')  # TODO make a logging call
@@ -105,26 +106,26 @@ class CharacterController(commands.Cog):
         character = self.get(ctx.author)
         inv_string = '=================EQUIPPED================\n'
         inv_string += 'Weapon: {}\n'.format(
-            character.equipped['weapon']['name'] if character.equipped['weapon'] is not None else 'None')
+            character.eq_weapon.name if character.eq_weapon is not None else 'None')
         inv_string += 'Head: {}\n'.format(
-            character.equipped['head']['name'] if character.equipped['head'] is not None else 'None')
+            character.eq_head.name if character.eq_head is not None else 'None')
         inv_string += 'Chest: {}\n'.format(
-            character.equipped['chest']['name'] if character.equipped['chest'] is not None else 'None')
+            character.eq_chest.name if character.eq_chest is not None else 'None')
         inv_string += 'Belt: {}\n'.format(
-            character.equipped['belt']['name'] if character.equipped['belt'] is not None else 'None')
+            character.eq_belt.name if character.eq_belt is not None else 'None')
         inv_string += 'Boots: {}\n'.format(
-            character.equipped['boots']['name'] if character.equipped['boots'] is not None else 'None')
+            character.eq_boots.name if character.eq_boots is not None else 'None')
         inv_string += 'Gloves: {}\n'.format(
-            character.equipped['gloves']['name'] if character.equipped['gloves'] is not None else 'None')
+            character.eq_gloves.name if character.eq_gloves is not None else 'None')
         inv_string += 'Amulet: {}\n'.format(
-            character.equipped['amulet']['name'] if character.equipped['amulet'] is not None else 'None')
+            character.eq_amulet.name if character.eq_amulet is not None else 'None')
         inv_string += 'Ring: {}\n'.format(
-            character.equipped['ring']['name'] if character.equipped['ring'] is not None else 'None')
+            character.eq_ring.name if character.eq_ring is not None else 'None')
         inv_string += '================INVENTORY================\n'
 
         i = 0
         for it in character.inventory:
-            inv_string += f'{i} - {it["name"]}{utilities.get_rarity_symbol(it["rarity"])} - {it["weight"]}wgt\n'
+            inv_string += f'{i} - {it.name}{utilities.get_rarity_symbol(it.rarity)} - {it.weight}wgt\n'
             i += 1
 
         inv_string += 'Carry: {}/{}\n'.format(character.current_carry, character.carry + character.bonus_carry)
@@ -138,7 +139,7 @@ class CharacterController(commands.Cog):
         if pos.isdigit() and int(pos) + 1 <= len(character.inventory):
             it = character.inventory[int(pos)]
         elif isinstance(pos, str) and pos in weapon.valid_slots:
-            it = character.equipped[pos]
+            it = getattr(character, 'eq_' + pos)
         else:
             await ctx.author.send(utilities.red('Invalid inventory position or gear slot.'))
             return
@@ -147,15 +148,15 @@ class CharacterController(commands.Cog):
             item_string = '''
 ====================ITEM===================='''
             item_string += f'''
-{it["name"]} - Level {it["level"]} {utilities.get_rarity_symbol(it['rarity'])}
+{it.name} - Level {it.level} {utilities.get_rarity_symbol(it.rarity)}
 
-"{it["description"]}"
+"{it.description}"
 '''
-            if it['_itype'] == ItemType.weapon.value:
+            if it.itype == ItemType.weapon.value:
                 item_string += f'''
-Class: {WeaponType(it['_weapon_type']).name.capitalize()}
+Class: {WeaponType(it.weapon_type).name.capitalize()}
 Damage: {weapon.get_damages_display_string(it)}
-Crit Damage: +{it['crit_damage']}
+Crit Damage: +{it.crit_damage}
 
 Requirements
 ------------
@@ -169,17 +170,16 @@ Sockets
 -------
 {utilities.get_socket_display(it)}
 '''
-            elif it['_itype'] == ItemType.potion.value:
+            elif it.itype == ItemType.potion.value:
                 item_string += f'''
 Effects
 -------
 {utilities.get_consumable_effects_display_string(it)}
 '''
-            elif it['_itype'] in [ItemType.head.value, ItemType.chest.value, ItemType.belt.value,
-                                  ItemType.boots.value, ItemType.gloves.value, ItemType.amulet.value,
-                                  ItemType.ring.value]:
+            elif it.itype in [ItemType.head.value, ItemType.chest.value, ItemType.belt.value, ItemType.boots.value,
+                              ItemType.gloves.value, ItemType.amulet.value, ItemType.ring.value]:
                 item_string += f'''
-Class: {ItemType(it['_itype']).name.capitalize()}
+Class: {ItemType(it.itype).name.capitalize()}
 
 Requirements
 ------------
@@ -194,8 +194,8 @@ Sockets
 {utilities.get_socket_display(it)}
 '''
             item_string += f'''
-Weight: {it["weight"]}
-Value: {it["value"]}'''
+Weight: {it.weight}
+Value: {it.value}'''
             await ctx.author.send(item_string)
         else:
             await ctx.author.send('No item equipped in that slot.')
@@ -249,7 +249,8 @@ Value: {it["value"]}'''
         try:
             if character.learn(book):
                 await ctx.author.send(utilities.bold('You have learned a new ability!'))
-                delete_item(self.connection, book)
+                # book.delete()
+                character.remove_from_inventory(book)
             else:
                 await ctx.author.send(utilities.yellow(
                     f'You are unable to learn anything by reading the {character.inventory[index]["name"]}.'))
@@ -273,9 +274,9 @@ Value: {it["value"]}'''
 
         if item is not None:
             if character.equip(item):
-                await ctx.author.send(f'{utilities.underline(item["name"])} equipped.')
+                await ctx.author.send(f'{utilities.underline(item.name)} equipped.')
             else:
-                await ctx.author.send(f'You do not meet the requirements to equip {item["name"]}.')
+                await ctx.author.send(f'You do not meet the requirements to equip {item.name}.')
 
     @commands.command(aliases=['uneq'])
     @commands.check(check_idle)
@@ -288,7 +289,7 @@ Value: {it["value"]}'''
             item = character.unequip(slot)
 
             if item is not None:
-                await ctx.author.send(f'{utilities.underline(item["name"])} unequipped.')
+                await ctx.author.send(f'{utilities.underline(item.name)} unequipped.')
 
     @commands.command()
     async def depths(self, ctx):
@@ -395,8 +396,8 @@ Value: {it["value"]}'''
             items = []
 
             for _ in range(2):
-                items.append(generate_random_item(self.connection, character.level, rarity=Rarity.common))
-                items.append(generate_random_book(self.connection, character.level))
+                items.append(generate_random_item(character.level, rarity=Rarity.common))
+                items.append(generate_random_book(character.level))
 
             character.restock(items)
             await ctx.channel.send(utilities.green(f'{character.name} has grown in power!'))

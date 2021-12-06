@@ -1,23 +1,23 @@
 import random
 import utilities
-from item import generate_random_item, Rarity
+from item import Rarity
+from item_factory import generate_random_item
 from character import Character
 
 
 class Loot:
-    def __init__(self, connection, characters: [Character]):
-        self.connection = connection
+    def __init__(self, characters: [Character]):
         self.characters = characters
         self.level = int(sum([x.level for x in characters]) / len(characters))
         self.description = random.choice(descs)
-        self.roll_item = generate_random_item(connection, self.level, rarity=Rarity.rare)
+        self.roll_item = generate_random_item(self.level, rarity=Rarity.rare)
         self.roll_list = []
         self.has_rolled = []
 
         for character in self.characters:
-            item = generate_random_item(connection, self.level, rarity=None)
+            item = generate_random_item(self.level, rarity=None)
             character.add_to_inventory(item, True)
-            self.description += f'\n {character["name"]} found: {item["name"]} {utilities.get_rarity_symbol(item["rarity"])}'
+            self.description += f'\n {character.name} found: {item.name} {utilities.get_rarity_symbol(item.rarity)}'
 
     def add_to_roll_list(self, name: str):
         if name not in self.has_rolled:

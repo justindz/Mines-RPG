@@ -3,15 +3,14 @@ import random
 
 import gemstone
 import utilities
-from item import socket_gemstone
+from item_factory import socket_gemstone
 from consumable import create_consumable
 from secrets import workshop_channel_id
 
 
 class WorkshopController(commands.Cog):
-    def __init__(self, bot, connection):
+    def __init__(self, bot):
         self.bot = bot
-        self.connection = connection
         self.banter.start()
         self.get = self.bot.get_cog('CharacterController').get
         self.name = 'Emma'
@@ -131,28 +130,28 @@ class WorkshopController(commands.Cog):
             gem = character.inventory[gemstone_index]
             item = character.inventory[item_index]
 
-            if gem['_itype'] != 11:
+            if gem.itype != 11:
                 await ctx.author.send(utilities.red('That is not a gemstone.'))
                 return
-            if item['_itype'] not in [1, 2, 3, 5, 6]:
+            if item.itype not in [1, 2, 3, 5, 6]:
                 await ctx.author.send(utilities.red('That is not a socketable item.'))
                 return
         except IndexError:
             await ctx.author.send(utilities.red('Invalid inventory position.'))
 
-        if character.level < gem['level']:
+        if character.level < gem.level:
             await ctx.author.send(utilities.yellow('You are not experienced enough to work with this quality of gem.'))
             return
 
         if not gemstone.usable_in(gem, item):
-            await ctx.author.send(utilities.yellow(f'{gem["name"]} cannot be applied to this item type.'))
+            await ctx.author.send(utilities.yellow(f'{gem.name} cannot be applied to this item type.'))
             return
 
-        if socket_gemstone(self.connection, item, gem):
+        if socket_gemstone(item, gem):
             character.remove_from_inventory(gem)
-            await workshop_channel.send(f'{ctx.author.name} improved their {item["name"]}, adding: {gem["name"]}.')
+            await workshop_channel.send(f'{ctx.author.name} improved their {item.name}, adding: {gem.name}.')
         else:
-            await ctx.author.send(utilities.yellow(f'{item["name"]} has no open sockets.'))
+            await ctx.author.send(utilities.yellow(f'{item.name} has no open sockets.'))
 
     @commands.command()
     @commands.check(check_workshop_channel)
@@ -176,11 +175,11 @@ class WorkshopController(commands.Cog):
             for index in [int(x) for x in indices]:
                 ing = character.inventory[index]
 
-                if ing['_itype'] != 12:
-                    await ctx.author.send(utilities.red(f'{ing["name"]} is not an ingredient.'))
+                if ing.itype != 12:
+                    await ctx.author.send(utilities.red(f'{ing.name} is not an ingredient.'))
                     return
 
-                if ing['level'] > character.level:
+                if ing.level > character.level:
                     await ctx.author.send(
                         utilities.yellow('You are not experienced enough to work with these ingredients.'))
                     return
@@ -189,21 +188,21 @@ class WorkshopController(commands.Cog):
         except IndexError:
             await ctx.author.send(utilities.red('Invalid inventory position.'))
 
-        consumable = create_consumable(self.connection, ingredients)
+        consumable = create_consumable(ingredients)
 
         if consumable is False:
             await workshop_channel.send(utilities.yellow(
                 'You must provide 1-3 ingredients by inventory position to brew a potion.'))
             return
 
-        consumable['description'] = consumable['description'].replace('|', character.name)
+        consumable.description = consumable.description.replace('|', character.name)
         consumable.save()
 
         for ing in ingredients:
             character.remove_from_inventory(ing)
 
         character.add_to_inventory(consumable, True)
-        await workshop_channel.send(f'{ctx.author.name} brewed: {consumable["name"]}.')
+        await workshop_channel.send(f'{ctx.author.name} brewed: {consumable.name}.')
 
 
 professions_desc = "So, you're interested in learning a trade to practice here in my workshop? Wonderful! At the moment, I'm equipped to support the activities of \\jewelers, \\alchemists, and \\cartographers. When you have made up your mind, you can \\choose a profession. While professions are entirely optional, they can help you in your journey. You can choose your profession at any time, but only once! As you become more experienced in the mines, your capabilities in your chosen profession will improve accordingly."

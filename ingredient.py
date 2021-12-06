@@ -1,5 +1,6 @@
 import random
-from mongokit_ng import Document
+from item import Item
+from pymodm import fields
 from enum import Enum
 
 import utilities
@@ -14,59 +15,32 @@ class IngredientType(Enum):
     neutral = 5  # Rarity
 
 
-class Ingredient(Document):
-    __database__ = 'delverpg'
-    __collection__ = 'ingredients'
-    structure = {
-        'name': str,
-        'description': str,
-        'type': int,
-        'level': int,
-        'rarity': int,
-        'effect': None,
-        'weight': int,
-        '_itype': int,
-        'value': int,
-    }
-    required_fields = [
-        'name',
-        'description',
-        'type',
-        'level',
-        'rarity',
-        # 'effect', This value is not in required fields, because it throws an error when the value is None
-        'weight',
-        '_itype',
-        'value'
-    ]
-    default_values = {
-        '_itype': 12,
-        'level': 1,
-        'weight': 1,
-        'value': 1,
-    }
-    use_dot_notation = True
-    use_autorefs = True
+class Ingredient(Item):
+    level = fields.IntegerField(required=True, default=1)
+    weight = fields.IntegerField(required=True, default=1)
+    itype = fields.IntegerField(required=True, default=12)
+    value = fields.IntegerField(required=True, default=1)
+    effect = fields.MongoBaseField(required=True)
 
 
-def get_ingredient(connection, key: str, level: int) -> Ingredient:
-    result = connection.Ingredient()
+def get_ingredient(key: str, level: int) -> Ingredient:
+    result = Ingredient()
     result.level = min(level, 1)
 
     for k, v in ingredients[key].items():
         result[k] = v
 
     result.name = f'{level_prefixes[utilities.clamp(level, 1, 17)]} {result.name}'
-    result.save()
+    # result.save()
     return result
 
 
-def get_random_ingredient(connection, level: int, rarity=1):
+def get_random_ingredient(level: int, rarity=1):
     candidates = {k: v for k, v in ingredients.items() if v['rarity'] == rarity}
 
     if len(candidates) > 0:
         key = random.choice(list(candidates.keys()))
-        return get_ingredient(connection, key, level)
+        return get_ingredient(key, level)
     else:
         print(f'Random ingredient generation at rarity {rarity} and level {level} found zero candidates.')
 

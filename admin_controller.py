@@ -1,13 +1,12 @@
 from discord.ext import commands
 
 from secrets import admins
-from item import generate_random_item, generate_book
+from item_factory import generate_random_item, generate_book
 
 
 class AdminController(commands.Cog):
-    def __init__(self, bot, connection):
+    def __init__(self, bot):
         self.bot = bot
-        self.connection = connection
         self.get = self.bot.get_cog('CharacterController').get
 
     #  CHECKS  #
@@ -21,13 +20,13 @@ class AdminController(commands.Cog):
         character = self.get(ctx.author)
 
         for _ in range(1, 10):
-            character.add_to_inventory(generate_random_item(self.connection, level), False)
+            character.add_to_inventory(generate_random_item(level), False)
 
     @commands.command(hidden=True)
     @commands.check(check_if_admin)
     async def spawn_book(self, ctx, key: str):
         character = self.get(ctx.author)
-        book = generate_book(self.connection, key)
+        book = generate_book(key)
 
         if book is not None:
             character.add_to_inventory(book, False)

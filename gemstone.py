@@ -1,46 +1,20 @@
 import random
-from mongokit_ng import Document
+from item import Item
+from pymodm import fields
 
 import utilities
 
 
-class Gemstone(Document):
-    __database__ = 'delverpg'
-    __collection__ = 'gemstones'
-    structure = {
-        'name': str,
-        'description': str,
-        'level': int,
-        'rarity': int,
-        'weight': int,
-        '_itype': int,
-        'effect': str,
-        'amount': None,
-        'value': int,
-    }
-    required_fields = [
-        'name',
-        'description',
-        'level',
-        'rarity',
-        'weight',
-        '_itype',
-        'effect',
-        'amount',
-        'value',
-    ]
-    default_values = {
-        'weight': 1,
-        '_itype': 11,
-    }
-    use_dot_notation = True
-    use_autorefs = True
+class Gemstone(Item):
+    itype = fields.IntegerField(required=True, default=11)
+    effect = fields.CharField(required=True)
+    amount = fields.MongoBaseField(required=True)
 
 
-def get_gemstone(connection, key: str, level: int) -> Gemstone:
+def get_gemstone(key: str, level: int) -> Gemstone:
     level = utilities.clamp(level, 1, 9) - 1
     base = gemstones[key]
-    gemstone = connection.Gemstone()
+    gemstone = Gemstone()
     gemstone.name = base['name'] + f' {base["tiers"][level]["name"]}'
     gemstone.description = base['description']
     gemstone.level = level + 1
@@ -49,25 +23,25 @@ def get_gemstone(connection, key: str, level: int) -> Gemstone:
     return gemstone
 
 
-def get_random_gemstone(connection, level: int) -> Gemstone:
+def get_random_gemstone(level: int) -> Gemstone:
     chance = random.random()
 
     if chance <= 0.1:
-        g = get_gemstone(connection, random.choice(['emerald', 'ruby', 'topaz', 'sapphire', 'diamond']), level)
+        g = get_gemstone(random.choice(['emerald', 'ruby', 'topaz', 'sapphire', 'diamond']), level)
         g.rarity = 3
         g.value = g.level * 3 + (g.level * 10)
     elif chance <= 0.3:
-        g = get_gemstone(connection, random.choice(['quartz', 'beryl', 'opal', 'sunstone', 'serpentine', 'fire_agate',
+        g = get_gemstone(random.choice(['quartz', 'beryl', 'opal', 'sunstone', 'serpentine', 'fire_agate',
                                                     'zircon', 'fluorite']), level)
         g.rarity = 2
         g.value = g.level * 3 + (g.level * 5)
     else:
-        g = get_gemstone(connection, random.choice([
+        g = get_gemstone(random.choice([
             'tourmaline', 'garnet', 'citrine', 'lapis', 'marble', 'obsidian', 'amethyst', 'hematite', 'moonstone']), level)
         g.rarity = 1
         g.value = g.level * 3
 
-    g.save()
+    # g.save()
     return g
 
 
@@ -90,7 +64,7 @@ def usable_in(gemstone, item) -> bool:
         'fire_penetration',
         'electricity_penetration',
         'water_penetration',
-    ] and item['_itype'] == 1:
+    ] and item['itype'] == 1:
         return True
     elif gemstone['effect'] in [
         'bonus_health_regen',
@@ -101,7 +75,7 @@ def usable_in(gemstone, item) -> bool:
         'bonus_fire_res',
         'bonus_electricity_res',
         'bonus_water_res',
-    ] and item['_itype'] in [2, 3, 5, 6]:
+    ] and item['itype'] in [2, 3, 5, 6]:
         return True
 
     return False

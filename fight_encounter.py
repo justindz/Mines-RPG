@@ -132,7 +132,7 @@ class Fight:
         chance = None
 
         if isinstance(ab, skill.Skill):
-            chance = char.equipped['weapon']['base_crit_chance']
+            chance = char.eq_weapon.base_crit_chance
         elif isinstance(ab, spell.Spell):
             chance = ab.base_crit_chance
 
@@ -320,8 +320,8 @@ class Fight:
         indices = []
 
         for item in character.inventory:
-            if item['_itype'] == ItemType.potion.value:
-                display_string += f'\n{display_counter} - {item["name"]} ({item["uses"]})'
+            if item.itype == ItemType.potion.value:
+                display_string += f'\n{display_counter} - {item.name} ({item.uses})'
                 display_counter += 1
                 indices.append(indices_counter)
 
