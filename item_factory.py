@@ -76,7 +76,6 @@ def generate_item(key: str, selection: dict, level: int, rarity=None, lucky=Fals
         key = random.choice(list(prefixes.keys()))
         item = add_affix(item, key, prefixes[key], level)
 
-    # item.save()
     return item
 
 
@@ -145,7 +144,6 @@ def generate_book(key: str, rarity=None, lucky=False):
             value += 5 * item.level
 
         item.value = value
-        # item.save()
         return item
     except KeyError:
         print(f'generate_book failed on KeyError for key: {key}')
@@ -181,9 +179,7 @@ def add_affix(item, name, affix, level):
     item.name = f'{name} {item.name}'
 
     if affix['effect'] in dir(item):
-        print(f'Applying base stat affix {name} to {item.name}')
-        # item[affix['effect']] += affix['value']
-        setattr(item, affix['effect'], getattr(item, affix['effect'] + affix['value']))
+        setattr(item, affix['effect'], getattr(item, affix['effect']) + affix['value'])
     elif affix['effect'] == 'damage_convert':
         item.damages[0][2] = affix['value']
     elif affix['effect'] == 'dice_added':
@@ -212,7 +208,7 @@ def socket_gemstone(item, gemstone):
             i += 1
         else:
             item.sockets[i] = gemstone['name']
-            setattr(item, gemstone['effect'], getattr(item, gemstone['effect'] + gemstone['amount']))
+            setattr(item, gemstone['effect'], getattr(item, gemstone['effect']) + gemstone['amount'])
             return True
 
     return False

@@ -20,7 +20,7 @@ class AdminController(commands.Cog):
         character = self.get(ctx.author)
 
         for _ in range(1, 10):
-            character.add_to_inventory(generate_random_item(level), False)
+            character.add_to_inventory(generate_random_item(level), True)
 
     @commands.command(hidden=True)
     @commands.check(check_if_admin)

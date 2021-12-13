@@ -12,7 +12,7 @@ class Ingredient(Item):
     weight = fields.IntegerField(required=True, default=1)
     itype = fields.IntegerField(required=True, default=12)
     value = fields.IntegerField(required=True, default=1)
-    effect = fields.MongoBaseField(required=True)
+    effect = fields.MongoBaseField(required=True, blank=True)
 
 
 def get_ingredient(key: str, level: int) -> Ingredient:
@@ -20,10 +20,9 @@ def get_ingredient(key: str, level: int) -> Ingredient:
     result.level = min(level, 1)
 
     for k, v in ingredients[key].items():
-        result[k] = v
+        setattr(result, k, v)
 
     result.name = f'{level_prefixes[utilities.clamp(level, 1, 17)]} {result.name}'
-    # result.save()
     return result
 
 

@@ -21,6 +21,7 @@ def get_gemstone(key: str, level: int) -> Gemstone:
     gemstone.level = level + 1
     gemstone.effect = base['effect']
     gemstone.amount = base['tiers'][level]['amount']
+    gemstone.weight = 1
     return gemstone
 
 
@@ -32,17 +33,17 @@ def get_random_gemstone(level: int) -> Gemstone:
         g.rarity = 3
         g.value = g.level * 3 + (g.level * 10)
     elif chance <= 0.3:
-        g = get_gemstone(random.choice(['quartz', 'beryl', 'opal', 'sunstone', 'serpentine', 'fire_agate',
-                                                    'zircon', 'fluorite']), level)
+        g = get_gemstone(random.choice(['quartz', 'beryl', 'opal', 'sunstone', 'serpentine', 'fire_agate', 'zircon',
+                                        'fluorite']), level)
         g.rarity = 2
         g.value = g.level * 3 + (g.level * 5)
     else:
         g = get_gemstone(random.choice([
-            'tourmaline', 'garnet', 'citrine', 'lapis', 'marble', 'obsidian', 'amethyst', 'hematite', 'moonstone']), level)
+            'tourmaline', 'garnet', 'citrine', 'lapis', 'marble', 'obsidian', 'amethyst', 'hematite', 'moonstone']),
+            level)
         g.rarity = 1
         g.value = g.level * 3
 
-    # g.save()
     return g
 
 

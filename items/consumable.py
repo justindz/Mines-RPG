@@ -55,7 +55,6 @@ def create_consumable(ingredients: list):
         key = random.choice(list(prefixes.keys()))
         result = add_affix(result, key, prefixes[key], result['level'])
 
-    # result.save()
     return result
 
 
