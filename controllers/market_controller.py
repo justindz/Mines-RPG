@@ -109,7 +109,7 @@ class MarketController(commands.Cog):
     @commands.check(check_market_channel)
     @commands.check(check_not_delving)
     async def sell(self, ctx, index: int):
-        """Sell an item to the NPC vendor. Sold items cannot be bought back."""
+        """Sell an item to the NPC vendor. Sold item_specs cannot be bought back."""
         character = self.get(ctx.author)
 
         try:
@@ -127,7 +127,7 @@ class MarketController(commands.Cog):
     @commands.check(check_market_channel)
     @commands.check(check_not_delving)
     async def bank(self, ctx):
-        """View a list of the items stored in your bank."""
+        """View a list of the item_specs stored in your bank."""
         character = self.get(ctx.author)
         out = f'=========={character.name}\'s Storage==========='
         i = 0
@@ -152,7 +152,7 @@ class MarketController(commands.Cog):
             return
 
         if len(character.bank) >= character.bank_limit:
-            await ctx.author.send(utilities.yellow(f'Your bank account is at the current limit of {character.bank_limit} items.'))
+            await ctx.author.send(utilities.yellow(f'Your bank account is at the current limit of {character.bank_limit} item_specs.'))
         elif character.deposit(index):
             await ctx.channel.send(f'{character.name} deposited {name} to the bank.')
 

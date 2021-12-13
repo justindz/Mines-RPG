@@ -1,17 +1,14 @@
 import random
 
-import accessory
-import armor
-import gemstone
-import ingredient
-import weapon
-from accessories import accessories
-from armors import armors
-from book import books, Book
-from gemstone import gemstones
-from ingredient import ingredients
-from item import Rarity, ItemType
-from weapons import weapons
+from items import accessory, weapon, armor, gemstone, ingredient
+from item_specs.accessories import accessories
+from item_specs.armors import armors
+from items.book import Book
+from item_specs.books import books
+from item_specs.gemstones import gemstones
+from item_specs.ingredients import ingredients
+from items.item import Rarity, ItemType
+from item_specs.weapons import weapons
 
 
 def generate_item(key: str, selection: dict, level: int, rarity=None, lucky=False):
@@ -216,7 +213,6 @@ def socket_gemstone(item, gemstone):
         else:
             item.sockets[i] = gemstone['name']
             setattr(item, gemstone['effect'], getattr(item, gemstone['effect'] + gemstone['amount']))
-            # gemstone.delete()
             return True
 
     return False

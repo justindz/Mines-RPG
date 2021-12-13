@@ -3,10 +3,9 @@ import discord
 from discord.ext import commands
 
 import utilities
-import weapon
-from weapon import WeaponType
-import armor
-from item import ItemType, Rarity
+from items import weapon, armor
+from items.weapon import WeaponType
+from items.item import ItemType, Rarity
 from item_factory import generate_random_item, generate_random_book
 from character import Character
 
@@ -102,7 +101,7 @@ class CharacterController(commands.Cog):
 
     @commands.command(aliases=['inventory'])
     async def inv(self, ctx):
-        """Lists all your equipped and carried items. Use the show command to view an individual item once you have its position number in your inventory."""
+        """Lists all your equipped and carried item_specs. Use the show command to view an individual item once you have its position number in your inventory."""
         character = self.get(ctx.author)
         inv_string = '=================EQUIPPED================\n'
         inv_string += 'Weapon: {}\n'.format(

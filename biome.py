@@ -26,12 +26,14 @@ class Biome(object):
 
 
 biomes = {
-    'generic': Biome('generic', ['basic'],
+    'generic': Biome('generic',
+                     ['basic'],
                      {
                          1: ['slime', 'scarab', 'spider'],
                          21: [],
                      }),
-    'infernal': Biome('infernal', ['infernal'],
+    'infernal': Biome('infernal',
+                      ['infernal'],
                       {
                           1: ['imp', 'bomb', 'ash_devil', 'damned_soul'],
                           21: ['cinder_demon', 'lust_demon'],

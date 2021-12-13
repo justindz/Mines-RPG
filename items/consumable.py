@@ -1,8 +1,8 @@
-from item import Item
 from pymodm import fields
 import random
 
-from ingredient import IngredientType
+from items.item import Item
+from item_specs.ingredients import IngredientType
 from item_factory import add_affix
 from prefixes import level_prefixes
 

@@ -3,11 +3,10 @@ from pymodm import MongoModel, fields
 from pymongo import WriteConcern
 
 import ability
-import item
+from items import item, book
 import utilities
-from item import ItemType
+from items.item import ItemType
 from elements import Elements
-import book
 import dice
 
 

@@ -9,7 +9,7 @@ from enemies import enemies
 from summon import Summon
 from summons import summons
 from elements import Elements
-from item import ItemType
+from items.item import ItemType
 import ability
 import spell
 import skill

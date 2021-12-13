@@ -1,5 +1,5 @@
 from elements import Elements
-from weapon import WeaponType
+from items.weapon import WeaponType
 
 weapons = {
     # Hammer/Str

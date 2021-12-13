@@ -20,8 +20,6 @@ rooms = {
             Room('Congratulations', 'Reaching this depth means you have successfully completed Boon Mine. In addition to the knowledge, levels, and loot you have gained, reaching this point unlocks new mines for you to explore. You are free to repeat Boon Mine as many times as you like, but you will not gain further levels here.'),
         ],
     },
-
-
     'infernal': {
         1: [
             Room('Lava Tubes', 'You find yourself traveling through a braided maze of interconnected lava tubes. The roughly circular tunnels are uncomfortably warm to the touch. Step marks, lava pillars, and lavacicles hint at the violent origins of these pathways.'),

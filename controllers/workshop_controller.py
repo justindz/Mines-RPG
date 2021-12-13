@@ -1,10 +1,10 @@
 from discord.ext import commands, tasks
 import random
 
-import gemstone
+from items import gemstone
 import utilities
 from item_factory import socket_gemstone
-from consumable import create_consumable
+from items.consumable import create_consumable
 from secrets import workshop_channel_id
 
 

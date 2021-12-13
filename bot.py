@@ -4,12 +4,8 @@ import logging
 from pymodm import connect
 
 import secrets
-import character_controller
-import party_controller
-import delve_controller
-import market_controller
-import workshop_controller
-import admin_controller
+from controllers import market_controller, admin_controller, party_controller, character_controller, \
+    workshop_controller, delve_controller
 
 #   LOGGING CONFIG   #
 logger = logging.getLogger('discord')

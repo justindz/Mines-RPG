@@ -30,3 +30,10 @@ class AdminController(commands.Cog):
 
         if book is not None:
             character.add_to_inventory(book, False)
+
+    @commands.command(hidden=True)
+    @commands.check(check_if_admin)
+    async def add_points(self, ctx, points: int):
+        character = self.get(ctx.author)
+        character.points += points
+        character.save()

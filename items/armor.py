@@ -1,4 +1,4 @@
-from item import Item
+from items.item import Item
 from pymodm import fields
 
 

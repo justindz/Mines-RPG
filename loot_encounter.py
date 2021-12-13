@@ -1,6 +1,6 @@
 import random
 import utilities
-from item import Rarity
+from items.item import Rarity
 from item_factory import generate_random_item
 from character import Character
 
@@ -38,7 +38,7 @@ class Loot:
 
 descs = [
     'You discover an equipment cache.',
-    'You find some items half-buried near unidentifiable remains.',
+    'You find some item_specs half-buried near unidentifiable remains.',
     'An abandoned campsite here has some salvageable goods.',
     'You find something useful on what appears to be a makeshift altar.',
     'You almost trip over a partially buried chest.',

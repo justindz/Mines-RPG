@@ -1,5 +1,5 @@
 from enum import Enum
-from item import Item
+from items.item import Item
 from pymodm import fields
 
 import utilities

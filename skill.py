@@ -1,8 +1,8 @@
-import weapon
+from items import weapon
 from elements import Elements
 import ability
 from ability import EffectType, Effect
-from weapon import all_types, bladed_types, melee_types
+from items.weapon import all_types, bladed_types, melee_types
 
 
 class Skill(ability.Ability):
