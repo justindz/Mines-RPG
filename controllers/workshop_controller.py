@@ -38,6 +38,11 @@ class WorkshopController(commands.Cog):
     async def banter(self):
         self.banter.change_interval(seconds=480.0 + random.uniform(0.0, 120.0))
         workshop_channel = self.bot.get_channel(workshop_channel_id)
+        last_message = await workshop_channel.history(limit=1).flatten()
+
+        if last_message[0].content.startswith(f'{self.name}'):
+            return
+
         rare = False
 
         if random.randint(1, 100) <= 1:
